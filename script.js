@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ** IMPORTANTE: ALtere esta data para a sua data inicial **
     // Formato: 'YYYY-MM-DDTHH:mm:ss'
     // Exemplo: 14 de Outubro de 2023, às 00:00:00
-    const startDate = new Date('2023-10-14T06:00:00');
+    const startDate = new Date('2023-10-14T 06:00:00');
 
     const yearsMonthsDaysElement = document.getElementById('years-months-days');
     const hoursMinutesSecondsElement = document.getElementById('hours-minutes-seconds');
