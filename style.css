@@ -12,6 +12,7 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden; /* IMPORTANTE: Esconde barras de rolagem globais. A rolagem será interna. */
+    -webkit-overflow-scrolling: touch; /* Melhora rolagem em iOS */
 }
 
 body {
@@ -36,21 +37,24 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%; /* Agora ocupa 100% da largura disponível */
+    width: 100%; /* Ocupa 100% da largura disponível */
     max-width: 500px; /* Largura máxima para desktop */
     box-sizing: border-box;
     margin: auto; /* Centraliza o container verticalmente se houver espaço extra */
     position: relative; /* PARA O POSICIONAMENTO ABSOLUTO DAS PÁGINAS */
-    /* A altura será definida pelo JavaScript para se ajustar ao conteúdo da página ativa */
-    min-height: 400px; /* Altura mínima para que não encolha demais, bom para mobile */
+    height: auto; /* IMPORTANTE: Altura dinâmica, ajustada pelo JS */
+    min-height: 400px; /* Altura mínima para não encolher demais em mobile */
+    max-height: calc(100vh - 40px); /* Garante que o container não exceda a altura da viewport menos o padding do body */
     transition: height 0.5s ease-in-out; /* Suaviza a mudança de altura */
-    overflow: hidden; /* IMPORTANTE: Oculta o conteúdo das páginas "hidden" fora dos limites do container */
+    overflow: hidden; /* Oculta o conteúdo das páginas "hidden" fora dos limites do container */
+    flex-shrink: 0; /* Impede que o container encolha dentro do flexbox do body */
 }
 
 /* Estilos para as páginas (abas) */
 .page {
     width: 100%;
-    height: 100%; /* Garante que a página ocupe a altura total do container (ajustado por JS) */
+    /* Altura será dinâmica, garantindo que o conteúdo caiba e possa ser rolado */
+    min-height: 100%; /* Garante que a página tenha pelo menos a altura do container */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -81,7 +85,13 @@ body {
     z-index: 2; /* Garante que a página ativa esteja acima */
 }
 
-/* Estilos comuns para campos e botões (mantidos como antes, se já funcionavam bem) */
+/* Estilos comuns para campos e botões */
+.title {
+    font-size: 2em;
+    color: var(--main-color);
+    margin-bottom: 20px; /* Espaço abaixo do título */
+}
+
 .date-input-container,
 .color-picker-container,
 .music-input-container,
@@ -96,6 +106,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    margin-bottom: 0; /* Evitar margens que empurram o conteúdo para fora */
 }
 
 .date-input-container label,
@@ -190,7 +201,7 @@ textarea::placeholder {
     justify-content: center;
     flex-wrap: wrap; /* Permite quebrar linha */
     width: 100%;
-    max-width: 200px; /* Força quebra de linha em mobile se 3 não couperem */
+    max-width: 200px; /* Força quebra de linha em mobile se 3 não couberem */
     margin: 0 auto;
 }
 
@@ -470,6 +481,7 @@ textarea::placeholder {
 @media (min-width: 600px) {
     .container {
         padding: 0; /* As páginas controlam o padding */
+        max-height: 90vh; /* Permite um pouco de margem em telas grandes */
     }
     .page {
         padding: 40px; /* Padding maior para as páginas em desktop */
