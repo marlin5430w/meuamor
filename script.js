@@ -1,561 +1,560 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // === Seletores de Elementos ===
-    const appWrapper = document.querySelector('.app-wrapper'); // Novo wrapper
-    const container = document.querySelector('.container');
+    // Referências para elementos HTML
+    const startDateInput = document.getElementById('startDate');
+    const setStartDateButton = document.getElementById('setStartDateButton');
+    const themeColorInput = document.getElementById('themeColor');
+    const musicLinkInput = document.getElementById('musicLink');
+    const musicNameInput = document.getElementById('musicName');
+    const loadMusicButton = document.getElementById('loadMusicButton');
+    const nextPage1Button = document.getElementById('nextPage1Button');
+    const generateLinkButton = document.getElementById('generateLinkButton');
+    const backToPage1Button = document.getElementById('backToPage1Button');
+    const backToPage2Button = document.getElementById('backToPage2Button');
+    const customMessageInput = document.getElementById('customMessage');
+    const copyMessage = document.getElementById('copyMessage');
+    const photoUploaders = document.querySelectorAll('.photo-uploader'); // Seleciona todos os uploaders
+    const removePhotoButtons = document.querySelectorAll('.remove-photo-button');
+    const emojiInputs = document.querySelectorAll('.emoji-input');
+
+    // Páginas
     const page1 = document.getElementById('page1');
     const page2 = document.getElementById('page2');
-    const viewModeDisplay = document.getElementById('viewModeDisplay');
+    const page3 = document.getElementById('page3');
 
-    const goToEmojiPageButton = document.getElementById('goToEmojiPageButton');
-    const backToConfigButton = document.getElementById('backToConfigButton');
-    const generateLinkButton = document.getElementById('generateLinkButton');
-    const copyShareLinkButton = document.getElementById('copyShareLinkButton');
-    const copyMessage = document.getElementById('copyMessage');
+    // Estado da aplicação
+    let startDate = new Date('2023-10-14T00:00:00'); // Data inicial padrão
+    let currentThemeColor = themeColorInput.value;
+    let musicData = { link: '', name: '' };
+    let photos = ['', '', '']; // Armazena URLs de imagens (base64 ou URL)
+    let photoFiles = [null, null, null]; // Armazena os objetos File para Slideshow
+    let currentPhotoIndex = 0;
+    let photoSlideshowInterval;
+    let player; // Variável global para o player do YouTube
 
-    const startDatePicker = document.getElementById('startDatePicker');
-    const setStartDateButton = document.getElementById('setStartDateButton');
-    const themeColorPicker = document.getElementById('themeColorPicker');
-    const musicLinkInput = document.getElementById('musicLinkInput');
-    const musicNameInput = document.getElementById('musicNameInput');
-    const loadMusicButton = document.getElementById('loadMusicButton');
-    const musicLoadedMessage = document.getElementById('musicLoadedMessage');
+    // --- Funções Auxiliares ---
 
-    const emojiInputs = [
-        document.getElementById('emojiInput1'),
-        document.getElementById('emojiInput2'),
-        document.getElementById('emojiInput3')
-    ];
-
-    const photoUploads = [
-        { input: document.getElementById('photoUpload1'), img: document.getElementById('uploadedPhoto1'), button: document.querySelector('.remove-photo-button[data-photo-id="1"]') },
-        { input: document.getElementById('photoUpload2'), img: document.getElementById('uploadedPhoto2'), button: document.querySelector('.remove-photo-button[data-photo-id="2"]') },
-        { input: document.getElementById('photoUpload3'), img: document.getElementById('uploadedPhoto3'), button: document.querySelector('.remove-photo-button[data-photo-id="3"]') }
-    ];
-
-    const personalMessageInput = document.getElementById('personalMessageInput');
-
-    const countdownMessage = document.getElementById('countdownMessage');
-    const exactTimeMessage = document.getElementById('exactTimeMessage');
-    const displayedMusicName = document.getElementById('displayedMusicName');
-    const player = document.getElementById('player');
-    const displayedPersonalMessage = document.getElementById('displayedPersonalMessage');
-    const photosContainer = document.querySelector('.photos-container.slideshow-mode');
-    const emojiRainContainer = document.getElementById('emojiRainContainer');
-
-    // === Variáveis Globais de Estado ===
-    let startDate = null;
-    let countdownInterval;
-    let slideshowInterval;
-    let currentSlide = 0;
-    let uploadedPhotoData = [];
-    let musicId = '';
-    let musicTitle = '';
-    let selectedEmojis = ['', '', ''];
-
-    // === Funções de Navegação entre Páginas ===
+    // Função para alternar páginas
     function showPage(pageToShow) {
-        const pages = [page1, page2, viewModeDisplay];
-        pages.forEach(page => {
+        [page1, page2, page3].forEach(page => {
             if (page === pageToShow) {
-                page.classList.add('active');
                 page.classList.remove('hidden');
+                page.classList.add('active');
             } else {
                 page.classList.add('hidden');
                 page.classList.remove('active');
             }
         });
-
-        // Não precisamos mais ajustar a altura do container dinamicamente via JS
-        // pois o CSS `height: 100%` para .container e .page já devem lidar com isso,
-        // desde que o app-wrapper tenha altura 100vh.
-        // O `overflow-y: auto` nas páginas é que vai permitir a rolagem interna.
+        // Scrolla para o topo da nova página ativa
+        if (pageToShow) {
+            pageToShow.scrollTop = 0;
+        }
     }
 
-    // === Funções de Utilitário ===
-    function parseURLParams() {
-        const params = new URLSearchParams(window.location.search);
-        return {
-            date: params.get('date'),
-            color: params.get('color'),
-            music: params.get('music'),
-            musicName: params.get('musicName'),
-            emoji1: params.get('emoji1'),
-            emoji2: params.get('emoji2'),
-            emoji3: params.get('emoji3'),
-            msg: params.get('msg'),
-            photos: params.getAll('photo')
-        };
-    }
-
-    function updateCountdown() {
-        if (!startDate) {
-            countdownMessage.textContent = "Selecione a data inicial.";
-            exactTimeMessage.textContent = "";
-            return;
+    // Carregar dados salvos no Local Storage
+    function loadSavedData() {
+        const savedDate = localStorage.getItem('startDate');
+        if (savedDate) {
+            startDate = new Date(savedDate);
+            startDateInput.value = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000)).toISOString().slice(0, -8);
         }
 
+        const savedColor = localStorage.getItem('themeColor');
+        if (savedColor) {
+            currentThemeColor = savedColor;
+            themeColorInput.value = savedColor;
+            document.documentElement.style.setProperty('--main-color', currentThemeColor);
+            document.documentElement.style.setProperty('--main-color-dark', tinycolor(currentThemeColor).darken(10).toString());
+            document.documentElement.style.setProperty('--main-color-shadow', tinycolor(currentThemeColor).setAlpha(0.4).toRgbString());
+            document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(currentThemeColor).setAlpha(0.5).toRgbString());
+            document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(currentThemeColor).setAlpha(0.1).toRgbString());
+        }
+
+        const savedMusicLink = localStorage.getItem('musicLink');
+        const savedMusicName = localStorage.getItem('musicName');
+        if (savedMusicLink) musicData.link = savedMusicLink;
+        if (savedMusicName) musicData.name = savedMusicName;
+        musicLinkInput.value = musicData.link;
+        musicNameInput.value = musicData.name;
+
+        const savedMessage = localStorage.getItem('customMessage');
+        if (savedMessage) customMessageInput.value = savedMessage;
+
+        const savedPhotos = JSON.parse(localStorage.getItem('photos')) || [];
+        savedPhotos.forEach((photo, index) => {
+            if (photo) {
+                photos[index] = photo;
+                const imgPreview = document.getElementById(`photoPreview${index + 1}`);
+                if (imgPreview) {
+                    imgPreview.src = photo;
+                    imgPreview.style.opacity = '1';
+                    imgPreview.nextElementSibling.style.display = 'none'; // Esconde o texto "Foto X"
+                    const removeBtn = photoUploaders[index].querySelector('.remove-photo-button');
+                    if (removeBtn) removeBtn.classList.add('show-button');
+                }
+            }
+        });
+
+        const savedEmojis = JSON.parse(localStorage.getItem('emojis')) || ['', '', ''];
+        emojiInputs.forEach((input, index) => {
+            input.value = savedEmojis[index] || '';
+        });
+    }
+
+    // Salvar dados no Local Storage
+    function saveAllData() {
+        localStorage.setItem('startDate', startDate.toISOString());
+        localStorage.setItem('themeColor', currentThemeColor);
+        localStorage.setItem('musicLink', musicData.link);
+        localStorage.setItem('musicName', musicData.name);
+        localStorage.setItem('customMessage', customMessageInput.value);
+        localStorage.setItem('photos', JSON.stringify(photos));
+        const emojisToSave = Array.from(emojiInputs).map(input => input.value);
+        localStorage.setItem('emojis', JSON.stringify(emojisToSave));
+    }
+
+    // Função para converter uma URL de vídeo do YouTube em um ID de vídeo
+    function getYouTubeVideoId(url) {
+        let videoId = '';
+        const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+        const match = url.match(regex);
+        if (match && match[1]) {
+            videoId = match[1];
+        }
+        return videoId;
+    }
+
+    // Iniciar o contador de tempo
+    function updateCounter() {
         const now = new Date();
-        const diffMs = now.getTime() - startDate.getTime();
+        const diff = now.getTime() - startDate.getTime(); // Diferença em milissegundos
 
-        if (diffMs < 0) {
-            countdownMessage.textContent = "A data inicial ainda não chegou!";
-            exactTimeMessage.textContent = "";
+        if (diff < 0) { // Se a data for no futuro
+            document.getElementById('counterDisplay').textContent = "Ainda não chegou a data!";
             return;
         }
 
-        const { display, exact } = formatTimeDifference(diffMs);
-        countdownMessage.textContent = display;
-        exactTimeMessage.textContent = exact;
-    }
-
-    function formatTimeDifference(ms) {
-        if (isNaN(ms) || ms < 0) {
-            return { display: "Tempo não definido.", exact: "" };
-        }
-
-        const seconds = Math.floor(ms / 1000);
+        const seconds = Math.floor(diff / 1000);
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
         const days = Math.floor(hours / 24);
         const months = Math.floor(days / 30.44); // Média de dias por mês
         const years = Math.floor(days / 365.25); // Média de dias por ano
 
-        const remainingDays = days % 365.25;
-        const remainingMonths = Math.floor(remainingDays / 30.44);
+        const remainingMonths = months % 12;
+        const remainingDays = days % 30; // Aproximação, para melhor precisão precisaria de cálculos de data mais complexos
         const remainingHours = hours % 24;
         const remainingMinutes = minutes % 60;
         const remainingSeconds = seconds % 60;
 
-        let displayParts = [];
-        if (years > 0) displayParts.push(`${years} ano${years !== 1 ? 's' : ''}`);
-        if (remainingMonths > 0) displayParts.push(`${remainingMonths} mês${remainingMonths !== 1 ? 'es' : ''}`);
-        if (displayParts.length < 2 && Math.floor(days % 30.44) > 0) displayParts.push(`${Math.floor(days % 30.44)} dia${Math.floor(days % 30.44) !== 1 ? 's' : ''}`);
-
-        const displayString = displayParts.length > 0 ? displayParts.join(', ') : '0 dias';
-
-        const exactTimeString = `${years} ano${years !== 1 ? 's' : ''}, ${remainingMonths} mês${remainingMonths !== 1 ? 'es' : ''}, ${Math.floor(days % 30.44)} dia${Math.floor(days % 30.44) !== 1 ? 's' : ''}\n${remainingHours} hora${remainingHours !== 1 ? 's' : ''}, ${remainingMinutes} minuto${remainingMinutes !== 1 ? 's' : ''} e ${remainingSeconds} segundo${remainingSeconds !== 1 ? 's' : ''}`;
-
-        return { display: displayString, exact: exactTimeString };
+        document.getElementById('counterDisplay').textContent =
+            `${years} ano${years !== 1 ? 's' : ''}, ` +
+            `${remainingMonths} mês${remainingMonths !== 1 ? 'es' : ''}, ` +
+            `${remainingDays} dia${remainingDays !== 1 ? 's' : ''}\n` +
+            `${remainingHours} hora${remainingHours !== 1 ? 's' : ''}, ` +
+            `${remainingMinutes} minuto${remainingMinutes !== 1 ? 's' : ''} e ` +
+            `${remainingSeconds} segundo${remainingSeconds !== 1 ? 's' : ''}`;
     }
 
-    function isValidYouTubeUrl(url) {
-        const regex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?$/;
-        const match = url.match(regex);
-        return match ? match[1] : null;
-    }
-
-    function loadYouTubePlayer(videoId) {
-        if (videoId) {
-            player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&enablejsapi=1&loop=1&playlist=${videoId}`;
-            player.style.display = 'block';
-            player.style.opacity = '1';
-            player.style.position = 'relative';
-            player.style.left = 'auto';
-            player.style.height = '100px';
-        } else {
-            player.src = '';
-            player.style.display = 'none';
-        }
-    }
-
-    function startSlideshow() {
-        stopSlideshow();
-        const photos = photosContainer.querySelectorAll('img');
-        if (photos.length === 0) {
-            photosContainer.style.display = 'none';
+    // Chuva de Emojis
+    function startEmojiRain() {
+        const emojiRainContainer = document.getElementById('emojiRainContainer');
+        const emojisToRain = Array.from(emojiInputs).map(input => input.value).filter(Boolean); // Pega emojis preenchidos
+        if (emojisToRain.length === 0) {
+            emojiRainContainer.style.display = 'none';
             return;
         }
-        photosContainer.style.display = 'flex';
-        photosContainer.classList.add('slideshow-mode');
-
-        currentSlide = 0;
-        photos.forEach(img => img.classList.remove('active'));
-        photos[currentSlide].classList.add('active');
-
-        slideshowInterval = setInterval(() => {
-            photos[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % photos.length;
-            photos[currentSlide].classList.add('active');
-        }, 5000);
-    }
-
-    function stopSlideshow() {
-        clearInterval(slideshowInterval);
-        photosContainer.classList.remove('slideshow-mode');
-        photosContainer.querySelectorAll('img').forEach(img => img.classList.remove('active'));
-    }
-
-    function startEmojiRain() {
-        stopEmojiRain();
-        if (selectedEmojis.filter(e => e).length === 0) return;
         emojiRainContainer.style.display = 'block';
 
         const createEmoji = () => {
-            const emoji = selectedEmojis[Math.floor(Math.random() * selectedEmojis.length)];
-            if (!emoji) return;
+            const emoji = document.createElement('span');
+            emoji.classList.add('falling-emoji');
+            emoji.textContent = emojisToRain[Math.floor(Math.random() * emojisToRain.length)];
+            emoji.style.left = `${Math.random() * 100}vw`;
+            emoji.style.animationDuration = `${Math.random() * 3 + 2}s`; // 2 to 5 seconds
+            emoji.style.animationDelay = `${Math.random() * 5}s`; // Delay up to 5 seconds
+            emojiRainContainer.appendChild(emoji);
 
-            const span = document.createElement('span');
-            span.classList.add('falling-emoji');
-            span.textContent = emoji;
-            span.style.left = `${Math.random() * 100}vw`;
-            span.style.animationDuration = `${Math.random() * 3 + 2}s`;
-            span.style.animationDelay = `${Math.random() * 2}s`;
-            emojiRainContainer.appendChild(span);
-
-            span.addEventListener('animationend', () => {
-                span.remove();
+            emoji.addEventListener('animationend', () => {
+                emoji.remove();
             });
         };
 
-        emojiRainContainer.intervalId = setInterval(createEmoji, 300);
-    }
-
-    function stopEmojiRain() {
-        emojiRainContainer.style.display = 'none';
-        if (emojiRainContainer.intervalId) {
-            clearInterval(emojiRainContainer.intervalId);
+        // Cria um número razoável de emojis. Ajuste conforme necessário.
+        for (let i = 0; i < 30; i++) {
+            createEmoji();
         }
-        emojiRainContainer.innerHTML = '';
+
+        // Garante que a chuva continue
+        setInterval(createEmoji, 500); // Adiciona um novo emoji a cada 0.5s
     }
 
-    // === Event Listeners de Edição ===
+    // Gerenciar o player do YouTube
+    function onYouTubeIframeAPIReady() {
+        const videoId = getYouTubeVideoId(musicData.link);
+        if (videoId) {
+            player = new YT.Player('player', {
+                height: '100',
+                width: '100%',
+                videoId: videoId,
+                playerVars: {
+                    'playsinline': 1,
+                    'autoplay': 1,
+                    'controls': 1,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'iv_load_policy': 3,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'start': 0
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+    }
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady; // Garante que a função esteja no escopo global
+
+    function onPlayerReady(event) {
+        event.target.playVideo();
+        document.querySelector('.music-player-display').style.display = 'block';
+        document.getElementById('musicInfoDisplay').textContent = musicData.name || "Música Carregada";
+        document.getElementById('musicInfoDisplay').classList.remove('hidden');
+    }
+
+    function onPlayerStateChange(event) {
+        // Implementar lógica de loop ou outras reações ao estado do player
+    }
+
+    // --- Event Listeners ---
+
     setStartDateButton.addEventListener('click', () => {
-        if (startDatePicker.value) {
-            startDate = new Date(startDatePicker.value);
-            localStorage.setItem('startDate', startDate.toISOString());
-            updateCountdown();
+        if (startDateInput.value) {
+            startDate = new Date(startDateInput.value);
+            saveAllData();
             alert('Data inicial definida!');
         } else {
             alert('Por favor, selecione uma data e hora.');
         }
     });
 
-    themeColorPicker.addEventListener('input', (event) => {
-        const newColor = event.target.value;
-        document.documentElement.style.setProperty('--main-color', newColor);
-        if (typeof tinycolor !== 'undefined') {
-            document.documentElement.style.setProperty('--main-color-dark', tinycolor(newColor).darken(10).toString());
-            document.documentElement.style.setProperty('--main-color-shadow', tinycolor(newColor).setAlpha(0.4).toString());
-            document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(newColor).setAlpha(0.5).toString());
-            document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(newColor).setAlpha(0.1).toString());
-        }
-        localStorage.setItem('themeColor', newColor);
+    themeColorInput.addEventListener('input', (event) => {
+        currentThemeColor = event.target.value;
+        document.documentElement.style.setProperty('--main-color', currentThemeColor);
+        // Atualiza as cores secundárias baseadas na cor principal
+        document.documentElement.style.setProperty('--main-color-dark', tinycolor(currentThemeColor).darken(10).toString());
+        document.documentElement.style.setProperty('--main-color-shadow', tinycolor(currentThemeColor).setAlpha(0.4).toRgbString());
+        document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(currentThemeColor).setAlpha(0.5).toRgbString());
+        document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(currentThemeColor).setAlpha(0.1).toRgbString());
+        saveAllData();
     });
 
     loadMusicButton.addEventListener('click', () => {
-        const url = musicLinkInput.value;
-        musicId = isValidYouTubeUrl(url);
-        if (musicId) {
-            musicTitle = musicNameInput.value || `Música: ${musicId}`;
-            musicLoadedMessage.textContent = `Música: "${musicTitle}" carregada!`;
-            musicLoadedMessage.style.display = 'block';
-            localStorage.setItem('musicId', musicId);
-            localStorage.setItem('musicTitle', musicTitle);
+        const link = musicLinkInput.value.trim();
+        const name = musicNameInput.value.trim();
+        if (link) {
+            musicData.link = link;
+            musicData.name = name;
+            saveAllData();
+            alert('Música carregada! Ela tocará na visualização final.');
         } else {
-            musicLoadedMessage.textContent = 'Link inválido do YouTube.';
-            musicLoadedMessage.style.color = '#ff4444';
-            musicLoadedMessage.style.display = 'block';
-            localStorage.removeItem('musicId');
-            localStorage.removeItem('musicTitle');
+            alert('Por favor, insira um link do YouTube válido.');
         }
-        setTimeout(() => {
-            musicLoadedMessage.style.display = 'none';
-            musicLoadedMessage.style.color = '#4CAF50';
-        }, 3000);
     });
 
-    emojiInputs.forEach((input, index) => {
-        input.addEventListener('input', (event) => {
-            let value = event.target.value;
-            value = value.replace(/[^\p{Emoji}\p{Emoji_Modifier}\p{Emoji_Component}\p{Emoji_Presentation}]/gu, '');
-            if (value.length > 2) {
-                value = value.slice(0, 2);
-            }
-            event.target.value = value;
-            selectedEmojis[index] = value;
-            localStorage.setItem(`emoji${index + 1}`, value);
-        });
-    });
+    // Adiciona event listeners para os inputs de arquivo
+    photoUploaders.forEach((uploader, index) => {
+        const fileInput = uploader.querySelector('.hidden-file-input');
+        const imgPreview = uploader.querySelector('img');
+        const uploadText = uploader.querySelector('.upload-text');
+        const removeBtn = uploader.querySelector('.remove-photo-button');
 
-    photoUploads.forEach((photoSlot, index) => {
-        photoSlot.input.addEventListener('change', (event) => {
+        fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
+                photoFiles[index] = file; // Salva o objeto File
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    photoSlot.img.src = e.target.result;
-                    photoSlot.img.style.display = 'block';
-                    photoSlot.img.style.opacity = '1';
-                    photoSlot.button.classList.add('show-button');
-                    uploadedPhotoData[index] = e.target.result;
-                    localStorage.setItem(`uploadedPhoto${index + 1}`, e.target.result);
-                    photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'none';
+                    photos[index] = e.target.result; // Salva o Base64
+                    imgPreview.src = e.target.result;
+                    imgPreview.style.opacity = '1';
+                    uploadText.style.display = 'none'; // Esconde o texto
+                    removeBtn.classList.add('show-button');
+                    saveAllData();
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        photoSlot.button.addEventListener('click', (event) => {
-            event.preventDefault();
-            photoSlot.img.src = '';
-            photoSlot.img.style.display = 'none';
-            photoSlot.img.style.opacity = '0';
-            photoSlot.button.classList.remove('show-button');
-            uploadedPhotoData[index] = '';
-            localStorage.removeItem(`uploadedPhoto${index + 1}`);
-            photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'block';
+        removeBtn.addEventListener('click', () => {
+            photos[index] = '';
+            photoFiles[index] = null; // Limpa o objeto File
+            imgPreview.src = '';
+            imgPreview.style.opacity = '0';
+            uploadText.style.display = 'block'; // Mostra o texto novamente
+            removeBtn.classList.remove('show-button');
+            saveAllData();
         });
     });
 
-    personalMessageInput.addEventListener('input', (event) => {
-        localStorage.setItem('personalMessage', event.target.value);
+    emojiInputs.forEach(input => {
+        input.addEventListener('input', saveAllData);
     });
 
+    customMessageInput.addEventListener('input', saveAllData);
 
-    // === Event Listeners de Navegação ===
-    goToEmojiPageButton.addEventListener('click', () => {
+    // --- Navegação entre Páginas ---
+    nextPage1Button.addEventListener('click', () => {
         showPage(page2);
     });
 
-    backToConfigButton.addEventListener('click', () => {
+    backToPage1Button.addEventListener('click', () => {
         showPage(page1);
     });
 
-    generateLinkButton.addEventListener('click', () => {
+    backToPage2Button.addEventListener('click', () => {
+        showPage(page2);
+        clearInterval(photoSlideshowInterval); // Para o slideshow ao voltar para edição
+        if (player) {
+            player.destroy(); // Destrói o player do YouTube
+            player = null;
+        }
+        document.getElementById('emojiRainContainer').style.display = 'none'; // Esconde a chuva de emojis
+        document.getElementById('slideshowContainer').innerHTML = ''; // Limpa o slideshow
+        document.getElementById('musicInfoDisplay').classList.add('hidden'); // Esconde info da musica
+    });
+
+    // --- Botão Gerar Link Compartilhável (CRÍTICO) ---
+    generateLinkButton.addEventListener('click', async () => {
+        await generateShareLink();
+    });
+
+    // Função para gerar o link compartilhável
+    async function generateShareLink() {
+        const baseUrl = window.location.origin + window.location.pathname; // marlin5430w.github.io/index.html
         const params = new URLSearchParams();
 
-        if (startDate) {
-            params.set('date', startDate.toISOString());
-        }
-        const themeColor = themeColorPicker.value;
-        params.set('color', themeColor.substring(1));
+        // Adiciona a data
+        params.append('date', startDate.toISOString());
 
-        if (musicId) {
-            params.set('music', musicId);
-            if (musicNameInput.value) {
-                params.set('musicName', encodeURIComponent(musicNameInput.value));
+        // Adiciona a cor do tema
+        params.append('color', currentThemeColor.replace('#', '')); // Remove o # para a URL
+
+        // Adiciona link e nome da música, se existirem
+        if (musicData.link) {
+            params.append('musicLink', musicData.link);
+            if (musicData.name) {
+                params.append('musicName', musicData.name);
             }
         }
 
-        selectedEmojis.forEach((emoji, index) => {
-            if (emoji) params.set(`emoji${index + 1}`, encodeURIComponent(emoji));
-        });
-
-        if (personalMessageInput.value) {
-            params.set('msg', encodeURIComponent(personalMessageInput.value));
+        // Adiciona emojis
+        const emojis = Array.from(emojiInputs).map(input => input.value).filter(Boolean);
+        if (emojis.length > 0) {
+            params.append('emojis', emojis.join(','));
         }
 
-        uploadedPhotoData.forEach(data => {
-            if (data) params.append('photo', encodeURIComponent(data));
-        });
+        // Adiciona mensagem personalizada
+        if (customMessageInput.value) {
+            params.append('message', customMessageInput.value);
+        }
 
-        const shareLink = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+        // Adiciona fotos (converta para Base64 ou armazene de forma eficiente se for muita coisa)
+        // Para a URL, é melhor usar Base64 para fotos pequenas, ou um serviço de upload para grandes.
+        // Por enquanto, vamos usar Base64, mas tenha em mente que URLs podem ficar MUITO longas.
+        const photosBase64 = photos.filter(Boolean);
+        if (photosBase64.length > 0) {
+            params.append('photos', JSON.stringify(photosBase64));
+        }
 
-        renderViewMode(params);
-        showPage(viewModeDisplay);
+        const shareLink = `${baseUrl}?${params.toString()}`;
 
-        window.history.pushState({}, '', shareLink);
-    });
+        try {
+            await navigator.clipboard.writeText(shareLink);
+            copyMessage.classList.add('show');
+            setTimeout(() => {
+                copyMessage.classList.remove('show');
+            }, 3000); // Esconde a mensagem após 3 segundos
 
-    copyShareLinkButton.addEventListener('click', () => {
-        const currentUrl = window.location.href;
-        navigator.clipboard.writeText(currentUrl)
-            .then(() => {
-                copyMessage.textContent = 'Link copiado!';
-                copyMessage.classList.add('show');
-                setTimeout(() => {
-                    copyMessage.classList.remove('show');
-                }, 2000);
-            })
-            .catch(err => {
-                console.error('Falha ao copiar o link: ', err);
-                copyMessage.textContent = 'Erro ao copiar!';
-                copyMessage.classList.add('show');
-                setTimeout(() => {
-                    copyMessage.classList.remove('show');
-                }, 2000);
+            // Após gerar e copiar o link, muda para a página de visualização
+            showPage(page3);
+            updateViewModeContent(); // Atualiza o conteúdo da página 3
+        } catch (err) {
+            console.error('Falha ao copiar o link: ', err);
+            alert('Não foi possível copiar o link. Por favor, copie manualmente: ' + shareLink);
+        }
+    }
+
+    // --- Funções para a Página de Visualização (Page 3) ---
+    function updateViewModeContent() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Data
+        const dateParam = urlParams.get('date');
+        if (dateParam) {
+            startDate = new Date(dateParam);
+            updateCounter();
+            setInterval(updateCounter, 1000);
+        } else {
+            // Se não houver data na URL, usa a data do local storage
+            updateCounter();
+            setInterval(updateCounter, 1000);
+        }
+
+        // Cor do Tema
+        const colorParam = urlParams.get('color');
+        if (colorParam) {
+            const loadedColor = '#' + colorParam;
+            document.documentElement.style.setProperty('--main-color', loadedColor);
+            document.documentElement.style.setProperty('--main-color-dark', tinycolor(loadedColor).darken(10).toString());
+            document.documentElement.style.setProperty('--main-color-shadow', tinycolor(loadedColor).setAlpha(0.4).toRgbString());
+            document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(loadedColor).setAlpha(0.5).toRgbString());
+            document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(loadedColor).setAlpha(0.1).toRgbString());
+        }
+
+        // Mensagem Personalizada
+        const messageParam = urlParams.get('message');
+        const viewModeMessageElement = document.getElementById('viewModeMessage');
+        if (messageParam) {
+            viewModeMessageElement.textContent = messageParam;
+            viewModeMessageElement.classList.remove('hidden');
+        } else {
+            viewModeMessageElement.classList.add('hidden');
+        }
+
+        // Emojis (para chuva de emojis)
+        const emojisParam = urlParams.get('emojis');
+        if (emojisParam) {
+            const loadedEmojis = emojisParam.split(',');
+            // Atualiza os inputs de emoji para a chuva de emojis usar os da URL
+            emojiInputs.forEach((input, index) => {
+                input.value = loadedEmojis[index] || '';
             });
-    });
-
-
-    // === Inicialização da Aplicação ===
-    function initialize() {
-        const urlParams = parseURLParams();
-
-        if (urlParams.date || urlParams.music || urlParams.emoji1 || urlParams.photos.length > 0 || urlParams.msg) {
-            renderViewMode(urlParams);
-            showPage(viewModeDisplay);
-        } else {
-            loadFromLocalStorage();
-            showPage(page1);
-        }
-
-        if (!urlParams.music) {
-            player.style.display = 'none';
-        }
-    }
-
-    function loadFromLocalStorage() {
-        const storedStartDate = localStorage.getItem('startDate');
-        if (storedStartDate) {
-            startDate = new Date(storedStartDate);
-            startDatePicker.value = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
-            updateCountdown();
-        } else {
-            countdownMessage.textContent = "Selecione a data inicial.";
-            exactTimeMessage.textContent = "";
-        }
-
-        const storedThemeColor = localStorage.getItem('themeColor');
-        if (storedThemeColor) {
-            themeColorPicker.value = storedThemeColor;
-            document.documentElement.style.setProperty('--main-color', storedThemeColor);
-            if (typeof tinycolor !== 'undefined') {
-                document.documentElement.style.setProperty('--main-color-dark', tinycolor(storedThemeColor).darken(10).toString());
-                document.documentElement.style.setProperty('--main-color-shadow', tinycolor(storedThemeColor).setAlpha(0.4).toString());
-                document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(storedThemeColor).setAlpha(0.5).toString());
-                document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(storedThemeColor).setAlpha(0.1).toString());
-            }
-        }
-
-        musicId = localStorage.getItem('musicId') || '';
-        musicTitle = localStorage.getItem('musicTitle') || '';
-        if (musicId) {
-            musicLinkInput.value = `https://www.youtube.com/watch?v=${musicId}`; // Link completo para o input
-            musicNameInput.value = musicTitle;
-            musicLoadedMessage.textContent = `Música: "${musicTitle}" carregada!`;
-            musicLoadedMessage.style.display = 'block';
-            setTimeout(() => musicLoadedMessage.style.display = 'none', 3000);
-        } else {
-            musicLinkInput.value = '';
-            musicNameInput.value = '';
-        }
-
-        emojiInputs.forEach((input, index) => {
-            const storedEmoji = localStorage.getItem(`emoji${index + 1}`);
-            if (storedEmoji) {
-                input.value = storedEmoji;
-                selectedEmojis[index] = storedEmoji;
-            } else {
-                input.value = '';
-                selectedEmojis[index] = '';
-            }
-        });
-
-        const storedMessage = localStorage.getItem('personalMessage');
-        if (storedMessage) {
-            personalMessageInput.value = storedMessage;
-        }
-
-        uploadedPhotoData = [];
-        photoUploads.forEach((photoSlot, index) => {
-            const storedPhoto = localStorage.getItem(`uploadedPhoto${index + 1}`);
-            if (storedPhoto) {
-                photoSlot.img.src = storedPhoto;
-                photoSlot.img.style.display = 'block';
-                photoSlot.img.style.opacity = '1';
-                photoSlot.button.classList.add('show-button');
-                uploadedPhotoData[index] = storedPhoto;
-                photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'none';
-            } else {
-                photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'block';
-                photoSlot.img.src = '';
-                photoSlot.img.style.display = 'none';
-                photoSlot.img.style.opacity = '0';
-                photoSlot.button.classList.remove('show-button');
-                uploadedPhotoData[index] = '';
-            }
-        });
-    }
-
-    function renderViewMode(params) {
-        clearInterval(countdownInterval);
-        stopSlideshow();
-        stopEmojiRain();
-        player.src = '';
-        displayedMusicName.parentElement.style.display = 'none';
-        photosContainer.innerHTML = '';
-
-        if (params.color) {
-            const newColor = `#${params.color}`;
-            document.documentElement.style.setProperty('--main-color', newColor);
-            if (typeof tinycolor !== 'undefined') {
-                document.documentElement.style.setProperty('--main-color-dark', tinycolor(newColor).darken(10).toString());
-                document.documentElement.style.setProperty('--main-color-shadow', tinycolor(newColor).setAlpha(0.4).toString());
-                document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(newColor).setAlpha(0.5).toString());
-                document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(newColor).setAlpha(0.1).toString());
-            }
-        }
-
-        if (params.date) {
-            startDate = new Date(params.date);
-            countdownInterval = setInterval(updateCountdown, 1000);
-            updateCountdown();
-        } else {
-            countdownMessage.textContent = "Data inicial não definida.";
-            exactTimeMessage.textContent = "";
-        }
-
-        musicId = params.music || '';
-        musicTitle = decodeURIComponent(params.musicName || '') || 'Música de Amor';
-        if (musicId) {
-            displayedMusicName.textContent = musicTitle;
-            loadYouTubePlayer(musicId);
-            displayedMusicName.parentElement.style.display = 'block';
-        } else {
-            displayedMusicName.parentElement.style.display = 'none';
-        }
-
-        if (params.msg) {
-            displayedPersonalMessage.textContent = decodeURIComponent(params.msg);
-            displayedPersonalMessage.classList.remove('hidden');
-            displayedPersonalMessage.classList.add('show');
-        } else {
-            displayedPersonalMessage.classList.add('hidden');
-            displayedPersonalMessage.classList.remove('show');
-        }
-
-        selectedEmojis = [
-            decodeURIComponent(params.emoji1 || ''),
-            decodeURIComponent(params.emoji2 || ''),
-            decodeURIComponent(params.emoji3 || '')
-        ].filter(e => e);
-        if (selectedEmojis.length > 0) {
             startEmojiRain();
         }
 
-        const photosInUrl = params.photos;
-
-        if (photosInUrl && photosInUrl.length > 0) {
-            photosInUrl.forEach((base64Data) => {
-                const imgElement = document.createElement('img');
-                imgElement.src = decodeURIComponent(base64Data);
-                const uploaderDiv = document.createElement('div');
-                uploaderDiv.classList.add('photo-uploader');
-                uploaderDiv.appendChild(imgElement);
-                photosContainer.appendChild(uploaderDiv);
-            });
-            photosContainer.style.display = 'flex';
-            startSlideshow();
-        } else {
-            photosContainer.style.display = 'none';
+        // Fotos (para slideshow)
+        const photosParam = urlParams.get('photos');
+        const slideshowContainer = document.getElementById('slideshowContainer');
+        slideshowContainer.innerHTML = ''; // Limpa qualquer conteúdo anterior
+        if (photosParam) {
+            const loadedPhotos = JSON.parse(photosParam);
+            if (loadedPhotos.length > 0) {
+                photoFiles = loadedPhotos; // Usa as URLs Base64 diretamente para o slideshow
+                startSlideshow();
+            }
         }
 
-        copyShareLinkButton.style.display = 'block';
+        // Música (YouTube Embed)
+        const musicLinkParam = urlParams.get('musicLink');
+        const musicNameParam = urlParams.get('musicName');
+        const musicInfoDisplay = document.getElementById('musicInfoDisplay');
+        const playerDiv = document.getElementById('player');
+
+        if (musicLinkParam) {
+            musicData.link = musicLinkParam;
+            musicData.name = musicNameParam || '';
+            if (typeof YT !== 'undefined' && YT.Player) {
+                // Se a API do YouTube já estiver pronta, cria o player
+                onYouTubeIframeAPIReady();
+            } else {
+                // Caso contrário, a API vai chamar onYouTubeIframeAPIReady quando carregar
+            }
+        } else {
+            // Esconde o player se não houver música
+            playerDiv.innerHTML = '';
+            document.querySelector('.music-player-display').style.display = 'none';
+        }
+    }
+
+    // Iniciar Slideshow de Fotos
+    function startSlideshow() {
+        if (photoFiles.length === 0) {
+            document.getElementById('slideshowContainer').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('slideshowContainer').style.display = 'block';
+        const slideshowContainer = document.getElementById('slideshowContainer');
+        slideshowContainer.innerHTML = ''; // Limpa o container antes de adicionar imagens
+
+        // Cria os elementos de imagem para o slideshow
+        photoFiles.forEach((photoSrc, index) => {
+            const imgWrapper = document.createElement('div');
+            imgWrapper.classList.add('photo-uploader'); // Reutiliza o estilo do uploader
+            const img = document.createElement('img');
+            img.src = photoSrc;
+            img.alt = `Foto ${index + 1}`;
+            img.classList.add('slideshow-photo'); // Nova classe para as imagens do slideshow
+            if (index === 0) {
+                img.classList.add('active'); // Primeira imagem ativa
+            }
+            imgWrapper.appendChild(img);
+            slideshowContainer.appendChild(imgWrapper);
+        });
+
+        currentPhotoIndex = 0;
+        const slideshowPhotos = slideshowContainer.querySelectorAll('.slideshow-photo');
+
+        if (slideshowPhotos.length > 1) {
+            photoSlideshowInterval = setInterval(() => {
+                slideshowPhotos[currentPhotoIndex].classList.remove('active');
+                currentPhotoIndex = (currentPhotoIndex + 1) % slideshowPhotos.length;
+                slideshowPhotos[currentPhotoIndex].classList.add('active');
+            }, 3000); // Troca a cada 3 segundos
+        } else if (slideshowPhotos.length === 1) {
+            slideshowPhotos[0].classList.add('active'); // Garante que a única foto seja exibida
+        }
     }
 
 
-    // --- Carregamento inicial ---
-    if (typeof tinycolor === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.6.0/tinycolor.min.js';
-        script.onload = initialize;
-        document.head.appendChild(script);
+    // --- Inicialização ---
+
+    loadSavedData(); // Carrega os dados salvos ao iniciar
+
+    // Verifica se há parâmetros na URL (indicando que a página foi compartilhada)
+    if (window.location.search) {
+        showPage(page3); // Mostra a página de visualização se houver parâmetros
+        updateViewModeContent();
     } else {
-        initialize();
+        showPage(page1); // Caso contrário, mostra a página de configuração inicial
     }
 
-    // Remover o event listener 'resize' aqui, pois a altura agora é mais controlada pelo CSS
-    // O ajuste dinâmico da altura do container não é mais necessário no JS
-    // se o CSS estiver corretamente configurado com height: 100% para .container e .page.
+    // Polyfill para tinycolor (se não estiver usando uma biblioteca externa)
+    // Se você estiver usando tinycolor.js via CDN, pode remover este bloco.
+    if (typeof tinycolor === 'undefined') {
+        window.tinycolor = function(color) {
+            let r, g, b, a = 1;
+            if (color && typeof color === 'string') {
+                if (color.startsWith('#') && color.length === 7) {
+                    r = parseInt(color.substring(1, 3), 16);
+                    g = parseInt(color.substring(3, 5), 16);
+                    b = parseInt(color.substring(5, 7), 16);
+                } else if (color.startsWith('rgb')) {
+                    const parts = color.match(/\d+/g).map(Number);
+                    r = parts[0]; g = parts[1]; b = parts[2];
+                    if (color.includes('rgba') && parts[3] !== undefined) a = parts[3];
+                }
+            }
+            return {
+                _r: r, _g: g, _b: b, _a: a,
+                darken: function(amount) {
+                    const val = (c, amt) => Math.max(0, Math.min(255, c - Math.floor(c * (amt / 100))));
+                    return `rgb(${val(this._r, amount)}, ${val(this._g, amount)}, ${val(this._b, amount)})`;
+                },
+                setAlpha: function(newAlpha) {
+                    this._a = newAlpha;
+                    return this;
+                },
+                toRgbString: function() {
+                    return `rgba(${this._r}, ${this._g}, ${this._b}, ${this._a})`;
+                },
+                toString: function() {
+                    return this.toRgbString();
+                }
+            };
+        };
+    }
 });
