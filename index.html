@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nosso Tempo Juntos</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -18,25 +17,21 @@
                 <label for="themeColorPicker">Escolha a Cor do Tema:</label>
                 <input type="color" id="themeColorPicker" value="#ff007f" class="color-picker">
             </div>
+
+            <div class="music-input-container">
+                <label for="youtubeLinkInput">Link da Música (YouTube):</label>
+                <input type="text" id="youtubeLinkInput" placeholder="Ex: https://www.youtube.com/watch?v=VIDEO_ID">
+                <label for="musicNameInput">Nome da Música (opcional):</label>
+                <input type="text" id="musicNameInput" placeholder="Nome da sua música">
+                <button id="loadMusicButton" class="action-button">Carregar Música</button>
+            </div>
         </div>
 
-        <div class="music-input-container" id="musicInputContainer">
-            <label for="musicLinkInput">Link da Música (YouTube):</label>
-            <input type="url" id="musicLinkInput" placeholder="Cole o link do YouTube aqui">
-            <label for="musicNameInput" class="small-label">Nome da Música (manual):</label>
-            <input type="text" id="musicNameInput" placeholder="Ex: Nome do Artista - Título da Música">
-            <button id="loadMusicButton" class="action-button-small">Carregar Música</button>
-            <p id="musicStatus" class="copy-message" style="margin-top: 5px;"></p>
+        <div class="music-player-display hidden" id="musicPlayerDisplay">
+            <p id="currentMusicName"></p>
+            <div id="player"></div> <p id="musicLoadedMessage" class="hidden">Música do YouTube carregada!</p>
         </div>
 
-        <div class="custom-audio-player" id="customAudioPlayer">
-            <button id="playPauseButton" class="player-button">
-                <i class="fas fa-play" id="playPauseIcon"></i>
-            </button>
-            <span id="displayMusicName" class="music-name-display"></span>
-            <iframe id="youtubePlayer" width="0" height="0" src="" frameborder="0" allow="autoplay; encrypted-media" style="display: none;"></iframe>
-        </div>
-        <button id="changeMusicButton" class="action-button-small hidden">Trocar Música</button>
 
         <div class="photos-container">
             <div class="photo-uploader">
@@ -77,6 +72,7 @@
         <span id="copyMessage" class="copy-message"></span>
     </div>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="script.js"></script>
 </body>
 </html>
