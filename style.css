@@ -65,10 +65,15 @@ body {
 .action-button.hidden,
 .date-input-container label.hidden,
 .date-picker.hidden,
-.color-picker-container.hidden {
+.color-picker-container.hidden,
+.message-slot textarea.hidden { /* NOVO: Esconde o textarea */
     display: none !important; /* Força o ocultamento total */
 }
 
+/* NOVO: Exibe o parágrafo de mensagem no modo somente leitura */
+.message-slot p.show {
+    display: block !important;
+}
 
 .date-input-container label {
     font-size: 1em; /* Um pouco maior para legibilidade em mobile */
@@ -86,7 +91,6 @@ body {
     font-size: 1.1em; /* Aumenta o tamanho da fonte */
     width: calc(100% - 24px); /* Ocupa 100% da largura menos o padding */
     box-sizing: border-box;
-    /* Ajustes específicos para browsers mobile */
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -216,31 +220,80 @@ body {
     border-radius: 8px;
 }
 
+/* NOVO: Estilos para o slot de mensagem */
+.message-slot {
+    width: 100%;
+    margin-bottom: 25px; /* Espaço abaixo das fotos e acima do título */
+    text-align: center;
+}
+
+.message-slot textarea {
+    width: calc(100% - 24px); /* Ajusta para padding */
+    max-width: 450px; /* Limita a largura em telas maiores */
+    height: 80px; /* Altura inicial */
+    padding: 10px;
+    border: 1px solid var(--main-color);
+    border-radius: 5px;
+    background-color: #2a2a2a;
+    color: #dedede;
+    font-size: 1em;
+    resize: vertical; /* Permite redimensionar verticalmente */
+    box-sizing: border-box;
+    line-height: 1.4; /* Espaçamento entre linhas */
+}
+
+.message-slot textarea::placeholder {
+    color: #888;
+}
+
+.message-slot p {
+    font-size: 1.1em;
+    line-height: 1.5;
+    color: #dedede;
+    background-color: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 80px; /* Garante altura mínima consistente com o textarea */
+    display: flex; /* Para centralizar o texto verticalmente */
+    align-items: center; /* Centraliza verticalmente */
+    justify-content: center; /* Centraliza horizontalmente */
+    white-space: pre-wrap; /* Preserva quebras de linha e espaços do texto */
+    word-wrap: break-word; /* Quebra palavras longas */
+    border: 1px solid var(--main-color);
+    box-sizing: border-box;
+}
+
+/* Esconde o parágrafo por padrão e só mostra com a classe 'show' */
+.message-slot p.hidden {
+    display: none;
+}
+
+
 .text-content {
     margin-top: 20px;
-    margin-bottom: 20px; /* Adicionado margem inferior para separar do botão */
+    margin-bottom: 20px;
 }
 
 .title {
-    font-size: 2em; /* Título um pouco maior para destaque */
+    font-size: 2em;
     font-weight: bold;
     margin-bottom: 15px;
     color: var(--main-color);
 }
 
 .counter-line {
-    font-size: 1.3em; /* Contador um pouco maior */
+    font-size: 1.3em;
     margin: 8px 0;
     line-height: 1.4;
 }
 
 .copy-message {
     color: #4CAF50;
-    font-size: 1em; /* Mensagem um pouco maior */
-    margin-top: 15px; /* Mais espaço */
+    font-size: 1em;
+    margin-top: 15px;
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
-    min-height: 20px; /* Garante que ocupa espaço mesmo vazio */
+    min-height: 20px;
 }
 
 .copy-message.show {
@@ -250,64 +303,70 @@ body {
 /* Media query para telas maiores (desktops e tablets) */
 @media (min-width: 600px) {
     .container {
-        padding: 40px; /* Mais padding em telas maiores */
+        padding: 40px;
     }
 
     .title {
-        font-size: 2.5em; /* Título maior */
+        font-size: 2.5em;
     }
 
     .counter-line {
-        font-size: 1.5em; /* Contador maior */
+        font-size: 1.5em;
     }
 
     .photos-container {
-        flex-direction: row; /* Fotos lado a lado em telas maiores */
-        flex-wrap: nowrap; /* Não quebra a linha se tiver espaço */
+        flex-direction: row;
+        flex-wrap: nowrap;
     }
 
     .photo-uploader {
-        width: 120px; /* Volta ao tamanho menor para 3 fotos lado a lado */
+        width: 120px;
         height: 120px;
     }
 
     .date-input-container {
-        flex-direction: row; /* Volta a alinhar input e botão de data lado a lado */
+        flex-direction: row;
         justify-content: center;
-        gap: 20px; /* Mais espaço entre eles */
-        flex-wrap: wrap; /* Permite quebrar se não houver espaço suficiente */
+        gap: 20px;
+        flex-wrap: wrap;
     }
 
     .date-input-container label {
-        margin-bottom: 0; /* Remove margem inferior quando lado a lado */
-        text-align: right; /* Alinha o label à direita do input */
+        margin-bottom: 0;
+        text-align: right;
     }
 
     .date-picker {
-        width: 220px; /* Largura padrão em desktop */
+        width: 220px;
     }
 
     #setStartDateButton {
         margin-top: 0;
-        width: auto; /* Volta ao tamanho automático */
+        width: auto;
         max-width: none;
     }
 
     .color-picker-container {
-        flex-direction: row; /* Label e input de cor lado a lado */
+        flex-direction: row;
         gap: 10px;
-        margin-top: 0; /* Remove margem superior se estiver na mesma linha */
+        margin-top: 0;
     }
 
     .color-picker {
         width: 80px;
         height: 30px;
     }
+
+    .message-slot textarea,
+    .message-slot p {
+        width: 100%;
+        max-width: 450px; /* Mantém a largura máxima para o texto */
+    }
 }
 
 /* Media query para tablets em modo paisagem e alguns desktops */
 @media (min-width: 768px) {
     .container {
-        max-width: 600px; /* Pode ser um pouco maior */
+        max-width: 600px;
     }
 }
