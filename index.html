@@ -2,113 +2,126 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nosso Tempo Juntos</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
-</head>
+    </head>
 <body>
-    <div class="app-wrapper">
-        <div class="container">
-            <div id="page1" class="page active">
-                <h1 class="title">Nosso Tempo Juntos</h1>
+    <div class="container">
+        <h1>Nosso Tempo Juntos</h1>
 
-                <div class="date-input-container">
+        <div id="page1" class="page active">
+            <section class="card">
+                <h2>Configure a Data e Tema</h2>
+                <div class="input-group">
                     <label for="startDate">Selecione a Data Inicial:</label>
-                    <input type="datetime-local" id="startDate">
-                    <button class="action-button" id="setStartDateButton">Definir Data</button>
+                    <input type="datetime-local" id="startDate" value="2023-10-14T00:00">
+                    <button id="setStartDateButton" class="main-button">Definir Data</button>
                 </div>
 
-                <div class="color-picker-container">
+                <div class="input-group">
                     <label for="themeColor">Escolha a Cor do Tema:</label>
-                    <input type="color" id="themeColor" value="#FF007F" class="color-picker">
+                    <input type="color" id="themeColor" value="#FF00FF">
                 </div>
 
-                <div class="music-input-container">
+                <div class="input-group">
                     <label for="musicLink">Link da Música (YouTube):</label>
-                    <input type="text" id="musicLink" placeholder="Ex: https://www.youtube.cc">
+                    <input type="text" id="musicLink" placeholder="Ex: https://www.youtube.com/watch?v=..." class="full-width-input">
                     <label for="musicName">Nome da Música (opcional):</label>
-                    <input type="text" id="musicName" placeholder="Nome da sua música">
-                    <button class="action-button" id="loadMusicButton">Carregar Música</button>
+                    <input type="text" id="musicName" placeholder="Nome da sua música" class="full-width-input">
+                    <button id="loadMusicButton" class="main-button">Carregar Música</button>
                 </div>
+            </section>
 
-                <button class="action-button" id="nextPage1Button">Próximo: Emojis e Fotos</button>
+            <section class="card">
+                <h2>Mensagem Especial</h2>
+                <div class="input-group">
+                    <label for="customMessage">Escreva sua mensagem personalizada aqui:</label>
+                    <textarea id="customMessage" rows="4" placeholder="Ex: Meu amor, cada dia ao seu lado é um presente..."></textarea>
+                </div>
+            </section>
+            
+            <div class="navigation-buttons">
+                <button id="nextPage1Button" class="main-button">Próximo: Emojis e Fotos</button>
+                <button id="generateLinkButton" class="main-button generate-button">Gerar Link Compartilhável</button>
             </div>
+        </div>
 
-            <div id="page2" class="page hidden">
-                <h1 class="title">Detalhes Especiais</h1>
-
-                <div class="emoji-input-container">
-                    <label>Escolha 3 Emojis (coloque 1 por campo):</label>
-                    <div class="emoji-inputs-wrapper">
+        <div id="page2" class="page hidden">
+            <section class="card">
+                <h2>Detalhes Especiais</h2>
+                <div class="input-group">
+                    <p>Escolha 3 Emojis (coloque 1 por campo):</p>
+                    <div class="emoji-inputs">
                         <input type="text" class="emoji-input" maxlength="2" placeholder="❤️">
                         <input type="text" class="emoji-input" maxlength="2" placeholder="✨">
                         <input type="text" class="emoji-input" maxlength="2" placeholder="😊">
                     </div>
                 </div>
 
-                <div class="photos-container" id="photosContainer">
-                    <label style="color: var(--main-color);">Carregue 3 Fotos (opcional):</label>
-                    <div class="photo-uploader" id="photoUploader1">
-                        <input type="file" class="hidden-file-input" data-index="0" accept="image/*">
-                        <label class="custom-file-upload" for="hiddenFileInput1">
-                            <img id="photoPreview1" src="" alt="Foto 1" style="opacity: 0;">
-                            <span class="upload-text">Foto 1</span>
-                        </label>
-                        <button class="remove-photo-button" data-index="0">X</button>
-                    </div>
-                    <div class="photo-uploader" id="photoUploader2">
-                        <input type="file" class="hidden-file-input" data-index="1" accept="image/*">
-                        <label class="custom-file-upload" for="hiddenFileInput2">
-                            <img id="photoPreview2" src="" alt="Foto 2" style="opacity: 0;">
-                            <span class="upload-text">Foto 2</span>
-                        </label>
-                        <button class="remove-photo-button" data-index="1">X</button>
-                    </div>
-                    <div class="photo-uploader" id="photoUploader3">
-                        <input type="file" class="hidden-file-input" data-index="2" accept="image/*">
-                        <label class="custom-file-upload" for="hiddenFileInput3">
-                            <img id="photoPreview3" src="" alt="Foto 3" style="opacity: 0;">
-                            <span class="upload-text">Foto 3</span>
-                        </label>
-                        <button class="remove-photo-button" data-index="2">X</button>
+                <div class="input-group">
+                    <p>Carregue 3 Fotos (opcional):</p>
+                    <div class="photo-upload-grid">
+                        <div class="photo-uploader">
+                            <input type="file" class="hidden-file-input" id="photoUpload1" accept="image/*">
+                            <label for="photoUpload1" class="custom-file-upload">
+                                <img id="photoPreview1" src="" alt="Pré-visualização da Foto 1">
+                                <span id="uploadText1" class="upload-text">Foto 1</span>
+                            </label>
+                            <button class="remove-photo-button hidden">X</button>
+                        </div>
+                        <div class="photo-uploader">
+                            <input type="file" class="hidden-file-input" id="photoUpload2" accept="image/*">
+                            <label for="photoUpload2" class="custom-file-upload">
+                                <img id="photoPreview2" src="" alt="Pré-visualização da Foto 2">
+                                <span id="uploadText2" class="upload-text">Foto 2</span>
+                            </label>
+                            <button class="remove-photo-button hidden">X</button>
+                        </div>
+                        <div class="photo-uploader">
+                            <input type="file" class="hidden-file-input" id="photoUpload3" accept="image/*">
+                            <label for="photoUpload3" class="custom-file-upload">
+                                <img id="photoPreview3" src="" alt="Pré-visualização da Foto 3">
+                                <span id="uploadText3" class="upload-text">Foto 3</span>
+                            </label>
+                            <button class="remove-photo-button hidden">X</button>
+                        </div>
                     </div>
                 </div>
+            </section>
 
+            <div class="navigation-buttons">
+                <button id="backToPage1Button" class="secondary-button">Voltar</button>
+            </div>
+        </div>
 
-                <div class="message-slot">
-                    <label for="customMessage">Escreva sua mensagem personalizada aqui...</label>
-                    <textarea id="customMessage" placeholder="Amo vc"></textarea>
+        <div id="page3" class="page hidden view-mode-page">
+            <h1 class="view-mode-title">Nosso Tempo Juntos</h1>
+            
+            <p id="counterDisplay" class="counter-display"></p>
+            <p id="viewModeMessage" class="view-mode-message hidden"></p>
+
+            <div id="slideshowContainer" class="slideshow-container hidden">
                 </div>
 
-                <button class="action-button" id="generateLinkButton">Gerar Link Compartilhável</button>
-                <p id="copyMessage" class="copy-message">Link copiado!</p>
-                <button class="action-button back-button" id="backToPage1Button">Voltar</button>
+            <div class="music-player-display hidden">
+                <p id="musicInfoDisplay" class="music-info-display hidden"></p>
+                <div id="player"></div> </div>
+
+            <div id="emojiRainContainer" class="emoji-rain-container"></div>
+
+            <div id="shareLinkSection" class="share-link-section hidden">
+                <p>Compartilhe este link:</p>
+                <textarea id="shareLinkDisplay" readonly></textarea>
+                <button id="copyLinkButton" class="main-button">Copiar Link</button>
+                <span id="copyMessage" class="copy-message">Copiado!</span>
             </div>
 
-            <div id="page3" class="page hidden">
-                <h1 class="title" id="viewModeTitle">Nosso Tempo Juntos</h1>
-
-                <div class="photos-container slideshow-mode" id="slideshowContainer">
-                    </div>
-
-                <div class="text-content">
-                    <p class="counter-line" id="counterDisplay"></p>
-                    <p class="message-slot"><p id="viewModeMessage" class="hidden"></p></p>
-                </div>
-
-                <div class="music-player-display">
-                    <p id="musicInfoDisplay" class="hidden"></p>
-                    <div id="player"></div>
-                </div>
-
-                <button class="action-button back-button" id="backToPage2Button">Voltar para Edição</button>
+            <div class="navigation-buttons">
+                <button id="backToPage2Button" class="main-button">Voltar para Edição</button>
             </div>
         </div>
     </div>
-    <div id="emojiRainContainer"></div>
 
     <script src="script.js"></script>
 </body>
