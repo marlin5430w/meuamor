@@ -244,7 +244,7 @@ body {
 }
 
 
-/* --- ESTILOS PARA AS FOTOS (AJUSTADOS) --- */
+/* --- ESTILOS PARA AS FOTOS (AJUSTADOS PARA DIMENSÃO 120x180) --- */
 .photos-container {
     display: flex;
     justify-content: center; /* Centraliza horizontalmente */
@@ -269,22 +269,22 @@ body {
     opacity: 0; /* Controlado pelo JS para o slideshow */
     transition: opacity 0.5s ease-in-out;
     border: 2px dashed var(--main-color-border-dash); /* Mantém a borda no slideshow */
-    width: 150px; /* Tamanho fixo para o slideshow */
-    height: 150px; /* Tamanho fixo para o slideshow */
+    width: 120px; /* Largura ajustada para o formato retrato */
+    height: 180px; /* Altura ajustada para o formato retrato */
     z-index: 1; /* Padrão para itens sobrepostos */
 }
 
 /* Garante que o container de fotos tenha altura definida no modo slideshow */
 .photos-container.slideshow-mode {
-    height: 180px; /* Altura fixa para o contêiner no modo slideshow */
+    height: 200px; /* Aumenta a altura fixa para o contêiner no modo slideshow (pouco mais que a foto) */
     /* Remove o gap no modo slideshow para que os elementos possam sobrepor */
     gap: 0;
 }
 
 
 .photo-uploader {
-    width: 150px;
-    height: 150px;
+    width: 120px; /* Largura ajustada para o formato retrato */
+    height: 180px; /* Altura ajustada para o formato retrato */
     background-color: #2a2a2a;
     border-radius: 8px;
     box-shadow: 0 0 10px var(--main-color-shadow);
@@ -498,7 +498,7 @@ body {
     }
 
 
-    /* ESTILOS PARA AS FOTOS (REVISADO PARA MEDIA QUERY) */
+    /* ESTILOS PARA AS FOTOS (REVISADO PARA MEDIA QUERY E DIMENSÃO) */
     .photos-container {
         flex-direction: row; /* Volta a ser row em telas maiores para a edição */
         flex-wrap: nowrap; /* Não quebra linha em telas maiores, mantém 3 lado a lado */
@@ -508,8 +508,8 @@ body {
 
     /* Esconde os photo-uploaders no modo de visualização */
     .photos-container.slideshow-mode .photo-uploader {
-        width: 150px;
-        height: 150px;
+        width: 150px; /* Largura ajustada para o formato retrato */
+        height: 225px; /* Altura ajustada para o formato retrato (1.5x a largura) */
         position: absolute; /* Para sobreposição no slideshow */
         transform: translate(-50%, -50%);
         opacity: 0;
@@ -518,13 +518,13 @@ body {
     }
 
     .photos-container.slideshow-mode {
-        height: 180px; /* Altura fixa para o slideshow */
+        height: 250px; /* Aumenta a altura fixa para o slideshow, para acomodar a nova dimensão */
         gap: 0; /* Sem gap no slideshow */
     }
 
     .photo-uploader {
-        width: 120px;
-        height: 120px;
+        width: 150px; /* Largura ajustada para o formato retrato */
+        height: 225px; /* Altura ajustada para o formato retrato (1.5x a largura) */
         /* Garante que esteja no fluxo normal de layout na edição */
         position: relative;
         transform: none;
