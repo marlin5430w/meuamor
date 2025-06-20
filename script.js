@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadYouTubePlayer(videoId) {
         if (videoId) {
-            player.src = `http://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&enablejsapi=1&iv_load_policy=3&loop=1&playlist=${videoId}`;
+            player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&enablejsapi=1&iv_load_policy=3&loop=1&playlist=${videoId}`;
             player.style.display = 'block'; // Garante que o player seja visível
             player.style.opacity = '1';
             player.style.position = 'relative'; // Volta ao fluxo normal do documento
