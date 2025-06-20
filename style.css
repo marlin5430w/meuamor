@@ -45,12 +45,12 @@ body {
     gap: 10px;
     transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out;
     overflow: hidden;
-    max-height: 200px;
+    max-height: 200px; /* Ajuste para ter certeza que o conteúdo fica visível */
     opacity: 1;
     width: 100%; /* Ocupa toda a largura do container */
 }
 
-/* Classe para esconder o container de data e cor */
+/* Classe para esconder o container de data e cor (ativada pelo JS no modo de visualização) */
 .date-input-container.hidden {
     opacity: 0;
     max-height: 0;
@@ -61,10 +61,8 @@ body {
 }
 
 /* Classes para esconder elementos no modo "somente leitura" */
+/* REMOVIDO: .date-input-container label.hidden, .date-picker.hidden, .color-picker-container.hidden */
 .action-button.hidden,
-.date-input-container label.hidden,
-.date-picker.hidden,
-.color-picker-container.hidden,
 .message-slot textarea.hidden {
     display: none !important; /* Força o ocultamento total */
 }
