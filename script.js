@@ -121,27 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { display: displayString, exact: exactTimeString };
     }
 
-    function updateCountdown() {
-        if (!startDate) {
-            countdownMessage.textContent = "Selecione a data inicial acima";
-            exactTimeMessage.textContent = "";
-            return;
-        }
-
-        const now = new Date();
-        const diff = now.getTime() - startDate.getTime();
-
-        if (diff < 0) { // Se a data inicial ainda não chegou
-            countdownMessage.textContent = "Ainda não chegamos lá...";
-            exactTimeMessage.textContent = "";
-            return;
-        }
-
-        const { display, exact } = formatTimeDifference(diff);
-        countdownMessage.textContent = `Juntos há: ${display}`;
-        exactTimeMessage.textContent = exact;
-    }
-
     function isValidYouTubeUrl(url) {
         const regex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?$/;
         const match = url.match(regex);
@@ -599,6 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Adiciona um listener para redimensionamento para ajustar a altura do container dinamicamente
+    // Isso é especialmente útil quando o teclado virtual do celular aparece/desaparece
     window.addEventListener('resize', () => {
         const activePage = document.querySelector('.page.active');
         if (activePage) {
