@@ -11,7 +11,7 @@ html, body {
     height: 100%; /* Fixa a altura em 100% da viewport */
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Importante: Esconde barras de rolagem globais para evitar "voar" */
+    overflow: hidden; /* IMPORTANTE: Esconde barras de rolagem globais. A rolagem será interna. */
 }
 
 body {
@@ -25,46 +25,44 @@ body {
     margin: 0;
     padding: 20px; /* Adicionado padding para garantir espaço nas bordas em mobile */
     box-sizing: border-box; /* Garante que padding não adicione largura extra */
-    /* Removido overflow-y: auto; daqui, será controlado pelos sub-elementos se necessário */
 }
 
 .container {
     background-color: #0d0d0d; /* Fundo ainda mais escuro para o container */
     border: 2px solid var(--main-color); /* Usando a variável */
     border-radius: 10px;
-    /* Removido padding direto do container. As páginas internas terão seu próprio padding. */
     text-align: center;
     box-shadow: 0 0 20px var(--main-color-shadow); /* Usando a variável */
-    display: flex; /* Mantido flex para o container principal */
+    display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%; /* Agora ocupa 100% da largura disponível */
-    max-width: 500px; /* Largura máxima */
+    max-width: 500px; /* Largura máxima para desktop */
     box-sizing: border-box;
     margin: auto; /* Centraliza o container verticalmente se houver espaço extra */
-    position: relative; /* Para posicionar as páginas */
-    /* Altura do container será controlada pelo JavaScript para se ajustar ao conteúdo da página ativa */
+    position: relative; /* PARA O POSICIONAMENTO ABSOLUTO DAS PÁGINAS */
     min-height: 400px; /* Altura mínima para que não encolha demais */
     transition: height 0.5s ease-in-out; /* Suaviza a mudança de altura */
+    overflow: hidden; /* IMPORTANTE: Oculta o conteúdo das páginas "hidden" fora dos limites do container */
 }
 
-/* Estilos para as páginas */
+/* Estilos para as páginas (abas) */
 .page {
     width: 100%;
-    min-height: 100%; /* Garante que a página ocupe a altura mínima do container */
+    height: 100%; /* Garante que a página ocupe a altura total do container (ajustado por JS) */
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px; /* Espaçamento entre os blocos dentro da página */
     transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-    position: absolute; /* Para que uma não afete o layout da outra */
+    position: absolute; /* Essencial para sobrepor as páginas e permitir transições */
     top: 0;
     left: 0;
-    padding: 30px; /* Padding interno para a página */
+    padding: 30px; /* Padding interno para o conteúdo da página */
     box-sizing: border-box;
-    background-color: #0d0d0d; /* Mesma cor do container */
-    border-radius: 10px;
-    overflow-y: auto; /* Adicionado rolagem para o conteúdo da página, se necessário */
+    background-color: #0d0d0d; /* Mesma cor do container para transição suave */
+    border-radius: 10px; /* Mantém as bordas arredondadas */
+    overflow-y: auto; /* PERMITE ROLAGEM VERTICAL DENTRO DA PÁGINA SE O CONTEÚDO EXCEDER */
     -webkit-overflow-scrolling: touch; /* Melhora rolagem em iOS */
 }
 
@@ -82,7 +80,7 @@ body {
     z-index: 2; /* Garante que a página ativa esteja acima */
 }
 
-/* Estilos comuns para campos e botões */
+/* Estilos comuns para campos e botões (mantidos como antes, se já funcionavam bem) */
 .date-input-container,
 .color-picker-container,
 .music-input-container,
