@@ -54,7 +54,7 @@ body {
 .page {
     width: 100%;
     /* Altura será dinâmica, garantindo que o conteúdo caiba e possa ser rolado */
-    min-height: 100%; /* Garante que a página tenha pelo menos a altura do container */
+    min-height: 100%; /* Garante que a página tenha pelo menos 100% da altura do container */
     display: flex;
     flex-direction: column;
     align-items: center;
