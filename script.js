@@ -59,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // A função que a API do YouTube chama quando está pronta
     window.onYouTubeIframeAPIReady = function() {
         console.log("YouTube IFrame API is ready.");
-        // Este é um bom lugar para carregar a música se houver uma no localStorage ou URL
         loadMusicFromStorageOrURL();
     };
 
@@ -67,20 +66,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyThemeColor(color) {
         root.style.setProperty('--main-color', color);
         const hexToRgb = hex => hex.match(/\w\w/g).map(x => parseInt(x, 16));
-        const rgbToRgbA = (rgb, alpha) => `rgba(${rgb.join(',')}, ${alpha})`;
         const rgb = hexToRgb(color);
         const darkerRgb = rgb.map(c => Math.max(0, c - 30));
         root.style.setProperty('--main-color-dark', `rgb(${darkerRgb.join(',')})`);
-        root.style.setProperty('--main-color-shadow', rgbToRgbA(rgb, 0.4));
-        root.style.setProperty('--main-color-border-dash', rgbToRgbA(rgb, 0.5));
-        root.style.setProperty('--main-color-hover-bg', rgbToRgbA(rgb, 0.1));
+        root.style.setProperty('--main-color-shadow', `rgba(${rgb.join(',')}, 0.4)`);
+        root.style.setProperty('--main-color-border-dash', `rgba(${rgb.join(',')}, 0.5)`);
+        root.style.setProperty('--main-color-hover-bg', `rgba(${rgb.join(',')}, 0.1)`);
     }
 
     function hideEditingElements() {
         dateInputContainer.classList.add('hidden');
         startDatePicker.classList.add('hidden');
         setStartDateButton.classList.add('hidden');
-        dateInputContainer.querySelector('label').classList.add('hidden');
+        // dateInputContainer.querySelector('label').classList.add('hidden'); // Removido para esconder toda a div pai
         colorPickerContainer.classList.add('hidden');
         musicInputContainer.classList.add('hidden'); // Esconde inputs de música
 
@@ -97,11 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentYoutubeVideoId) {
             musicPlayerDisplay.classList.add('show');
             currentMusicNameElement.textContent = currentMusicTitle || "Música em Reprodução";
-            // Inicia o player do YouTube (autoplay)
             if (player) {
+                // Se o player já existe, tenta tocar.
+                // Se o vídeo estiver pausado, playVideo() irá resumir.
+                // Se estiver em outro estado, também tentará tocar.
                 player.playVideo();
             } else {
-                // Se o player ainda não foi criado, cria e ele deve tocar automaticamente
+                // Se o player ainda não foi criado (primeiro carregamento da página no modo de visualização), cria e ele deve tocar automaticamente
                 createYoutubePlayer(currentYoutubeVideoId, true);
             }
         } else {
@@ -117,13 +117,13 @@ document.addEventListener('DOMContentLoaded', () => {
         dateInputContainer.classList.remove('hidden');
         startDatePicker.classList.remove('hidden');
         setStartDateButton.classList.remove('hidden');
-        dateInputContainer.querySelector('label').classList.remove('hidden');
+        // dateInputContainer.querySelector('label').classList.remove('hidden'); // Removido
         colorPickerContainer.classList.remove('hidden');
         musicInputContainer.classList.remove('hidden'); // Mostra inputs de música
 
         photosContainer.classList.remove('slideshow-mode'); // Desativa o modo slideshow no CSS
 
-        if (generateLinkButton) generateLinkButton.classList.remove('hidden');
+        if (generateLinkButton) generateLinkButton.classList.remove('hidden'); // Garante que o botão esteja visível
 
         personalMessageInput.classList.remove('hidden');
         personalMessageDisplay.classList.remove('show');
@@ -157,6 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Estas funções foram removidas da lógica de setStartDateButton e não são mais necessárias como funções separadas para esconder/mostrar apenas a data.
+    // A visibilidade da área de edição completa será gerenciada por hideEditingElements/showEditingElements.
+    /*
     function hideDateInput() {
         dateInputContainer.classList.add('hidden');
         startDatePicker.classList.add('hidden');
@@ -170,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setStartDateButton.classList.remove('hidden');
         dateInputContainer.querySelector('label').classList.remove('hidden');
     }
+    */
 
     // --- Lógica do Slideshow ---
     function startSlideshow() {
@@ -179,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Nenhuma imagem para o slideshow. Mostrando placeholders.");
             imagePreviews.forEach((img, index) => {
                 img.classList.remove('active');
-                img.src = 'https://via.placeholder.com/150x150?text=Sem+Fotos';
+                img.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`; // Usando as novas dimensões
                 img.style.opacity = '1';
                 img.style.zIndex = '1';
                 photoUploaders[index].style.opacity = '1';
@@ -235,7 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
         activeImages = imagePreviews.filter(img => !img.src.includes('via.placeholder.com'));
         console.log("Imagens ativas para slideshow:", activeImages.map(img => img.src));
 
-        if (!photosContainer.classList.contains('slideshow-mode')) {
+        // A lógica de mostrar/esconder o botão de remover agora depende do modo de edição/visualização
+        // e se a imagem é um placeholder.
+        if (!dateInputContainer.classList.contains('hidden')) { // Se estiver no modo de edição
             imagePreviews.forEach((img, index) => {
                 if (!img.src.includes('via.placeholder.com')) {
                     removePhotoButtons[index].classList.add('show-button');
@@ -245,6 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+
+        // Se a página já está no modo de visualização, inicie o slideshow
         if (dateInputContainer.classList.contains('hidden')) {
             startSlideshow();
         }
@@ -285,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function onPlayerReady(event) {
         console.log("Player is ready:", event.target);
-        if (event.target.getPlayerState() !== YT.PlayerState.PLAYING) {
+        if (event.target.getPlayerState() !== YT.PlayerState.PLAYING && event.target.getPlaylistId()) {
              event.target.playVideo(); // Tenta tocar se não estiver tocando
         }
     }
@@ -317,7 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 3000);
 
             // Cria o player, mas não inicia o autoplay imediatamente, a menos que esteja no modo de visualização
-            // Isso evita que a música comece a tocar assim que o usuário seleciona no modo de edição
             createYoutubePlayer(currentYoutubeVideoId, false);
 
         } else {
@@ -372,8 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Lógica de Carregamento Inicial (Prioridade: URL Hash > localStorage) ---
-    // Esta parte foi modificada para chamar a `loadMusicFromStorageOrURL` no início
-    // e garantir que a lógica de "hideEditingElements" ou "showEditingElements" seja chamada corretamente.
     const initialHashParams = window.location.hash.substring(1);
 
     if (initialHashParams) {
@@ -406,20 +411,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             imagePreviews[index].onload = () => {
                                 loadedCount++;
                                 if (loadedCount === imagesToLoadCount) {
-                                    updateActiveImages();
+                                    updateActiveImages(); // Inicia o slideshow após carregar todas as imagens
                                 }
                             };
                             imagePreviews[index].src = imgData;
                         } else {
-                            imagePreviews[index].src = 'https://via.placeholder.com/150x150?text=Sem+Fotos';
+                            imagePreviews[index].src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
                         }
                     }
                 });
             } else {
                 imagePreviews.forEach((img, index) => {
-                    img.src = 'https://via.placeholder.com/150x150?text=Sem+Fotos';
+                    img.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
                 });
-                updateActiveImages();
+                updateActiveImages(); // Inicia o slideshow mesmo sem imagens carregadas
             }
 
             if (data.themeColor && typeof data.themeColor === 'string' && data.themeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -440,11 +445,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentMusicTitle = data.musicTitle || "Música em Reprodução";
             }
 
+            // A lógica de esconder elementos de edição é apenas se a data for válida E já estiver no modo de visualização.
+            // Para links gerados, sempre será modo de visualização.
             if (isValidDate(startDate)) {
                 hideEditingElements(); // Chama hideEditingElements que cuidará do player
             } else {
                 updateDisplayForNoDate();
-                showEditingElements();
+                showEditingElements(); // Se o link for inválido, volta para o modo de edição
             }
 
         } catch (e) {
@@ -454,21 +461,20 @@ document.addEventListener('DOMContentLoaded', () => {
             showEditingElements();
         }
     } else {
+        // Se não há hash na URL, então é o modo de edição por padrão.
         const storedStartDate = localStorage.getItem('countdownStartDate');
         if (storedStartDate) {
             startDate = new Date(storedStartDate);
             startDatePicker.value = storedStartDate.substring(0, 16);
             if (isValidDate(startDate)) {
                 startCountdown();
-                hideDateInput();
+                // Não esconde a área de data aqui, ela permanece visível para edição
             } else {
                 startDate = null;
                 updateDisplayForNoDate();
-                showDateInput();
             }
         } else {
             updateDisplayForNoDate();
-            showDateInput();
         }
 
         imagePreviews.forEach((imgElement, index) => {
@@ -476,10 +482,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (storedImage) {
                 imgElement.src = storedImage;
             } else {
-                imgElement.src = 'https://via.placeholder.com/120x120?text=Foto ' + (index + 1);
+                imgElement.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`; // Usando as novas dimensões
             }
         });
-        setTimeout(updateActiveImages, 100);
+        setTimeout(updateActiveImages, 100); // Garante que as imagens e botões de remover sejam atualizados
 
         const storedThemeColor = localStorage.getItem('themeColor');
         if (storedThemeColor && storedThemeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -493,12 +499,11 @@ document.addEventListener('DOMContentLoaded', () => {
             personalMessageInput.value = storedPersonalMessage;
         }
 
-        showEditingElements();
+        showEditingElements(); // Garante que todos os elementos de edição estejam visíveis
     }
 
     // Chama loadMusicFromStorageOrURL DENTRO do DOMContentLoaded, mas APÓS a lógica inicial de hash/localStorage.
     // Isso garante que o input esteja preenchido e o player (invisível) seja carregado no modo de edição.
-    // Se onYouTubeIframeAPIReady já chamou, esta será redundante, mas segura.
     if (typeof YT !== 'undefined' && YT.Player) {
         loadMusicFromStorageOrURL();
     }
@@ -512,16 +517,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isValidDate(startDate)) {
                 localStorage.setItem('countdownStartDate', startDate.toISOString());
                 startCountdown();
-                hideDateInput();
+                // Não chama hideDateInput() aqui. A área de edição permanece visível.
             } else {
                 alert("Por favor, insira uma data e hora válidas.");
                 updateDisplayForNoDate();
-                showDateInput();
+                // Permanece no modo de edição
             }
         } else {
             alert("Por favor, selecione uma data e hora.");
             updateDisplayForNoDate();
-            showDateInput();
+            // Permanece no modo de edição
         }
     });
 
@@ -544,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const imageDataUrl = e.target.result;
                     imagePreviews[index].src = imageDataUrl;
                     localStorage.setItem(`uploadedImage${index + 1}`, imageDataUrl);
-                    updateActiveImages();
+                    updateActiveImages(); // Re-avalia as imagens ativas e seus botões de remover
                 };
                 reader.readAsDataURL(file);
             }
@@ -555,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', (event) => {
             event.preventDefault();
             const index = parseInt(event.target.dataset.index);
-            const defaultPlaceholderSrc = `https://via.placeholder.com/120x120?text=Foto+${index + 1}`;
+            const defaultPlaceholderSrc = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`; // Usando as novas dimensões
 
             imagePreviews[index].src = defaultPlaceholderSrc;
             localStorage.removeItem(`uploadedImage${index + 1}`);
@@ -596,6 +601,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 copyMessage.classList.remove('show');
                 copyMessage.textContent = "";
             }, 3000);
+
+            // APÓS GERAR E COPIAR O LINK, ESCONDER OS ELEMENTOS DE EDIÇÃO
+            hideEditingElements(); // Esta função agora será chamada apenas aqui!
+
         } catch (err) {
             console.error('Falha ao copiar o link: ', err);
             copyMessage.textContent = "Erro ao copiar. Copie manualmente: " + link;
