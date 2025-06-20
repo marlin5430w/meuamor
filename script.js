@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('imagePreview3')
     ];
 
+    // NOVO: Seleciona todos os botões de remover
+    const removePhotoButtons = document.querySelectorAll('.remove-photo-button');
+
     const personalMessageInput = document.getElementById('personalMessageInput');
     const personalMessageDisplay = document.getElementById('personalMessageDisplay');
     const messageSlot = document.getElementById('messageSlot');
@@ -59,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dateInputContainer.querySelector('label').classList.add('hidden');
         colorPickerContainer.classList.add('hidden');
 
-        // Esconde os photo-uploaders para ativar o modo slideshow (CSS)
         photoUploaders.forEach(uploader => {
             if (uploader) uploader.classList.add('hidden');
         });
@@ -68,9 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
         personalMessageInput.classList.add('hidden');
         personalMessageDisplay.classList.add('show');
 
-        // Inicia o slideshow quando os elementos de edição são escondidos
-        // Chamamos updateActiveImages para garantir que a lista esteja correta e o slideshow inicie
-        updateActiveImages();
+        // Esconde os botões de remover no modo de visualização
+        removePhotoButtons.forEach(button => button.style.display = 'none');
+
+        updateActiveImages(); // Garante que a lista de imagens para o slideshow esteja atualizada
         startSlideshow(); // Força o início do slideshow
     }
 
@@ -81,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dateInputContainer.querySelector('label').classList.remove('hidden');
         colorPickerContainer.classList.remove('hidden');
 
-        // Mostra os photo-uploaders para o modo edição (CSS)
         photoUploaders.forEach(uploader => {
             if (uploader) uploader.classList.remove('hidden');
         });
@@ -90,17 +92,19 @@ document.addEventListener('DOMContentLoaded', () => {
         personalMessageInput.classList.remove('hidden');
         personalMessageDisplay.classList.remove('show');
 
-        // Para o slideshow quando os elementos de edição são mostrados
-        clearInterval(slideshowInterval);
-        // Reseta as imagens para o estado inicial de edição (todas visíveis e sem classes de slideshow)
+        clearInterval(slideshowInterval); // Para o slideshow
+
+        // Mostra os botões de remover se a imagem não for um placeholder no modo edição
         imagePreviews.forEach((img, index) => {
             img.classList.remove('active');
-            img.style.opacity = ''; // Remove o estilo de opacidade inline
-            img.style.zIndex = ''; // Remove o estilo de z-index inline
-            // Garante que a imagem do preview esteja visível no modo edição
-            // O src já deve estar definido via localStorage ou placeholder
-            // A opacidade 1 no CSS via .photo-uploader img e .photo-uploader:not(.hidden)
-            // deve cuidar disso.
+            img.style.opacity = '';
+            img.style.zIndex = '';
+            // Se a imagem não for placeholder, mostra o botão de remover
+            if (!img.src.includes('via.placeholder.com')) {
+                removePhotoButtons[index].style.display = 'flex';
+            } else {
+                removePhotoButtons[index].style.display = 'none'; // Esconde se for placeholder
+            }
         });
     }
 
@@ -124,43 +128,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (activeImages.length === 0) {
             console.log("Nenhuma imagem para o slideshow. Mostrando placeholders.");
-            // Garante que os placeholders sejam visíveis e ocupem o espaço
             imagePreviews.forEach((img, index) => {
                 img.classList.remove('active');
-                img.src = 'https://via.placeholder.com/150x150?text=Foto+' + (index + 1); // Garante placeholder padrão
+                img.src = 'https://via.placeholder.com/150x150?text=Sem+Fotos';
                 img.style.opacity = '1';
                 img.style.zIndex = '1';
             });
-            // Não há imagens para slideshow, então não inicia o setInterval
             return;
         }
 
-        // Garante que todas as imagens comecem invisíveis, exceto a primeira ativa
         imagePreviews.forEach(img => {
             img.classList.remove('active');
             img.style.opacity = '0';
-            img.style.zIndex = '1'; // Z-index padrão
+            img.style.zIndex = '1';
         });
 
-        currentImageIndex = 0; // Começa sempre da primeira imagem válida
-        activeImages[currentImageIndex].classList.add('active'); // Ativa a primeira imagem
-        activeImages[currentImageIndex].style.opacity = '1'; // Garante que esteja visível
-        activeImages[currentImageIndex].style.zIndex = '2'; // Garante que esteja acima
+        currentImageIndex = 0;
+        activeImages[currentImageIndex].classList.add('active');
+        activeImages[currentImageIndex].style.opacity = '1';
+        activeImages[currentImageIndex].style.zIndex = '2';
 
 
         slideshowInterval = setInterval(() => {
-            // Desativa a imagem atual
             activeImages[currentImageIndex].classList.remove('active');
             activeImages[currentImageIndex].style.opacity = '0';
-            activeImages[currentImageIndex].style.zIndex = '1'; // Volta ao z-index padrão
+            activeImages[currentImageIndex].style.zIndex = '1';
 
-            // Avança para a próxima imagem
             currentImageIndex = (currentImageIndex + 1) % activeImages.length;
 
-            // Ativa a próxima imagem
             activeImages[currentImageIndex].classList.add('active');
-            activeImages[currentImageIndex].style.opacity = '1'; // Torna visível
-            activeImages[currentImageIndex].style.zIndex = '2'; // Traz para frente
+            activeImages[currentImageIndex].style.opacity = '1';
+            activeImages[currentImageIndex].style.zIndex = '2';
 
         }, 1000); // Mudar imagem a cada 1 segundo (1000 milissegundos)
     }
@@ -169,6 +167,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateActiveImages() {
         activeImages = imagePreviews.filter(img => !img.src.includes('via.placeholder.com'));
         console.log("Imagens ativas para slideshow:", activeImages.map(img => img.src));
+
+        // No modo edição, atualiza a visibilidade dos botões de remover
+        if (!dateInputContainer.classList.contains('hidden')) { // Se não estiver hidden (modo edição)
+            imagePreviews.forEach((img, index) => {
+                if (!img.src.includes('via.placeholder.com')) {
+                    removePhotoButtons[index].style.display = 'flex'; // Mostra se tem foto
+                } else {
+                    removePhotoButtons[index].style.display = 'none'; // Esconde se for placeholder
+                }
+            });
+        }
+
         // Se já estiver no modo somente leitura (hidden), reinicia o slideshow com a nova lista
         if (dateInputContainer.classList.contains('hidden')) {
             startSlideshow();
@@ -196,12 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 startDate = null;
             }
 
-            // Carrega as imagens do link
             let imagesToLoadCount = 0;
             if (data.images && Array.isArray(data.images)) {
                  imagesToLoadCount = data.images.filter(imgData => imgData && typeof imgData === 'string' && imgData.startsWith('data:image')).length;
             }
-
 
             if (imagesToLoadCount > 0) {
                 let imagesLoaded = 0;
@@ -211,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             imagePreviews[index].onload = () => {
                                 imagesLoaded++;
                                 if (imagesLoaded === imagesToLoadCount) {
-                                    updateActiveImages(); // Todas as imagens carregadas, atualiza e inicia slideshow
+                                    updateActiveImages();
                                 }
                             };
                             imagePreviews[index].src = imgData;
@@ -221,17 +229,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             } else {
-                // Se não há imagens válidas no link, usa placeholders e tenta iniciar slideshow
                 imagePreviews.forEach((img, index) => {
                     img.src = 'https://via.placeholder.com/150x150?text=Foto+' + (index + 1);
                 });
-                updateActiveImages(); // Tenta iniciar slideshow com placeholders se for o caso
+                updateActiveImages();
             }
-
 
             if (data.themeColor && typeof data.themeColor === 'string' && data.themeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
                 currentThemeColor = data.themeColor;
-                themeColorPicker.value = storedThemeColor; // Define o valor do picker na UI
+                themeColorPicker.value = currentThemeColor; // Define o valor do picker na UI
                 applyThemeColor(currentThemeColor);
             }
 
@@ -242,10 +248,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (isValidDate(startDate)) {
-                hideEditingElements(); // Isso vai chamar updateActiveImages() e startSlideshow() no final
+                hideEditingElements();
             } else {
                 updateDisplayForNoDate();
-                showEditingElements(); // Isso vai parar qualquer slideshow
+                showEditingElements();
             }
 
         } catch (e) {
@@ -255,7 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showEditingElements();
         }
     } else {
-        // Se não houver hash, tenta carregar do localStorage (modo editável)
         const storedStartDate = localStorage.getItem('countdownStartDate');
         if (storedStartDate) {
             startDate = new Date(storedStartDate);
@@ -276,15 +281,12 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePreviews.forEach((imgElement, index) => {
             const storedImage = localStorage.getItem(`uploadedImage${index + 1}`);
             if (storedImage) {
-                imgElement.src = storedImage; // Apenas define o SRC, o onload será tratado por updateActiveImages
+                imgElement.src = storedImage;
             } else {
                 imgElement.src = 'https://via.placeholder.com/120x120?text=Foto ' + (index + 1);
             }
         });
-        // Chama updateActiveImages após a carga inicial do localStorage para preencher activeImages
-        // Isso é feito com um pequeno atraso para garantir que as imagens tenham chance de renderizar
         setTimeout(updateActiveImages, 100);
-
 
         const storedThemeColor = localStorage.getItem('themeColor');
         if (storedThemeColor && storedThemeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -298,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
             personalMessageInput.value = storedPersonalMessage;
         }
 
-        showEditingElements(); // Garante que todos os elementos de edição estejam visíveis por padrão no modo edição
+        showEditingElements();
     }
 
 
@@ -346,11 +348,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 reader.readAsDataURL(file);
             } else {
-                // Se o usuário cancela a seleção de um arquivo ou remove
-                imagePreviews[index].src = 'https://via.placeholder.com/120x120?text=Foto ' + (index + 1);
-                localStorage.removeItem(`uploadedImage${index + 1}`);
-                updateActiveImages(); // Atualiza a lista de imagens ativas se uma for removida
+                // Caso o usuário cancele a seleção ou o arquivo não seja válido,
+                // podemos resetar para o placeholder. A remoção explícita será pelo botão "X".
             }
+        });
+    });
+
+    // NOVO: Adiciona listener para os botões de remover foto
+    removePhotoButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault(); // Impede que o label (que é um for="imageUpload") seja clicado
+            const index = parseInt(event.target.dataset.index); // Pega o índice da foto
+            const defaultPlaceholderSrc = `https://via.placeholder.com/120x120?text=Foto+${index + 1}`; // Placeholder para a edição
+
+            imagePreviews[index].src = defaultPlaceholderSrc; // Reseta a imagem para o placeholder
+            localStorage.removeItem(`uploadedImage${index + 1}`); // Remove do localStorage
+            event.target.style.display = 'none'; // Esconde o próprio botão de remover
+
+            updateActiveImages(); // Atualiza a lista de imagens ativas (remove a imagem excluída do slideshow)
         });
     });
 
@@ -363,7 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const config = {
             startDate: startDate.toISOString(),
-            // Filtra URLs de placeholder antes de salvar
             images: imagePreviews.map(img => img.src.includes('via.placeholder.com') ? null : img.src),
             themeColor: currentThemeColor,
             personalMessage: personalMessageInput.value
