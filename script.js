@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const dateInputContainer = document.getElementById('dateInputContainer'); // Novo
     const startDatePicker = document.getElementById('startDatePicker');
     const setStartDateButton = document.getElementById('setStartDateButton');
     const yearsMonthsDaysElement = document.getElementById('years-months-days');
     const hoursMinutesSecondsElement = document.getElementById('hours-minutes-seconds');
 
-    // Elementos das imagens
     const imageUploads = [
         document.getElementById('imageUpload1'),
         document.getElementById('imageUpload2'),
@@ -21,28 +21,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Funções de Carregamento Inicial e Salvamento ---
 
-    // Carregar data inicial do localStorage
     const storedStartDate = localStorage.getItem('countdownStartDate');
     if (storedStartDate) {
         startDate = new Date(storedStartDate);
         startDatePicker.value = storedStartDate.substring(0, 16);
         if (isValidDate(startDate)) {
             startCountdown();
+            hideDateInput(); // Esconde se a data é válida e carregada
         } else {
             startDate = null;
             updateDisplayForNoDate();
+            showDateInput(); // Mostra se a data carregada é inválida
         }
     } else {
         updateDisplayForNoDate();
+        showDateInput(); // Mostra se não há data salva
     }
 
-    // Carregar imagens do localStorage
     imagePreviews.forEach((imgElement, index) => {
         const storedImage = localStorage.getItem(`uploadedImage${index + 1}`);
         if (storedImage) {
             imgElement.src = storedImage;
         }
     });
+
+    // --- Funções para Esconder/Mostrar o Slot de Data ---
+    function hideDateInput() {
+        dateInputContainer.classList.add('hidden');
+    }
+
+    function showDateInput() {
+        dateInputContainer.classList.remove('hidden');
+    }
 
     // --- Listeners de Eventos ---
 
@@ -53,17 +63,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isValidDate(startDate)) {
                 localStorage.setItem('countdownStartDate', startDate.toISOString());
                 startCountdown();
+                hideDateInput(); // Esconde depois de definir a data
             } else {
                 alert("Por favor, insira uma data e hora válidas.");
                 updateDisplayForNoDate();
+                showDateInput(); // Garante que esteja visível se a data for inválida
             }
         } else {
             alert("Por favor, selecione uma data e hora.");
             updateDisplayForNoDate();
+            showDateInput(); // Garante que esteja visível se nenhuma data for selecionada
         }
     });
 
-    // Listener para cada input de imagem
     imageUploads.forEach((inputElement, index) => {
         inputElement.addEventListener('change', (event) => {
             const file = event.target.files[0];
@@ -72,14 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 reader.onload = (e) => {
                     const imageDataUrl = e.target.result;
                     imagePreviews[index].src = imageDataUrl;
-                    localStorage.setItem(`uploadedImage${index + 1}`, imageDataUrl); // Salva no localStorage
+                    localStorage.setItem(`uploadedImage${index + 1}`, imageDataUrl);
                 };
-                reader.readAsDataURL(file); // Converte a imagem para Base64 URL
+                reader.readAsDataURL(file);
             }
         });
     });
 
-    // --- Funções do Contador (iguais às anteriores) ---
+    // --- Funções do Contador ---
 
     function startCountdown() {
         if (countdownInterval) {
@@ -140,12 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let months = 0;
         let tempDate = new Date(startDate);
 
-        // Lógica de cálculo de meses e anos mais precisa
         while (tempDate < now) {
             const nextMonth = new Date(tempDate);
             nextMonth.setMonth(tempDate.getMonth() + 1);
 
-            // Tenta manter o dia do mês se possível, mas ajusta para o último dia do mês se necessário
             if (nextMonth.getDate() !== tempDate.getDate()) {
                 const lastDayOfNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).getDate();
                 if (tempDate.getDate() > lastDayOfNextMonth) {
@@ -164,21 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
         years = Math.floor(months / 12);
         months %= 12;
 
-        // Recalcular os dias restantes a partir da data de início ajustada por anos e meses
         const adjustedStartDateForDays = new Date(startDate);
         adjustedStartDateForDays.setFullYear(startDate.getFullYear() + years);
         adjustedStartDateForDays.setMonth(startDate.getMonth() + months);
 
-        // Se o dia original for maior que o último dia do mês ajustado, ajusta para o último dia
-        if (adjustedStartDateForDays.getDate() < startDate.getDate() &&
-            adjustedStartDateForDays.getMonth() === now.getMonth() &&
-            adjustedStartDateForDays.getFullYear() === now.getFullYear()) {
-             // Esta parte do ajuste de dias é a mais complexa e pode haver pequenas imprecisões sem uma biblioteca dedicada.
-             // Para a maioria dos casos, o cálculo direto de dias após anos/meses ajustados funciona bem.
-        }
-
         let totalDaysFromAdjusted = Math.floor((now.getTime() - adjustedStartDateForDays.getTime()) / (1000 * 60 * 60 * 24));
-        if (totalDaysFromAdjusted < 0) totalDaysFromAdjusted = 0; // Evitar dias negativos
+        if (totalDaysFromAdjusted < 0) totalDaysFromAdjusted = 0;
 
         yearsMonthsDaysElement.textContent =
             `${years} ano${years !== 1 ? 's' : ''}, ` +
