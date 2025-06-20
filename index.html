@@ -20,11 +20,19 @@
 
             <div class="music-input-container">
                 <label for="youtubeLinkInput">Link da Música (YouTube):</label>
-                <input type="text" id="youtubeLinkInput" placeholder="Ex: https://www.youtube.com/watch?v=VIDEO_ID">
+                <input type="text" id="youtubeLinkInput" placeholder="Ex: https://www.youtube.com/watch?v=dQw4w9WgXcQ">
                 <label for="musicNameInput">Nome da Música (opcional):</label>
                 <input type="text" id="musicNameInput" placeholder="Nome da sua música">
                 <button id="loadMusicButton" class="action-button">Carregar Música</button>
             </div>
+
+            <div class="emoji-input-container">
+                <label>Escolha 3 Emojis (coloque 1 por campo):</label>
+                <input type="text" id="emojiInput1" class="emoji-input" maxlength="2" placeholder="❤️">
+                <input type="text" id="emojiInput2" class="emoji-input" maxlength="2" placeholder="✨">
+                <input type="text" id="emojiInput3" class="emoji-input" maxlength="2" placeholder="💫">
+            </div>
+
         </div>
 
         <div class="music-player-display hidden" id="musicPlayerDisplay">
@@ -37,21 +45,21 @@
             <div class="photo-uploader">
                 <input type="file" id="imageUpload1" accept="image/*" class="hidden-file-input">
                 <label for="imageUpload1" class="custom-file-upload">
-                    <img id="imagePreview1" src="https://via.placeholder.com/120x120?text=Foto+1" alt="Foto 1">
+                    <img id="imagePreview1" src="https://via.placeholder.com/120x180?text=Foto+1" alt="Foto 1">
                     <button type="button" class="remove-photo-button" data-index="0">X</button>
                 </label>
             </div>
             <div class="photo-uploader">
                 <input type="file" id="imageUpload2" accept="image/*" class="hidden-file-input">
                 <label for="imageUpload2" class="custom-file-upload">
-                    <img id="imagePreview2" src="https://via.placeholder.com/120x120?text=Foto+2" alt="Foto 2">
+                    <img id="imagePreview2" src="https://via.placeholder.com/120x180?text=Foto+2" alt="Foto 2">
                     <button type="button" class="remove-photo-button" data-index="1">X</button>
                 </label>
             </div>
             <div class="photo-uploader">
                 <input type="file" id="imageUpload3" accept="image/*" class="hidden-file-input">
                 <label for="imageUpload3" class="custom-file-upload">
-                    <img id="imagePreview3" src="https://via.placeholder.com/120x120?text=Foto+3" alt="Foto 3">
+                    <img id="imagePreview3" src="https://via.placeholder.com/120x180?text=Foto+3" alt="Foto 3">
                     <button type="button" class="remove-photo-button" data-index="2">X</button>
                 </label>
             </div>
@@ -71,6 +79,8 @@
         <button id="generateLinkButton" class="action-button">Gerar Link Compartilhável</button>
         <span id="copyMessage" class="copy-message"></span>
     </div>
+
+    <div id="emojiRainContainer"></div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="script.js"></script>
