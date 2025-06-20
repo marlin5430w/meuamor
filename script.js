@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // === Seletores de Elementos ===
+    const container = document.querySelector('.container'); // Seleciona o container principal
     const page1 = document.getElementById('page1');
     const page2 = document.getElementById('page2');
     const viewModeDisplay = document.getElementById('viewModeDisplay');
@@ -62,8 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 page.classList.remove('active');
             }
         });
-        // Ajusta o padding do container principal quando as páginas ativas controlam o padding
-        document.querySelector('.container').classList.add('page-active');
+
+        // Ajusta a altura do container para se adaptar à altura da página ativa
+        // Usa setTimeout para garantir que a página ativa já tenha calculado sua altura final
+        setTimeout(() => {
+            const activePageHeight = pageToShow.scrollHeight; // Inclui o padding
+            container.style.height = `${activePageHeight}px`;
+        }, 50); // Pequeno atraso para garantir que o layout da página seja renderizado
     }
 
     // === Funções de Utilitário ===
@@ -103,7 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let displayParts = [];
         if (years > 0) displayParts.push(`${years} ano${years !== 1 ? 's' : ''}`);
         if (remainingMonths > 0) displayParts.push(`${remainingMonths} mês${remainingMonths !== 1 ? 'es' : ''}`);
-        if (displayParts.length < 2 && days % 30.44 < 1 && days > 0) displayParts.push(`${days} dia${days !== 1 ? 's' : ''}`); // Mostra dias se não houver meses/anos e for relevante
+        // Mostra dias se não houver meses/anos E se houver dias relevantes (não zero)
+        if (displayParts.length < 2 && Math.floor(days % 30.44) > 0) displayParts.push(`${Math.floor(days % 30.44)} dia${Math.floor(days % 30.44) !== 1 ? 's' : ''}`);
 
         const displayString = displayParts.length > 0 ? displayParts.join(', ') : '0 dias';
 
@@ -154,13 +161,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startSlideshow() {
+        stopSlideshow(); // Limpa qualquer slideshow anterior
         const photos = photosContainer.querySelectorAll('img');
         if (photos.length === 0) {
             photosContainer.style.display = 'none'; // Esconde se não houver fotos
             return;
         }
         photosContainer.style.display = 'flex'; // Garante que o container esteja visível
+        photosContainer.classList.add('slideshow-mode'); // Adiciona a classe para o CSS do slideshow
 
+        currentSlide = 0; // Reinicia o slide
         photos.forEach(img => img.classList.remove('active'));
         photos[currentSlide].classList.add('active');
 
@@ -173,9 +183,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function stopSlideshow() {
         clearInterval(slideshowInterval);
+        photosContainer.classList.remove('slideshow-mode'); // Remove a classe do slideshow
+        // Certifica-se de que todas as imagens estejam ocultas após parar o slideshow
+        photosContainer.querySelectorAll('img').forEach(img => img.classList.remove('active'));
     }
 
     function startEmojiRain() {
+        stopEmojiRain(); // Limpa qualquer chuva de emojis anterior
         if (selectedEmojis.filter(e => e).length === 0) return; // Não inicia se não houver emojis
         emojiRainContainer.style.display = 'block';
 
@@ -219,10 +233,13 @@ document.addEventListener('DOMContentLoaded', () => {
     themeColorPicker.addEventListener('input', (event) => {
         const newColor = event.target.value;
         document.documentElement.style.setProperty('--main-color', newColor);
-        document.documentElement.style.setProperty('--main-color-dark', tinycolor(newColor).darken(10).toString());
-        document.documentElement.style.setProperty('--main-color-shadow', tinycolor(newColor).setAlpha(0.4).toString());
-        document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(newColor).setAlpha(0.5).toString());
-        document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(newColor).setAlpha(0.1).toString());
+        // Verifica se tinycolor está carregado antes de usar
+        if (typeof tinycolor !== 'undefined') {
+            document.documentElement.style.setProperty('--main-color-dark', tinycolor(newColor).darken(10).toString());
+            document.documentElement.style.setProperty('--main-color-shadow', tinycolor(newColor).setAlpha(0.4).toString());
+            document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(newColor).setAlpha(0.5).toString());
+            document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(newColor).setAlpha(0.1).toString());
+        }
         localStorage.setItem('themeColor', newColor);
     });
 
@@ -275,6 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     photoSlot.button.classList.add('show-button');
                     uploadedPhotoData[index] = e.target.result; // Armazena o Base64
                     localStorage.setItem(`uploadedPhoto${index + 1}`, e.target.result);
+                    // Esconde o texto "Foto X"
+                    photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             }
@@ -379,12 +398,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // Caso contrário, carrega do localStorage e fica no modo de edição (Página 1)
             loadFromLocalStorage();
-            showPage(page1);
+            showPage(page1); // Garante que a página 1 seja mostrada ao iniciar sem parâmetros
         }
-
-        // Atualiza a contagem a cada segundo
-        clearInterval(countdownInterval); // Limpa qualquer intervalo anterior
-        countdownInterval = setInterval(updateCountdown, 1000);
 
         // Garante que o player esteja invisível no início se não for modo de visualização com música
         if (!urlParams.music) {
@@ -397,7 +412,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const storedStartDate = localStorage.getItem('startDate');
         if (storedStartDate) {
             startDate = new Date(storedStartDate);
+            // Ajusta o fuso horário para exibir corretamente no input datetime-local
             startDatePicker.value = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
+            updateCountdown(); // Atualiza o contador na tela de edição
+        } else {
+            countdownMessage.textContent = "Selecione a data inicial"; // Mensagem padrão para a tela de edição
+            exactTimeMessage.textContent = "";
         }
 
         // Carregar cor
@@ -405,22 +425,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (storedThemeColor) {
             themeColorPicker.value = storedThemeColor;
             document.documentElement.style.setProperty('--main-color', storedThemeColor);
-            document.documentElement.style.setProperty('--main-color-dark', tinycolor(storedThemeColor).darken(10).toString());
-            document.documentElement.style.setProperty('--main-color-shadow', tinycolor(storedStartDate).setAlpha(0.4).toString());
-            document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(storedStartDate).setAlpha(0.5).toString());
-            document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(storedStartDate).setAlpha(0.1).toString());
+            if (typeof tinycolor !== 'undefined') {
+                document.documentElement.style.setProperty('--main-color-dark', tinycolor(storedThemeColor).darken(10).toString());
+                document.documentElement.style.setProperty('--main-color-shadow', tinycolor(storedThemeColor).setAlpha(0.4).toString());
+                document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(storedThemeColor).setAlpha(0.5).toString());
+                document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(storedThemeColor).setAlpha(0.1).toString());
+            }
         }
 
         // Carregar música
         musicId = localStorage.getItem('musicId') || '';
         musicTitle = localStorage.getItem('musicTitle') || '';
-        musicLinkInput.value = musicId ? `https://www.youtube.com/watch?v=${musicId}` : '';
-        musicNameInput.value = musicTitle;
         if (musicId) {
+            musicLinkInput.value = `https://www.youtube.com/watch?v=${musicId}`; // Mostra o link completo no input
+            musicNameInput.value = musicTitle;
             musicLoadedMessage.textContent = `Música: "${musicTitle}" carregada!`;
             musicLoadedMessage.style.display = 'block';
             setTimeout(() => musicLoadedMessage.style.display = 'none', 3000);
+        } else {
+            musicLinkInput.value = '';
+            musicNameInput.value = '';
         }
+
 
         // Carregar emojis
         emojiInputs.forEach((input, index) => {
@@ -428,6 +454,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (storedEmoji) {
                 input.value = storedEmoji;
                 selectedEmojis[index] = storedEmoji;
+            } else {
+                input.value = ''; // Garante que o campo esteja vazio se não houver emoji armazenado
+                selectedEmojis[index] = '';
             }
         });
 
@@ -452,21 +481,28 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                  // Garante que o texto "Foto X" esteja visível se não houver foto
                 photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'block';
+                photoSlot.img.src = '';
+                photoSlot.img.style.display = 'none';
+                photoSlot.img.style.opacity = '0';
+                photoSlot.button.classList.remove('show-button');
+                uploadedPhotoData[index] = '';
             }
         });
     }
 
     function renderViewMode(params) {
-        // Limpa intervalos antigos
+        // Limpa intervalos antigos e elementos visuais de edição
         clearInterval(countdownInterval);
-        clearInterval(slideshowInterval);
+        stopSlideshow();
         stopEmojiRain();
+        player.src = ''; // Limpa o player de música
+        displayedMusicName.parentElement.style.display = 'none'; // Esconde o contêiner da música
+        photosContainer.innerHTML = ''; // Limpa fotos antigas do slideshow
 
         // Aplicar cor do tema
         if (params.color) {
             const newColor = `#${params.color}`;
             document.documentElement.style.setProperty('--main-color', newColor);
-            // Certifique-se de que tinycolor esteja carregado para estas funções
             if (typeof tinycolor !== 'undefined') {
                 document.documentElement.style.setProperty('--main-color-dark', tinycolor(newColor).darken(10).toString());
                 document.documentElement.style.setProperty('--main-color-shadow', tinycolor(newColor).setAlpha(0.4).toString());
@@ -518,8 +554,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fotos
-        // Limpa fotos antigas do slideshow
-        photosContainer.innerHTML = '';
         const photosInUrl = params.photos;
 
         if (photosInUrl && photosInUrl.length > 0) {
@@ -528,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 imgElement.src = decodeURIComponent(base64Data);
                 // Adiciona a imagem a um uploader fictício para manter a estrutura do slideshow CSS
                 const uploaderDiv = document.createElement('div');
-                uploaderDiv.classList.add('photo-uploader');
+                uploaderDiv.classList.add('photo-uploader'); // Mantém a classe para o estilo de foto no slideshow
                 uploaderDiv.appendChild(imgElement);
                 photosContainer.appendChild(uploaderDiv);
             });
@@ -553,4 +587,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         initialize(); // tinycolor já está carregado, inicializa diretamente
     }
+
+    // Adiciona um listener para redimensionamento para ajustar a altura do container dinamicamente
+    window.addEventListener('resize', () => {
+        const activePage = document.querySelector('.page.active');
+        if (activePage) {
+            container.style.height = `${activePage.scrollHeight}px`;
+        }
+    });
 });
