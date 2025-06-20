@@ -1,587 +1,545 @@
+/* Variáveis de Tema (manter no topo) */
 :root {
-    --main-color: #ff007f; /* Variável CSS para a cor principal */
-    --main-color-dark: #e6006e; /* Cor mais escura para hover */
-    --main-color-shadow: rgba(255, 0, 127, 0.4); /* Sombra */
-    --main-color-border-dash: rgba(255, 0, 127, 0.5); /* Borda tracejada */
-    --main-color-hover-bg: rgba(255, 0, 127, 0.1); /* Fundo hover translúcido */
-}
-
-/* ** CRÍTICO: Garante que o HTML e o BODY ocupem 100% da viewport e não rolem DE JEITO NENHUM ** */
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden; /* Esconde barras de rolagem globais */
-    -webkit-overflow-scrolling: touch; /* Melhora rolagem em iOS */
-    box-sizing: border-box; /* Garante que padding e borda não adicionem tamanho */
-    /* ** NOVO: Força o posicionamento e o tamanho para preencher a tela inteira, impedindo a rolagem do documento ** */
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    --main-color: #FF00FF; /* Cor principal - rosa choque */
+    --main-color-dark: #cc00cc; /* Um pouco mais escuro para hover/active */
+    --main-color-shadow: rgba(255, 0, 255, 0.4); /* Sombra transparente */
+    --main-color-border-dash: rgba(255, 0, 255, 0.5); /* Borda tracejada para upload de foto */
+    --main-color-hover-bg: rgba(255, 0, 255, 0.1); /* Fundo sutil para hover */
+    --text-color: #f0f0f0; /* Cor do texto claro */
+    --background-color: #1a1a1a; /* Fundo escuro */
+    --card-background: #2a2a2a; /* Fundo dos cards */
+    --border-radius: 12px;
+    --input-bg-color: #3a3a3a;
+    --input-border-color: #555;
+    --placeholder-color: #bbb;
 }
 
 body {
-    background-color: #1a1a1a;
-    color: #dedede;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
     display: flex;
     justify-content: center;
-    align-items: center;
-}
-
-.app-wrapper {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Alinhar ao topo para permitir rolagem */
+    min-height: 100vh; /* Garante que o corpo ocupa a altura total da viewport */
     box-sizing: border-box;
-    overflow: hidden;
+    overflow-x: hidden; /* Evita rolagem horizontal indesejada */
 }
 
 .container {
-    background-color: #0d0d0d;
+    background-color: #000000; /* Fundo preto mais escuro */
     border: 2px solid var(--main-color);
-    border-radius: 10px;
-    text-align: center;
+    border-radius: var(--border-radius);
+    padding: 30px;
+    width: 100%;
+    max-width: 600px;
     box-shadow: 0 0 20px var(--main-color-shadow);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 500px;
-    box-sizing: border-box;
+    text-align: center;
+    overflow: hidden; /* Para gerenciar as páginas com overflow */
     position: relative;
-    height: calc(100vh - 40px); /* 100% da altura da viewport menos 20px de padding em cima e 20px embaixo */
-    padding: 20px;
-    transition: height 0.5s ease-in-out;
-    overflow: hidden; /* Oculta o conteúdo das páginas "hidden" fora dos limites do container */
-    flex-shrink: 0;
+    box-sizing: border-box; /* Garante que padding e border sejam incluídos na largura/altura total */
 }
 
-/* Estilos para as páginas (abas) */
-.page {
-    width: 100%;
-    /* Altura da página ajustada para preencher o container e permitir rolagem */
-    height: calc(100% - 60px); /* 100% do .container - (30px top + 30px bottom) */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px; /* Reduzi o gap para dar mais espaço */
-    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-    position: absolute;
-    top: 30px; /* Posiciona abaixo do padding top do .container */
-    left: 20px; /* Posiciona abaixo do padding left do .container */
-    padding: 0; /* Removido padding direto da página, ele está no container */
-    box-sizing: border-box;
-    background-color: #0d0d0d;
-    border-radius: 10px;
-    /* CRÍTICO: Permite rolagem VERTICAL dentro da página se o conteúdo EXCEDER a altura visível */
-    overflow-y: auto; /* Permite rolagem apenas onde necessário */
-    -webkit-overflow-scrolling: touch; /* Melhora rolagem em iOS */
-    touch-action: pan-y; /* Ajuda a garantir que apenas a rolagem vertical seja manipulada pelo elemento */
-    overscroll-behavior-y: contain; /* Impede que a rolagem "vaze" para o body em iOS quando o final é alcançado */
-}
-
-
-.page.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(100%);
-    z-index: 1;
-}
-
-.page.active {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(0);
-    z-index: 2;
-}
-
-/* Restante do CSS permanece o mesmo (elementos internos, botões, fotos, etc.) */
-
-.title {
-    font-size: 2em;
+h1 {
     color: var(--main-color);
+    margin-bottom: 25px;
+    font-size: 2.2em;
+    text-shadow: 0 0 10px var(--main-color-shadow);
+}
+
+h2 {
+    color: var(--main-color);
+    margin-bottom: 20px;
+    font-size: 1.6em;
+    text-shadow: 0 0 5px var(--main-color-shadow);
+}
+
+.card {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    text-align: left; /* Alinha o conteúdo dos cards à esquerda */
+}
+
+.input-group {
     margin-bottom: 20px;
 }
 
-.date-input-container,
-.color-picker-container,
-.music-input-container,
-.emoji-input-container,
-.message-slot {
-    width: 100%;
-    border: 1px dashed var(--main-color-border-dash);
-    padding: 15px;
-    border-radius: 8px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 0; /* Remover margin-bottom para evitar que o conteúdo exceda */
-}
-
-.date-input-container label,
-.color-picker-container label,
-.music-input-container label,
-.emoji-input-container label,
-.message-slot label {
-    font-size: 1em;
-    color: var(--main-color);
-    text-align: center;
-    margin-bottom: 5px;
-    width: 100%;
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-weight: bold;
 }
 
 input[type="datetime-local"],
 input[type="text"],
 textarea {
-    width: calc(100% - 24px);
-    padding: 10px;
-    border: 1px solid var(--main-color);
-    border-radius: 5px;
-    background-color: #2a2a2a;
-    color: #dedede;
+    width: calc(100% - 20px); /* Ajusta para padding */
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--input-border-color);
+    border-radius: 8px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
     font-size: 1em;
-    box-sizing: border-box;
+    box-sizing: border-box; /* Inclui padding na largura */
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1); /* Torna o ícone do calendário branco/visível */
+}
+
+input[type="color"] {
+    width: 100%;
+    height: 50px;
+    border: 1px solid var(--input-border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    background: var(--input-bg-color); /* Garante um fundo para o input */
+}
+
+.full-width-input {
+    width: calc(100% - 20px); /* Para inputs que devem ocupar 100% da largura do pai */
 }
 
 textarea {
-    resize: vertical;
+    resize: vertical; /* Permite redimensionar verticalmente */
     min-height: 80px;
 }
 
 input::placeholder,
 textarea::placeholder {
-    color: #888;
+    color: var(--placeholder-color);
 }
 
-.color-picker {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    width: 100px;
-    height: 35px;
-    border: 1px solid var(--main-color);
-    background-color: #2a2a2a;
-    padding: 0;
-    cursor: pointer;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.color-picker::-webkit-color-swatch-wrapper { padding: 0; }
-.color-picker::-webkit-color-swatch { border: none; border-radius: 4px; }
-.color-picker::-moz-color-swatch-wrapper { border: none; padding: 0; }
-.color-picker::-moz-color-swatch { border: none; border-radius: 4px; }
-
-.action-button {
+.main-button, .secondary-button {
     background-color: var(--main-color);
     color: white;
+    padding: 14px 25px;
     border: none;
-    padding: 12px 20px;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 1.1em;
-    transition: background-color 0.3s ease;
-    width: calc(100% - 2px);
-    max-width: 300px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px var(--main-color-shadow);
+    width: 100%; /* Ajusta para nova organização */
     box-sizing: border-box;
+    margin-bottom: 10px; /* Espaço entre botões */
 }
 
-.action-button:hover {
+.main-button:hover {
     background-color: var(--main-color-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px var(--main-color-shadow);
 }
 
-.back-button {
-    background-color: #555;
-    margin-top: 10px;
-}
-.back-button:hover {
-    background-color: #777;
+.main-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px var(--main-color-shadow);
 }
 
-/* Emojis */
-.emoji-input-container {
-    min-height: 180px;
-    justify-content: center;
+.secondary-button {
+    background-color: var(--input-bg-color);
+    color: var(--main-color);
+    border: 2px solid var(--main-color);
+    box-shadow: none;
 }
 
-.emoji-inputs-wrapper {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
+.secondary-button:hover {
+    background-color: var(--main-color-hover-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--main-color-shadow);
+}
+
+.secondary-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Navegação de Páginas */
+.page {
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    position: absolute; /* Permite sobrepor as páginas */
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 200px;
-    margin: 0 auto;
+    height: 100%; /* Garante que a página preencha o container */
+    padding: 30px; /* Mesmo padding do container */
+    box-sizing: border-box;
+    overflow-y: auto; /* Permite rolagem dentro de cada página, se o conteúdo for grande */
+    opacity: 0;
+    transform: translateX(100%);
+    z-index: 1; /* Garante que a página ativa esteja acima */
+}
+
+.page.active {
+    opacity: 1;
+    transform: translateX(0);
+    z-index: 2;
+}
+
+.page.hidden {
+    display: none; /* Usamos 'display: none' em vez de apenas 'hidden' */
+}
+
+/* Estilos Específicos da Página 2 (Emojis e Fotos) */
+.emoji-inputs {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .emoji-input {
-    flex-basis: 60px;
-    height: 60px;
-    max-width: 60px;
+    width: 60px; /* Ajuste para caber 3 emojis */
     text-align: center;
-    font-size: 2.2em;
+    font-size: 2em;
     padding: 5px;
-    border: 1px solid var(--main-color);
-    border-radius: 8px;
-    background-color: #2a2a2a;
-    color: #dedede;
-    box-sizing: border-box;
-    line-height: 1;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 60px; /* Altura para emojis */
 }
 
-/* Fotos - **AJUSTES AQUI** */
-.photos-container {
-    display: flex;
+.photo-upload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
     justify-content: center;
-    align-items: center;
-    width: 100%;
-    position: relative;
-    /* overflow: hidden; */ /* Removi overflow hidden para garantir visibilidade */
-    flex-wrap: wrap;
-    gap: 15px; /* Reduzi o gap para as fotos */
-    height: auto; /* Altura automática para se ajustar ao conteúdo */
-    padding: 15px;
-    border: 1px dashed var(--main-color-border-dash);
-    border-radius: 8px;
-    box-sizing: border-box;
-    /* ** NOVO: Adicionado min-height para garantir um espaço mínimo para as fotos ** */
-    min-height: 200px; /* Um mínimo para o container das fotos */
 }
 
 .photo-uploader {
-    width: 120px;
-    height: 180px;
-    background-color: #2a2a2a;
-    border-radius: 8px;
-    box-shadow: 0 0 10px var(--main-color-shadow);
-    overflow: hidden; /* Manter overflow hidden aqui para cortar a imagem dentro do uploader */
-    flex-shrink: 0;
-    opacity: 1;
     position: relative;
-    transform: none;
-    z-index: auto;
+    width: 100%;
+    padding-top: 100%; /* Proporção 1:1 */
+    background-color: var(--input-bg-color);
     border: 2px dashed var(--main-color-border-dash);
-}
-
-.custom-file-upload {
+    border-radius: 8px;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 100%;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    border: none;
-    border-radius: 8px;
-    position: relative;
-    color: #dedede;
-    font-size: 0.9em;
-}
-.custom-file-upload:hover {
-    background-color: var(--main-color-hover-bg);
+    overflow: hidden; /* Garante que a imagem não vaze */
+    box-sizing: border-box;
 }
 
 .photo-uploader img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    border-radius: 8px;
-    transition: opacity 0.5s ease-in-out;
-    opacity: 0;
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Garante que a imagem preencha o espaço sem distorcer */
+    border-radius: 6px;
+    opacity: 0; /* Começa invisível */
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* Permite cliques através da imagem para o label */
 }
-.photos-container.slideshow-mode .photo-uploader img.active {
-    opacity: 1;
-    z-index: 2;
-}
-.hidden-file-input { display: none; }
+
 .photo-uploader .upload-text {
-    display: block;
-}
-.photo-uploader img[style*="opacity: 1"] + .upload-text {
-    display: none;
+    position: absolute;
+    color: var(--placeholder-color);
+    font-size: 1.1em;
+    pointer-events: none; /* Permite cliques através do texto para o label */
+    display: block; /* Garante que o texto seja visível por padrão */
 }
 
-
-.remove-photo-button {
+.photo-uploader .remove-photo-button {
     position: absolute;
     top: 5px;
     right: 5px;
-    background-color: rgba(255, 0, 127, 0.8);
+    background-color: rgba(255, 0, 0, 0.7);
     color: white;
     border: none;
     border-radius: 50%;
     width: 25px;
     height: 25px;
     font-size: 0.9em;
-    font-weight: bold;
     cursor: pointer;
-    display: none;
+    display: none; /* Escondido por padrão */
     align-items: center;
     justify-content: center;
-    z-index: 10;
+    z-index: 10; /* Acima da imagem */
     transition: background-color 0.2s ease;
 }
-.remove-photo-button:hover { background-color: rgba(255, 0, 127, 1); }
-.photo-uploader .remove-photo-button.show-button { display: flex; }
 
-
-/* Visualização Final */
-#viewModeDisplay {
-    padding: 30px;
-    gap: 15px;
+.photo-uploader .remove-photo-button.show-button {
+    display: flex; /* Mostra o botão quando a imagem é carregada */
 }
 
-#viewModeDisplay .title { margin-bottom: 5px; }
+.photo-uploader .remove-photo-button:hover {
+    background-color: rgba(255, 0, 0, 0.9);
+}
 
-.music-player-display {
+.hidden-file-input {
     display: none;
-    margin-top: 20px;
-    text-align: center;
-    width: 100%;
-    max-width: 450px;
-}
-.music-player-display p {
-    font-size: 1.1em;
-    color: var(--main-color);
-    margin-bottom: 10px;
-    word-wrap: break-word;
-}
-#player {
-    width: 100%;
-    max-width: 400px;
-    height: 100px;
-    margin: 0 auto;
-    opacity: 1;
-    pointer-events: auto;
-    position: relative;
-    left: auto;
 }
 
-.text-content {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-.counter-line {
-    font-size: 1.3em;
-    margin: 5px 0;
-    line-height: 1.4;
-}
-
-.message-slot p {
-    font-size: 1.1em;
-    line-height: 1.5;
-    color: #dedede;
-    background-color: #2a2a2a;
-    padding: 15px;
-    border-radius: 8px;
-    min-height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    border: 1px solid var(--main-color);
-    box-sizing: border-box;
-}
-.message-slot p.hidden { display: none; }
-
-
-.photos-container.slideshow-mode {
-    height: 250px;
-    gap: 0;
-    padding: 0;
-    border: none;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-.photos-container.slideshow-mode .photo-uploader {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    border: none;
-    box-shadow: 0 0 15px var(--main-color-shadow);
-}
-
-.photos-container.slideshow-mode .photo-uploader img {
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-}
-
-.photos-container.slideshow-mode .photo-uploader img.active {
-    opacity: 1;
-    z-index: 2;
-}
-.photos-container.slideshow-mode .upload-text,
-.photos-container.slideshow-mode .remove-photo-button {
-    display: none !important;
-}
-
-.copy-message {
-    color: #4CAF50;
-    font-size: 1em;
-    margin-top: 15px;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    min-height: 20px;
-}
-.copy-message.show { opacity: 1; }
-
-/* Chuva de Emojis */
-#emojiRainContainer {
-    position: fixed;
+.custom-file-upload {
+    position: absolute; /* Para cobrir todo o .photo-uploader */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Nova seção para o link gerado */
+.share-link-section {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.share-link-section p {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    color: var(--text-color);
+}
+
+.share-link-section textarea {
+    width: calc(100% - 20px);
+    height: 80px;
+    margin-bottom: 15px;
+    resize: none;
+    font-size: 0.9em;
+    cursor: text;
+}
+
+.copy-message {
+    display: block;
+    color: green; /* Ou uma cor de sucesso */
+    margin-top: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-weight: bold;
+}
+
+.copy-message.show {
+    opacity: 1;
+}
+
+
+/* Estilos para a página de visualização (Page 3) */
+.view-mode-page {
+    /* Garante que elementos de edição não sejam visíveis */
+    padding-top: 50px; /* Ajuste se o h1 for menor */
+    text-align: center;
+    display: flex; /* Usa flexbox para centralizar conteúdo */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%; /* Garante que ocupe a altura total da página */
+    position: absolute; /* Para sobrepor as outras páginas */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-color); /* Fundo da página de visualização */
+    z-index: 10; /* Garante que fique acima de tudo quando ativo */
+}
+
+.view-mode-page.hidden {
     display: none;
 }
+
+.view-mode-title {
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+.counter-display {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--main-color);
+    margin-bottom: 20px;
+    white-space: pre-wrap; /* Preserva quebras de linha */
+    text-shadow: 0 0 8px var(--main-color-shadow);
+}
+
+.view-mode-message {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: var(--text-color);
+    max-width: 90%;
+    word-wrap: break-word; /* Quebra palavras longas */
+}
+
+.slideshow-container {
+    width: 90%;
+    max-width: 400px; /* Tamanho razoável para o slideshow */
+    height: 400px;
+    position: relative;
+    margin: 20px auto 30px auto;
+    border: 3px solid var(--main-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 0 15px var(--main-color-shadow);
+    display: flex; /* Para centralizar a imagem dentro do container */
+    justify-content: center;
+    align-items: center;
+    background-color: #000; /* Fundo preto para o slideshow */
+}
+
+.slideshow-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Ajusta a imagem inteira dentro do container */
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 1s ease-in-out; /* Transição suave entre as fotos */
+}
+
+.slideshow-photo.active {
+    opacity: 1;
+}
+
+.music-player-display {
+    margin-top: 30px;
+    background-color: var(--card-background);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 10px var(--main-color-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.music-info-display {
+    font-size: 1.1em;
+    color: var(--text-color);
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#player {
+    width: 100%;
+    height: 100px; /* Altura fixa para o player YouTube, ajuste se necessário */
+    min-height: 100px;
+    background-color: #000; /* Garante fundo preto enquanto o player carrega */
+    border-radius: 8px;
+    overflow: hidden; /* Para garantir que o iframe não vaze */
+}
+
+/* Chuva de Emojis */
+.emoji-rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Permite cliques através */
+    overflow: hidden;
+    z-index: 9; /* Abaixo do conteúdo principal da visualização */
+}
+
 .falling-emoji {
     position: absolute;
     font-size: 2em;
     opacity: 0;
-    transform: translateY(-50px);
     animation: fall linear infinite;
-    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
-    will-change: transform, opacity;
+    animation-fill-mode: forwards;
 }
+
 @keyframes fall {
     0% {
-        transform: translateY(-50px);
+        transform: translateY(-10vh) translateX(0);
         opacity: 0;
     }
     10% {
         opacity: 1;
     }
-    90% {
-        opacity: 1;
-    }
     100% {
-        transform: translateY(calc(100vh + 50px));
-        opacity: 0;
+        transform: translateY(100vh) translateX(var(--fall-x-offset, 0px));
+        opacity: 0.8;
     }
 }
 
-
-/* Media query para telas maiores (desktops e tablets) */
-@media (min-width: 600px) {
+/* Media Queries para Responsividade */
+@media (max-width: 768px) {
     .container {
-        height: calc(100vh - 80px);
-        max-width: 500px;
-        padding: 40px;
-    }
-    .page {
-        top: 40px;
-        left: 40px;
-        height: calc(100% - 80px);
+        padding: 20px;
+        margin: 10px;
     }
 
-    .title {
-        font-size: 2.5em;
+    h1 {
+        font-size: 1.8em;
     }
-    .counter-line {
+
+    h2 {
+        font-size: 1.3em;
+    }
+
+    .main-button, .secondary-button {
+        padding: 12px 20px;
+        font-size: 1em;
+    }
+
+    .emoji-input {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8em;
+    }
+
+    .photo-upload-grid {
+        grid-template-columns: 1fr; /* Uma coluna em telas pequenas */
+    }
+
+    .photo-uploader {
+        width: 80%; /* Ajuste a largura para ser mais centralizada */
+        margin: 0 auto; /* Centraliza a foto quando é uma coluna */
+    }
+
+    .slideshow-container {
+        width: 95%;
+        height: 300px; /* Ajusta altura para telas menores */
+    }
+
+    .counter-display {
+        font-size: 1.4em;
+    }
+
+    .view-mode-message {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
         font-size: 1.5em;
     }
 
-    .date-input-container {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-    }
-    .date-input-container label { text-align: right; }
-    input[type="datetime-local"] { width: 220px; }
-    #setStartDateButton {
-        margin-top: 0;
-        width: auto;
-        max-width: none;
-    }
-    .color-picker-container {
-        flex-direction: row;
-        gap: 10px;
-        margin-top: 0;
+    h2 {
+        font-size: 1.2em;
     }
 
-    .music-input-container {
-        flex-direction: row;
-        justify-content: center;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-    .music-input-container label {
-        flex-basis: 100%;
-        text-align: center;
-    }
-    .music-input-container input[type="text"] {
-        width: 45%;
-        max-width: 250px;
-    }
-
-    .emoji-inputs-wrapper {
-        max-width: none;
-        flex-wrap: nowrap;
-    }
     .emoji-input {
-        flex-basis: 70px;
-        height: 70px;
-        max-width: 70px;
-        font-size: 2.5em;
+        width: 45px;
+        height: 45px;
+        font-size: 1.6em;
     }
 
-    .photos-container {
-        flex-wrap: wrap; /* Mantenha como wrap para permitir que as fotos quebrem a linha */
-        gap: 20px; /* Aumentei o gap um pouco para as fotos */
-        /* Removi altura fixa, mas mantive o min-height */
-        min-height: 250px; /* Um mínimo maior para desktop */
-    }
-    .photo-uploader {
-        width: 150px;
-        height: 225px;
-    }
-    .photos-container.slideshow-mode {
-        height: 280px;
-    }
-    .photos-container.slideshow-mode .photo-uploader {
-        width: 150px;
-        height: 225px;
-    }
-}
-
-@media (min-width: 768px) {
-    .container {
-        max-width: 600px;
-    }
-    .music-input-container input[type="text"] {
-        width: auto;
-        flex-grow: 1;
+    .slideshow-container {
+        height: 250px;
     }
 }
