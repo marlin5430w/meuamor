@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
             startDatePicker.value = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
             updateCountdown(); // Atualiza o contador na tela de edição
         } else {
-            countdownMessage.textContent = "Selecione a data inicial"; // Mensagem padrão para a tela de edição
+            countdownMessage.textContent = "Selecione a data inicial."; // Mensagem padrão para a tela de edição
             exactTimeMessage.textContent = "";
         }
 
