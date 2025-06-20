@@ -4,30 +4,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const yearsMonthsDaysElement = document.getElementById('years-months-days');
     const hoursMinutesSecondsElement = document.getElementById('hours-minutes-seconds');
 
-    let startDate = null; // A data inicial será definida pelo usuário
+    // Elementos das imagens
+    const imageUploads = [
+        document.getElementById('imageUpload1'),
+        document.getElementById('imageUpload2'),
+        document.getElementById('imageUpload3')
+    ];
+    const imagePreviews = [
+        document.getElementById('imagePreview1'),
+        document.getElementById('imagePreview2'),
+        document.getElementById('imagePreview3')
+    ];
 
-    // Tenta carregar a data inicial do localStorage se houver
+    let startDate = null;
+    let countdownInterval;
+
+    // --- Funções de Carregamento Inicial e Salvamento ---
+
+    // Carregar data inicial do localStorage
     const storedStartDate = localStorage.getItem('countdownStartDate');
     if (storedStartDate) {
         startDate = new Date(storedStartDate);
-        startDatePicker.value = storedStartDate.substring(0, 16); // Preenche o input com a data salva
+        startDatePicker.value = storedStartDate.substring(0, 16);
         if (isValidDate(startDate)) {
             startCountdown();
         } else {
-            startDate = null; // Reseta se a data salva for inválida
+            startDate = null;
             updateDisplayForNoDate();
         }
     } else {
         updateDisplayForNoDate();
     }
 
+    // Carregar imagens do localStorage
+    imagePreviews.forEach((imgElement, index) => {
+        const storedImage = localStorage.getItem(`uploadedImage${index + 1}`);
+        if (storedImage) {
+            imgElement.src = storedImage;
+        }
+    });
+
+    // --- Listeners de Eventos ---
 
     setStartDateButton.addEventListener('click', () => {
         const inputDateValue = startDatePicker.value;
         if (inputDateValue) {
             startDate = new Date(inputDateValue);
             if (isValidDate(startDate)) {
-                localStorage.setItem('countdownStartDate', startDate.toISOString()); // Salva no localStorage
+                localStorage.setItem('countdownStartDate', startDate.toISOString());
                 startCountdown();
             } else {
                 alert("Por favor, insira uma data e hora válidas.");
@@ -39,21 +63,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    let countdownInterval; // Variável para armazenar o ID do intervalo
+    // Listener para cada input de imagem
+    imageUploads.forEach((inputElement, index) => {
+        inputElement.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageDataUrl = e.target.result;
+                    imagePreviews[index].src = imageDataUrl;
+                    localStorage.setItem(`uploadedImage${index + 1}`, imageDataUrl); // Salva no localStorage
+                };
+                reader.readAsDataURL(file); // Converte a imagem para Base64 URL
+            }
+        });
+    });
+
+    // --- Funções do Contador (iguais às anteriores) ---
 
     function startCountdown() {
         if (countdownInterval) {
-            clearInterval(countdownInterval); // Limpa o intervalo anterior se existir
+            clearInterval(countdownInterval);
         }
-        updateCounter(); // Atualiza imediatamente
-        countdownInterval = setInterval(updateCounter, 1000); // Inicia o novo intervalo
+        updateCounter();
+        countdownInterval = setInterval(updateCounter, 1000);
     }
 
     function updateDisplayForNoDate() {
         yearsMonthsDaysElement.textContent = "Selecione a data inicial acima";
         hoursMinutesSecondsElement.textContent = "";
         if (countdownInterval) {
-            clearInterval(countdownInterval); // Para o contador se não houver data
+            clearInterval(countdownInterval);
         }
     }
 
@@ -68,11 +108,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const now = new Date();
-        let diff = now.getTime() - startDate.getTime(); // Diferença em milissegundos
+        let diff = now.getTime() - startDate.getTime();
 
-        if (diff < 0) { // Se a data inicial for no futuro
+        if (diff < 0) {
             yearsMonthsDaysElement.textContent = "Aguardando o início...";
-            // Calcula tempo restante para a data futura
             let futureDiff = startDate.getTime() - now.getTime();
             let futureSeconds = Math.floor(futureDiff / 1000);
             let futureMinutes = Math.floor(futureSeconds / 60);
@@ -88,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // --- Lógica de cálculo de tempo (a mesma de antes, com pequenas melhorias) ---
         let seconds = Math.floor(diff / 1000);
         let minutes = Math.floor(seconds / 60);
         let hours = Math.floor(minutes / 60);
@@ -102,14 +140,17 @@ document.addEventListener('DOMContentLoaded', () => {
         let months = 0;
         let tempDate = new Date(startDate);
 
-        while (tempDate <= now) { // Ajuste para incluir o mês atual se a data estiver dentro
+        // Lógica de cálculo de meses e anos mais precisa
+        while (tempDate < now) {
             const nextMonth = new Date(tempDate);
             nextMonth.setMonth(tempDate.getMonth() + 1);
 
-            // Ajuste para não pular meses (ex: Jan 31 + 1 mês = Mar 3)
+            // Tenta manter o dia do mês se possível, mas ajusta para o último dia do mês se necessário
             if (nextMonth.getDate() !== tempDate.getDate()) {
-                nextMonth.setDate(0); // Volta para o último dia do mês anterior
-                nextMonth.setDate(tempDate.getDate()); // Tenta voltar ao dia original
+                const lastDayOfNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).getDate();
+                if (tempDate.getDate() > lastDayOfNextMonth) {
+                    nextMonth.setDate(lastDayOfNextMonth);
+                }
             }
 
             if (nextMonth <= now) {
@@ -132,16 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (adjustedStartDateForDays.getDate() < startDate.getDate() &&
             adjustedStartDateForDays.getMonth() === now.getMonth() &&
             adjustedStartDateForDays.getFullYear() === now.getFullYear()) {
-             // Este ajuste é complexo e pode ser simplificado se a precisão "humana" não for 100% crítica
-             // Para maior robustez em dias, considera a diferença total de dias
-             // A lógica de "meses exatos" é a mais complexa para replicar sem bibliotecas
+             // Esta parte do ajuste de dias é a mais complexa e pode haver pequenas imprecisões sem uma biblioteca dedicada.
+             // Para a maioria dos casos, o cálculo direto de dias após anos/meses ajustados funciona bem.
         }
 
         let totalDaysFromAdjusted = Math.floor((now.getTime() - adjustedStartDateForDays.getTime()) / (1000 * 60 * 60 * 24));
-
-        // Assegura que totalDaysFromAdjusted não seja negativo devido a pequenos desajustes de data
-        if (totalDaysFromAdjusted < 0) totalDaysFromAdjusted = 0;
-
+        if (totalDaysFromAdjusted < 0) totalDaysFromAdjusted = 0; // Evitar dias negativos
 
         yearsMonthsDaysElement.textContent =
             `${years} ano${years !== 1 ? 's' : ''}, ` +
