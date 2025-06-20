@@ -31,7 +31,7 @@ body {
     flex-direction: column;
     align-items: center;
     width: 100%; /* Agora ocupa 100% da largura disponível */
-    max-width: 500px; /* Largura máxima um pouco maior para as fotos */
+    max-width: 500px; /* Largura máxima */
     box-sizing: border-box;
     margin: auto; /* Centraliza o container verticalmente se houver espaço extra */
 }
@@ -66,11 +66,11 @@ body {
 .date-input-container label.hidden,
 .date-picker.hidden,
 .color-picker-container.hidden,
-.message-slot textarea.hidden { /* NOVO: Esconde o textarea */
+.message-slot textarea.hidden {
     display: none !important; /* Força o ocultamento total */
 }
 
-/* NOVO: Exibe o parágrafo de mensagem no modo somente leitura */
+/* Exibe o parágrafo de mensagem no modo somente leitura */
 .message-slot p.show {
     display: block !important;
 }
@@ -168,31 +168,40 @@ body {
 
 /* Estilos para as fotos e upload */
 .photos-container {
-    display: flex;
-    flex-direction: column; /* Empilha as fotos em mobile por padrão */
-    justify-content: center; /* Centraliza as fotos na coluna */
+    display: flex; /* Mantém flexbox para controle de posicionamento */
+    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 20px; /* Mais espaço entre as fotos empilhadas */
-    margin-bottom: 30px; /* Mais margem inferior */
     width: 100%;
+    height: 180px; /* Altura fixa para o contêiner das fotos em slideshow */
+    margin-bottom: 30px;
+    position: relative; /* Contexto de posicionamento para as fotos */
+    overflow: hidden; /* Garante que fotos fora dos limites sejam cortadas */
 }
 
 .photo-uploader {
-    width: 150px; /* Fotos um pouco maiores em mobile */
+    width: 150px;
     height: 150px;
     background-color: #2a2a2a;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 0 10px var(--main-color-shadow);
-    position: relative;
-    transition: opacity 0.5s ease-in-out;
-    opacity: 1;
+    position: absolute; /* POSICIONA AS FOTOS UMA ATRÁS DA OUTRA */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centraliza a foto */
+    opacity: 0; /* Começa com opacidade 0 para transição */
+    transition: opacity 0.5s ease-in-out; /* Transição suave para opacidade */
+    border: 2px dashed var(--main-color-border-dash); /* Borda visível para o uploader */
 }
 
-/* Esconde o input de arquivo padrão */
-.hidden-file-input {
-    display: none;
+/* Garante que o photo-uploader visível em edição tenha opacidade 1 e z-index maior */
+/* Isso é importante para que o usuário possa interagir com ele */
+.photo-uploader:not(.hidden) {
+    opacity: 1; /* Mostra o uploader durante a edição */
+    position: relative; /* Volta para posicionamento normal para edição */
+    transform: none; /* Remove a centralização absoluta para edição */
+    margin: 10px; /* Adiciona margem para separá-los na edição */
+    flex-shrink: 0; /* Impede que encolham */
 }
 
 /* Estilo para o label que age como botão/área de upload */
@@ -204,7 +213,7 @@ body {
     height: 100%;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    border: 2px dashed var(--main-color-border-dash);
+    border: none; /* A borda já está no .photo-uploader */
     border-radius: 8px;
 }
 
@@ -218,7 +227,26 @@ body {
     object-fit: cover;
     display: block;
     border-radius: 8px;
+    /* Transição de opacidade para a imagem, gerenciada pelo JS */
+    transition: opacity 0.5s ease-in-out;
+    opacity: 0; /* Inicia escondida, o JS vai gerenciar */
+    position: absolute; /* Para empilhar as imagens internas */
+    top: 0;
+    left: 0;
+    z-index: 1; /* Padrão, o JS vai ajustar */
 }
+
+/* Imagem ativa no slideshow */
+.photo-uploader img.active {
+    opacity: 1;
+    z-index: 2; /* Garante que a imagem ativa esteja acima */
+}
+
+/* Esconde o input de arquivo padrão */
+.hidden-file-input {
+    display: none;
+}
+
 
 /* NOVO: Estilos para o slot de mensagem */
 .message-slot {
@@ -315,14 +343,26 @@ body {
     }
 
     .photos-container {
-        flex-direction: row;
+        /* No modo slideshow, as fotos ficarão sempre centralizadas e sobrepostas */
+        /* Para o modo edição, elas voltam a ficar lado a lado */
+        flex-direction: row; /* Volta a alinhar lado a lado na edição */
         flex-wrap: nowrap;
+        height: 180px; /* Mantém altura para fotos */
     }
 
     .photo-uploader {
-        width: 120px;
+        width: 120px; /* Volta ao tamanho menor para 3 fotos lado a lado na edição */
         height: 120px;
     }
+
+    /* Override para o modo edição em telas grandes */
+    .photo-uploader:not(.hidden) {
+        position: relative;
+        transform: none;
+        opacity: 1;
+        margin: 0 10px; /* Espaçamento entre elas */
+    }
+
 
     .date-input-container {
         flex-direction: row;
@@ -360,7 +400,7 @@ body {
     .message-slot textarea,
     .message-slot p {
         width: 100%;
-        max-width: 450px; /* Mantém a largura máxima para o texto */
+        max-width: 450px;
     }
 }
 
