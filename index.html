@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nosso Tempo Juntos</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -20,15 +21,23 @@
         </div>
 
         <div class="music-input-container" id="musicInputContainer">
-            <label for="musicLinkInput">Link da Música (YouTube, SoundCloud, etc.):</label>
-            <input type="url" id="musicLinkInput" placeholder="Cole o link da música aqui">
+            <label for="musicLinkInput">Link da Música (YouTube):</label>
+            <input type="url" id="musicLinkInput" placeholder="Cole o link do YouTube aqui">
+            <label for="musicNameInput" class="small-label">Nome da Música (manual):</label>
+            <input type="text" id="musicNameInput" placeholder="Ex: Nome do Artista - Título da Música">
             <button id="loadMusicButton" class="action-button-small">Carregar Música</button>
-            <audio id="audioPlayer" controls loop style="width: 100%; margin-top: 10px; display: none;"></audio>
-            <iframe id="youtubePlayer" width="100%" height="auto" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="display: none; aspect-ratio: 16/9; margin-top: 10px;"></iframe>
             <p id="musicStatus" class="copy-message" style="margin-top: 5px;"></p>
         </div>
 
+        <div class="custom-audio-player" id="customAudioPlayer">
+            <button id="playPauseButton" class="player-button">
+                <i class="fas fa-play" id="playPauseIcon"></i>
+            </button>
+            <span id="displayMusicName" class="music-name-display"></span>
+            <iframe id="youtubePlayer" width="0" height="0" src="" frameborder="0" allow="autoplay; encrypted-media" style="display: none;"></iframe>
+        </div>
         <button id="changeMusicButton" class="action-button-small hidden">Trocar Música</button>
+
         <div class="photos-container">
             <div class="photo-uploader">
                 <input type="file" id="imageUpload1" accept="image/*" class="hidden-file-input">
