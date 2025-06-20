@@ -32,11 +32,10 @@ body {
     flex-direction: column; /* Em coluna para telas pequenas */
     align-items: center;
     gap: 10px; /* Espaço entre os elementos */
-    /* Adicionado transição para um efeito suave ao esconder/mostrar */
-    transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out;
-    overflow: hidden; /* Garante que o conteúdo não vaze durante a transição */
-    max-height: 200px; /* Altura máxima para a transição */
-    opacity: 1; /* Começa visível */
+    transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out; /* Adicionado padding */
+    overflow: hidden;
+    max-height: 200px;
+    opacity: 1;
 }
 
 /* Nova classe para esconder o container de data */
@@ -44,9 +43,17 @@ body {
     opacity: 0;
     max-height: 0;
     margin-bottom: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    pointer-events: none; /* Desabilita interações com os elementos escondidos */
+    padding-top: 0; /* Adicionado */
+    padding-bottom: 0; /* Adicionado */
+    pointer-events: none;
+}
+
+/* Nova classe para esconder os uploaders de foto e o botão de link */
+.photo-uploader.hidden,
+.action-button.hidden,
+.date-input-container label.hidden, /* Esconder label também */
+.date-picker.hidden {
+    display: none !important; /* Força o ocultamento total */
 }
 
 
@@ -67,8 +74,8 @@ body {
     box-sizing: border-box; /* Inclui padding na largura */
 }
 
-/* Estilo para o botão */
-#setStartDateButton {
+/* Estilo para os botões gerais */
+.action-button {
     background-color: #ff007f;
     color: white;
     border: none;
@@ -77,10 +84,16 @@ body {
     cursor: pointer;
     font-size: 1em;
     transition: background-color 0.3s ease;
+    margin-top: 20px; /* Espaço acima do botão */
 }
 
-#setStartDateButton:hover {
+.action-button:hover {
     background-color: #e6006e;
+}
+
+/* Estilo específico para o botão de definir data */
+#setStartDateButton {
+    margin-top: 0; /* Remove a margem extra do botão de data */
 }
 
 
@@ -103,6 +116,9 @@ body {
     overflow: hidden; /* Garante que a imagem não saia dos limites */
     box-shadow: 0 0 10px rgba(255, 0, 127, 0.2); /* Sombra suave */
     position: relative; /* Para posicionar elementos filhos */
+    /* Adicionado transição para esconder/mostrar */
+    transition: opacity 0.5s ease-in-out;
+    opacity: 1; /* Começa visível */
 }
 
 /* Esconde o input de arquivo padrão */
@@ -150,6 +166,18 @@ body {
     font-size: 1.2em;
     margin: 8px 0;
     line-height: 1.4; /* Espaçamento entre linhas */
+}
+
+.copy-message {
+    color: #4CAF50; /* Verde para mensagem de sucesso */
+    font-size: 0.9em;
+    margin-top: 10px;
+    opacity: 0; /* Começa invisível */
+    transition: opacity 0.3s ease-in-out;
+}
+
+.copy-message.show {
+    opacity: 1;
 }
 
 /* Responsividade básica */
