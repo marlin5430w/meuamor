@@ -66,10 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ajusta a altura do container para se adaptar à altura da página ativa
         // Usa setTimeout para garantir que a página ativa já tenha calculado sua altura final
+        // Um atraso um pouco maior (e.g., 100ms) pode ser necessário dependendo do conteúdo
         setTimeout(() => {
-            const activePageHeight = pageToShow.scrollHeight; // Inclui o padding
+            const activePageHeight = pageToShow.scrollHeight; // Inclui o padding da página
             container.style.height = `${activePageHeight}px`;
-        }, 50); // Pequeno atraso para garantir que o layout da página seja renderizado
+        }, 100); // Atraso ligeiramente maior para garantir o cálculo correto da altura
     }
 
     // === Funções de Utilitário ===
@@ -148,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadYouTubePlayer(videoId) {
         if (videoId) {
-            player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&enablejsapi=1&iv_load_policy=3&loop=1&playlist=${videoId}`;
+            player.src = `http://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&enablejsapi=1&iv_load_policy=3&loop=1&playlist=${videoId}`;
             player.style.display = 'block'; // Garante que o player seja visível
             player.style.opacity = '1';
             player.style.position = 'relative'; // Volta ao fluxo normal do documento
@@ -193,27 +194,34 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedEmojis.filter(e => e).length === 0) return; // Não inicia se não houver emojis
         emojiRainContainer.style.display = 'block';
 
-        setInterval(() => {
+        // Usa requestAnimationFrame para animação suave
+        const createEmoji = () => {
             const emoji = selectedEmojis[Math.floor(Math.random() * selectedEmojis.length)];
-            if (!emoji) return; // Não crie emoji se for vazio
+            if (!emoji) return;
 
             const span = document.createElement('span');
             span.classList.add('falling-emoji');
             span.textContent = emoji;
-            span.style.left = `${Math.random() * 100}vw`; // Posição horizontal aleatória
-            span.style.animationDuration = `${Math.random() * 3 + 2}s`; // Duração aleatória (2-5s)
-            span.style.animationDelay = `${Math.random() * 2}s`; // Atraso aleatório
+            span.style.left = `${Math.random() * 100}vw`;
+            span.style.animationDuration = `${Math.random() * 3 + 2}s`;
+            span.style.animationDelay = `${Math.random() * 2}s`;
             emojiRainContainer.appendChild(span);
 
-            // Remove o emoji depois que ele cair para não sobrecarregar o DOM
             span.addEventListener('animationend', () => {
                 span.remove();
             });
-        }, 300); // Cria um emoji a cada 300ms
+        };
+
+        // Cria emojis em intervalos regulares
+        // Guarde o ID do setInterval para poder limpá-lo com stopEmojiRain
+        emojiRainContainer.intervalId = setInterval(createEmoji, 300);
     }
 
     function stopEmojiRain() {
         emojiRainContainer.style.display = 'none';
+        if (emojiRainContainer.intervalId) {
+            clearInterval(emojiRainContainer.intervalId);
+        }
         // Remove todos os emojis existentes
         emojiRainContainer.innerHTML = '';
     }
@@ -391,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         const urlParams = parseURLParams();
 
-        if (urlParams.date) {
+        if (urlParams.date || urlParams.music || urlParams.emoji1 || urlParams.photos.length > 0 || urlParams.msg) {
             // Se houver parâmetros na URL, entra no modo de visualização
             renderViewMode(urlParams);
             showPage(viewModeDisplay);
@@ -437,7 +445,8 @@ document.addEventListener('DOMContentLoaded', () => {
         musicId = localStorage.getItem('musicId') || '';
         musicTitle = localStorage.getItem('musicTitle') || '';
         if (musicId) {
-            musicLinkInput.value = `https://www.youtube.com/watch?v=${musicId}`; // Mostra o link completo no input
+            // Note: O link do YouTube para display no input é diferente do embed
+            musicLinkInput.value = `https://www.youtube.com/watch?v=${musicId}`;
             musicNameInput.value = musicTitle;
             musicLoadedMessage.textContent = `Música: "${musicTitle}" carregada!`;
             musicLoadedMessage.style.display = 'block';
