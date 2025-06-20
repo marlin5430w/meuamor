@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const root = document.documentElement; // Referência ao elemento <html> para CSS variables
+    const root = document.documentElement;
     const dateInputContainer = document.getElementById('dateInputContainer');
     const startDatePicker = document.getElementById('startDatePicker');
     const setStartDateButton = document.getElementById('setStartDateButton');
@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateLinkButton = document.getElementById('generateLinkButton');
     const copyMessage = document.getElementById('copyMessage');
 
-    const themeColorPicker = document.getElementById('themeColorPicker'); // Novo
-    const colorPickerContainer = document.querySelector('.color-picker-container'); // Novo
+    const themeColorPicker = document.getElementById('themeColorPicker');
+    const colorPickerContainer = document.querySelector('.color-picker-container');
 
     const photoUploaders = [
         document.querySelector('.photos-container > .photo-uploader:nth-child(1)'),
@@ -28,20 +28,23 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('imagePreview3')
     ];
 
+    const personalMessageInput = document.getElementById('personalMessageInput'); // NOVO
+    const personalMessageDisplay = document.getElementById('personalMessageDisplay'); // NOVO
+    const messageSlot = document.getElementById('messageSlot'); // NOVO
+
+
     let startDate = null;
-    let currentThemeColor = '#ff007f'; // Cor padrão inicial
+    let currentThemeColor = '#ff007f';
     let countdownInterval;
 
     // --- Funções de Aplicação de Tema e Visibilidade ---
     function applyThemeColor(color) {
         root.style.setProperty('--main-color', color);
-        // Calcula tons mais escuros e sombras programaticamente
-        // Isso é uma simplificação. Para cores complexas, talvez precise de uma lib ou cores fixas.
         const hexToRgb = hex => hex.match(/\w\w/g).map(x => parseInt(x, 16));
         const rgbToRgbA = (rgb, alpha) => `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
 
         const rgb = hexToRgb(color);
-        const darkerRgb = rgb.map(c => Math.max(0, c - 30)); // Escurece em 30 unidades
+        const darkerRgb = rgb.map(c => Math.max(0, c - 30));
         root.style.setProperty('--main-color-dark', `rgb(${darkerRgb[0]}, ${darkerRgb[1]}, ${darkerRgb[2]})`);
         root.style.setProperty('--main-color-shadow', rgbToRgbA(rgb, 0.4));
         root.style.setProperty('--main-color-border-dash', rgbToRgbA(rgb, 0.5));
@@ -53,12 +56,16 @@ document.addEventListener('DOMContentLoaded', () => {
         startDatePicker.classList.add('hidden');
         setStartDateButton.classList.add('hidden');
         dateInputContainer.querySelector('label').classList.add('hidden');
-        colorPickerContainer.classList.add('hidden'); // Novo: Esconde o seletor de cor
+        colorPickerContainer.classList.add('hidden');
 
         photoUploaders.forEach(uploader => {
             if (uploader) uploader.classList.add('hidden');
         });
         if (generateLinkButton) generateLinkButton.classList.add('hidden');
+
+        // NOVO: Esconde o textarea e mostra o p de exibição
+        personalMessageInput.classList.add('hidden');
+        personalMessageDisplay.classList.add('show');
     }
 
     function showEditingElements() {
@@ -66,21 +73,23 @@ document.addEventListener('DOMContentLoaded', () => {
         startDatePicker.classList.remove('hidden');
         setStartDateButton.classList.remove('hidden');
         dateInputContainer.querySelector('label').classList.remove('hidden');
-        colorPickerContainer.classList.remove('hidden'); // Novo: Mostra o seletor de cor
+        colorPickerContainer.classList.remove('hidden');
 
         photoUploaders.forEach(uploader => {
             if (uploader) uploader.classList.remove('hidden');
         });
         if (generateLinkButton) generateLinkButton.classList.remove('hidden');
+
+        // NOVO: Mostra o textarea e esconde o p de exibição
+        personalMessageInput.classList.remove('hidden');
+        personalMessageDisplay.classList.remove('show');
     }
 
-    // A função para esconder SÓ o input de data é mantida para o caso de o usuário definir a data mas ainda querer editar outras coisas
     function hideDateInput() {
         dateInputContainer.classList.add('hidden');
-        // Mas os outros elementos de edição permanecem visíveis se o link não foi gerado
-        startDatePicker.classList.add('hidden'); // Esconde o input
-        setStartDateButton.classList.add('hidden'); // Esconde o botão
-        dateInputContainer.querySelector('label').classList.add('hidden'); // Esconde a label
+        startDatePicker.classList.add('hidden');
+        setStartDateButton.classList.add('hidden');
+        dateInputContainer.querySelector('label').classList.add('hidden');
     }
 
     function showDateInput() {
@@ -95,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const hashParams = window.location.hash.substring(1);
 
     if (hashParams) {
-        // Se houver hash, tenta carregar as configurações de lá (modo somente leitura)
         try {
             const decodedParams = decodeURIComponent(hashParams);
             const data = JSON.parse(decodedParams);
@@ -106,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     startCountdown();
                 } else {
                     console.error("Data inválida no link.");
-                    startDate = null; // Reseta se inválido
+                    startDate = null;
                 }
             } else {
                 startDate = null;
@@ -125,20 +133,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyThemeColor(currentThemeColor);
             }
 
-            // Após carregar TUDO do link, decide se esconde
-            if (isValidDate(startDate)) { // Se a data do link é válida, esconde tudo.
+            if (data.personalMessage && typeof data.personalMessage === 'string') { // NOVO
+                personalMessageDisplay.textContent = data.personalMessage;
+            } else {
+                personalMessageDisplay.textContent = ""; // Garante que esteja vazio se não houver mensagem
+            }
+
+
+            if (isValidDate(startDate)) {
                 hideEditingElements();
-            } else { // Se não há data válida no link, assume modo edição.
+            } else {
                 updateDisplayForNoDate();
                 showEditingElements();
             }
-
 
         } catch (e) {
             console.error("Erro ao decodificar ou analisar o link:", e);
             alert("O link de personalização está inválido. Por favor, crie um novo.");
             updateDisplayForNoDate();
-            showEditingElements(); // Se o hash for inválido, mostra os elementos de edição
+            showEditingElements();
         }
     } else {
         // Se não houver hash, tenta carregar do localStorage (modo editável)
@@ -169,9 +182,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const storedThemeColor = localStorage.getItem('themeColor');
         if (storedThemeColor && storedThemeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
             currentThemeColor = storedThemeColor;
-            themeColorPicker.value = storedThemeColor; // Define o valor do input do picker
+            themeColorPicker.value = storedThemeColor;
         }
-        applyThemeColor(currentThemeColor); // Aplica a cor carregada ou a padrão
+        applyThemeColor(currentThemeColor);
+
+        const storedPersonalMessage = localStorage.getItem('personalMessage'); // NOVO
+        if (storedPersonalMessage) {
+            personalMessageInput.value = storedPersonalMessage;
+        }
+
 
         showEditingElements(); // Garante que todos os elementos de edição estejam visíveis por padrão no modo edição
     }
@@ -199,10 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    themeColorPicker.addEventListener('input', (event) => { // Novo: Listener para o input de cor
+    themeColorPicker.addEventListener('input', (event) => {
         currentThemeColor = event.target.value;
         applyThemeColor(currentThemeColor);
-        localStorage.setItem('themeColor', currentThemeColor); // Salva a cor imediatamente
+        localStorage.setItem('themeColor', currentThemeColor);
+    });
+
+    personalMessageInput.addEventListener('input', (event) => { // NOVO
+        localStorage.setItem('personalMessage', event.target.value);
     });
 
     imageUploads.forEach((inputElement, index) => {
@@ -220,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Gerar Link (Inclui a cor do tema) ---
+    // --- Gerar Link (Inclui a mensagem personalizada) ---
     generateLinkButton.addEventListener('click', async () => {
         if (!startDate || !isValidDate(startDate)) {
             alert("Por favor, defina a data inicial antes de gerar o link.");
@@ -230,7 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = {
             startDate: startDate.toISOString(),
             images: [],
-            themeColor: currentThemeColor // Inclui a cor do tema
+            themeColor: currentThemeColor,
+            personalMessage: personalMessageInput.value // NOVO: Inclui a mensagem
         };
 
         imagePreviews.forEach(imgElement => {
@@ -261,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // --- Funções do Contador ---
+    // --- Funções do Contador --- (inalteradas)
 
     function startCountdown() {
         if (countdownInterval) {
