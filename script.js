@@ -90,6 +90,27 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function updateCountdown() {
+        if (!startDate) {
+            countdownMessage.textContent = "Selecione a data inicial.";
+            exactTimeMessage.textContent = "";
+            return;
+        }
+
+        const now = new Date();
+        const diffMs = now.getTime() - startDate.getTime();
+
+        if (diffMs < 0) {
+            countdownMessage.textContent = "A data inicial ainda não chegou!";
+            exactTimeMessage.textContent = "";
+            return;
+        }
+
+        const { display, exact } = formatTimeDifference(diffMs);
+        countdownMessage.textContent = display;
+        exactTimeMessage.textContent = exact;
+    }
+
     function formatTimeDifference(ms) {
         if (isNaN(ms) || ms < 0) {
             return { display: "Tempo não definido.", exact: "" };
