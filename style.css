@@ -68,7 +68,7 @@ body {
 }
 
 
-/* Estilos para as fotos */
+/* Estilos para as fotos e upload */
 .photos-container {
     display: flex;
     justify-content: space-around; /* Distribui as fotos igualmente */
@@ -79,23 +79,44 @@ body {
     width: 100%;
 }
 
-.photo-placeholder {
+.photo-uploader {
     width: 120px; /* Largura para cada foto */
     height: 120px; /* Altura para cada foto */
     background-color: #2a2a2a; /* Fundo para a área da foto */
     border-radius: 8px; /* Cantos arredondados */
     overflow: hidden; /* Garante que a imagem não saia dos limites */
-    display: flex; /* Para centralizar a imagem dentro do placeholder */
-    justify-content: center;
-    align-items: center;
     box-shadow: 0 0 10px rgba(255, 0, 127, 0.2); /* Sombra suave */
+    position: relative; /* Para posicionar elementos filhos */
 }
 
-.photo-placeholder img {
+/* Esconde o input de arquivo padrão */
+.hidden-file-input {
+    display: none;
+}
+
+/* Estilo para o label que age como botão/área de upload */
+.custom-file-upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: 2px dashed rgba(255, 0, 127, 0.5); /* Borda tracejada para indicar clicável */
+    border-radius: 8px; /* Cantos arredondados para a borda tracejada */
+}
+
+.custom-file-upload:hover {
+    background-color: rgba(255, 0, 127, 0.1); /* Efeito hover */
+}
+
+.photo-uploader img {
     width: 100%; /* Imagem ocupa 100% da largura do placeholder */
     height: 100%; /* Imagem ocupa 100% da altura do placeholder */
     object-fit: cover; /* Recorta a imagem para preencher o espaço, mantendo a proporção */
     display: block; /* Remove espaço extra que alguns navegadores adicionam */
+    border-radius: 8px; /* Cantos arredondados para a imagem */
 }
 
 .text-content {
@@ -134,7 +155,7 @@ body {
         flex-direction: column; /* Fotos em coluna em telas pequenas */
     }
 
-    .photo-placeholder {
+    .photo-uploader {
         width: 150px; /* Fotos um pouco maiores em coluna */
         height: 150px;
     }
