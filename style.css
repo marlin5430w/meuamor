@@ -21,24 +21,81 @@ body {
     flex-direction: column;
     align-items: center;
     width: 90%; /* Ajusta a largura para ser responsiva */
-    max-width: 400px; /* Largura máxima */
+    max-width: 500px; /* Largura máxima um pouco maior para as fotos */
     box-sizing: border-box; /* Inclui padding e border na largura total */
 }
 
-.placeholder-image {
-    width: 100%;
-    height: 200px; /* Altura do espaço da imagem */
-    background-color: #2a2a2a; /* Cor de fundo para a área da imagem */
+/* Estilos para o input de data */
+.date-input-container {
+    margin-bottom: 25px;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* Em coluna para telas pequenas */
     align-items: center;
-    margin-bottom: 20px;
-    border-radius: 5px; /* Bordas arredondadas para a área da imagem */
+    gap: 10px; /* Espaço entre os elementos */
 }
 
-.placeholder-image img {
-    max-width: 80px; /* Tamanho do ícone central */
-    opacity: 0.6; /* Opacidade para o ícone */
+.date-input-container label {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    color: #ff007f;
+}
+
+.date-picker {
+    padding: 10px;
+    border: 1px solid #ff007f;
+    border-radius: 5px;
+    background-color: #2a2a2a;
+    color: #dedede;
+    font-size: 1em;
+    width: 220px; /* Largura fixa para o input */
+    box-sizing: border-box; /* Inclui padding na largura */
+}
+
+/* Estilo para o botão */
+#setStartDateButton {
+    background-color: #ff007f;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#setStartDateButton:hover {
+    background-color: #e6006e;
+}
+
+
+/* Estilos para as fotos */
+.photos-container {
+    display: flex;
+    justify-content: space-around; /* Distribui as fotos igualmente */
+    align-items: center;
+    flex-wrap: wrap; /* Quebra para a linha de baixo em telas pequenas */
+    gap: 15px; /* Espaço entre as fotos */
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+.photo-placeholder {
+    width: 120px; /* Largura para cada foto */
+    height: 120px; /* Altura para cada foto */
+    background-color: #2a2a2a; /* Fundo para a área da foto */
+    border-radius: 8px; /* Cantos arredondados */
+    overflow: hidden; /* Garante que a imagem não saia dos limites */
+    display: flex; /* Para centralizar a imagem dentro do placeholder */
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.2); /* Sombra suave */
+}
+
+.photo-placeholder img {
+    width: 100%; /* Imagem ocupa 100% da largura do placeholder */
+    height: 100%; /* Imagem ocupa 100% da altura do placeholder */
+    object-fit: cover; /* Recorta a imagem para preencher o espaço, mantendo a proporção */
+    display: block; /* Remove espaço extra que alguns navegadores adicionam */
 }
 
 .text-content {
@@ -73,7 +130,19 @@ body {
         font-size: 1em;
     }
 
-    .placeholder-image {
+    .photos-container {
+        flex-direction: column; /* Fotos em coluna em telas pequenas */
+    }
+
+    .photo-placeholder {
+        width: 150px; /* Fotos um pouco maiores em coluna */
         height: 150px;
+    }
+
+    .date-input-container {
+        width: 100%; /* Ocupa a largura total */
+    }
+    .date-picker {
+        width: calc(100% - 20px); /* Ajusta a largura para o padding */
     }
 }
