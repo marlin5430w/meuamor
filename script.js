@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyMessage = document.getElementById('copyMessage');
 
     const themeColorPicker = document.getElementById('themeColorPicker');
+    const colorPickerContainer = document.querySelector('.color-picker-container');
 
     const photosContainer = document.querySelector('.photos-container');
     const photoUploaders = [
@@ -32,20 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const personalMessageInput = document.getElementById('personalMessageInput');
     const personalMessageDisplay = document.getElementById('personalMessageDisplay');
+    const messageSlot = document.getElementById('messageSlot');
 
-    const musicInputContainer = document.getElementById('musicInputContainer');
-    const musicLinkInput = document.getElementById('musicLinkInput');
-    const musicNameInput = document.getElementById('musicNameInput'); // NOVO: Input para o nome da música
+    // NOVOS ELEMENTOS DE MÚSICA
+    const musicInputContainer = document.querySelector('.music-input-container');
+    const youtubeLinkInput = document.getElementById('youtubeLinkInput');
+    const musicNameInput = document.getElementById('musicNameInput');
     const loadMusicButton = document.getElementById('loadMusicButton');
-    const musicStatus = document.getElementById('musicStatus');
-    const changeMusicButton = document.getElementById('changeMusicButton');
-
-    // NOVO: Elementos do player customizado
-    const customAudioPlayer = document.getElementById('customAudioPlayer');
-    const playPauseButton = document.getElementById('playPauseButton');
-    const playPauseIcon = document.getElementById('playPauseIcon');
-    const displayMusicName = document.getElementById('displayMusicName');
-    const youtubePlayer = document.getElementById('youtubePlayer'); // O iframe oculto do YouTube
+    const musicPlayerDisplay = document.getElementById('musicPlayerDisplay');
+    const currentMusicNameElement = document.getElementById('currentMusicName');
+    const musicLoadedMessage = document.getElementById('musicLoadedMessage');
 
     let startDate = null;
     let currentThemeColor = '#ff007f';
@@ -53,150 +50,133 @@ document.addEventListener('DOMContentLoaded', () => {
     let slideshowInterval;
     let currentImageIndex = 0;
     let activeImages = [];
-    let currentMusicLink = '';
-    let currentMusicName = ''; // NOVO: Variável para o nome da música
-    let youtubePlayerReady = false;
-    let isPlaying = false; // Estado do player customizado
 
-    // Variável para o objeto Player da API do YouTube Iframe
-    let player;
+    // Variáveis da Música
+    let player; // Objeto do player do YouTube
+    let currentYoutubeVideoId = null;
+    let currentMusicTitle = "";
 
-    // Função de callback da API do YouTube
-    window.onYouTubeIframeAPIReady = () => {
-        youtubePlayerReady = true;
-        if (currentMusicLink) {
-            initializeYouTubePlayer(getYouTubeVideoId(currentMusicLink));
-        }
+    // A função que a API do YouTube chama quando está pronta
+    window.onYouTubeIframeAPIReady = function() {
+        console.log("YouTube IFrame API is ready.");
+        // Este é um bom lugar para carregar a música se houver uma no localStorage ou URL
+        loadMusicFromStorageOrURL();
     };
-
-    function initializeYouTubePlayer(videoId) {
-        if (player) {
-            player.destroy(); // Destrói o player existente para recriar
-        }
-        player = new YT.Player('youtubePlayer', {
-            videoId: videoId,
-            playerVars: {
-                'autoplay': 0, // Inicia pausado no modo de edição/configuração
-                'controls': 0, // Sem controles do YouTube
-                'disablekb': 1, // Desabilita controles de teclado
-                'fs': 0, // Sem fullscreen
-                'loop': 1, // Loop
-                'modestbranding': 1, // Logo menor
-                'rel': 0, // Sem vídeos relacionados
-                'showinfo': 0, // Sem informações do vídeo
-                'iv_load_policy': 3, // Esconde anotações
-                'playlist': videoId, // Essencial para o loop funcionar corretamente
-                'enablejsapi': 1, // Habilita a API JavaScript
-                'mute': 0 // Inicia com som (mas será bloqueado por autoplay em alguns casos)
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange,
-                'onError': onPlayerError
-            }
-        });
-    }
-
-    function onPlayerReady(event) {
-        // console.log("YouTube Player Ready!");
-        // Não auto-play aqui, pois depende da interação do usuário.
-        // O autoplay será tentado em playLoadedMusic para o modo de visualização.
-    }
-
-    function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.PLAYING) {
-            isPlaying = true;
-            playPauseIcon.classList.remove('fa-play');
-            playPauseIcon.classList.add('fa-pause');
-        } else {
-            isPlaying = false;
-            playPauseIcon.classList.remove('fa-pause');
-            playPauseIcon.classList.add('fa-play');
-        }
-    }
-
-    function onPlayerError(event) {
-        console.error("Erro no player do YouTube:", event.data);
-        musicStatus.textContent = "Erro ao carregar música do YouTube. Link inválido ou restrito.";
-        musicStatus.classList.add('show');
-        setTimeout(() => musicStatus.classList.remove('show'), 5000);
-        stopMusic(); // Para a reprodução e limpa o player
-    }
-
 
     // --- Funções de Aplicação de Tema e Visibilidade ---
     function applyThemeColor(color) {
         root.style.setProperty('--main-color', color);
         const hexToRgb = hex => hex.match(/\w\w/g).map(x => parseInt(x, 16));
+        const rgbToRgbA = (rgb, alpha) => `rgba(${rgb.join(',')}, ${alpha})`;
         const rgb = hexToRgb(color);
         const darkerRgb = rgb.map(c => Math.max(0, c - 30));
         root.style.setProperty('--main-color-dark', `rgb(${darkerRgb.join(',')})`);
-        root.style.setProperty('--main-color-shadow', `rgba(${rgb.join(',')}, 0.4)`);
-        root.style.setProperty('--main-color-border-dash', `rgba(${rgb.join(',')}, 0.5)`);
-        root.style.setProperty('--main-color-hover-bg', `rgba(${rgb.join(',')}, 0.1)`);
+        root.style.setProperty('--main-color-shadow', rgbToRgbA(rgb, 0.4));
+        root.style.setProperty('--main-color-border-dash', rgbToRgbA(rgb, 0.5));
+        root.style.setProperty('--main-color-hover-bg', rgbToRgbA(rgb, 0.1));
     }
 
     function hideEditingElements() {
         dateInputContainer.classList.add('hidden');
-        musicInputContainer.classList.add('hidden');
-        customAudioPlayer.classList.remove('hidden-when-editing'); // Remove classe de esconder na edição
-        customAudioPlayer.classList.remove('hidden'); // Certifica que o player customizado está visível
-        photosContainer.classList.add('slideshow-mode');
+        startDatePicker.classList.add('hidden');
+        setStartDateButton.classList.add('hidden');
+        dateInputContainer.querySelector('label').classList.add('hidden');
+        colorPickerContainer.classList.add('hidden');
+        musicInputContainer.classList.add('hidden'); // Esconde inputs de música
+
+        photosContainer.classList.add('slideshow-mode'); // Ativa o modo slideshow no CSS
 
         if (generateLinkButton) generateLinkButton.classList.add('hidden');
-        if (currentMusicLink) {
-            changeMusicButton.classList.remove('hidden');
-            displayMusicName.textContent = currentMusicName || "Música"; // Exibe o nome da música
-        } else {
-            changeMusicButton.classList.add('hidden');
-            customAudioPlayer.classList.add('hidden'); // Esconde o player se não houver música
-        }
 
         personalMessageInput.classList.add('hidden');
         personalMessageDisplay.classList.add('show');
 
         removePhotoButtons.forEach(button => button.classList.remove('show-button'));
 
-        updateActiveImages();
-        startSlideshow();
-        playLoadedMusic(); // Tenta tocar a música se já estiver carregada
+        // Mostra o player de música no modo de visualização
+        if (currentYoutubeVideoId) {
+            musicPlayerDisplay.classList.add('show');
+            currentMusicNameElement.textContent = currentMusicTitle || "Música em Reprodução";
+            // Inicia o player do YouTube (autoplay)
+            if (player) {
+                player.playVideo();
+            } else {
+                // Se o player ainda não foi criado, cria e ele deve tocar automaticamente
+                createYoutubePlayer(currentYoutubeVideoId, true);
+            }
+        } else {
+            musicPlayerDisplay.classList.remove('show');
+            if (player) player.stopVideo(); // Para o player se não houver música
+        }
+
+        updateActiveImages(); // Garante que a lista de imagens para o slideshow esteja atualizada
+        startSlideshow(); // Força o início do slideshow
     }
 
     function showEditingElements() {
-        changeMusicButton.classList.add('hidden');
-        customAudioPlayer.classList.add('hidden-when-editing'); // Esconde o player customizado na edição
-        customAudioPlayer.classList.add('hidden'); // Garante que o player esteja escondido
-
         dateInputContainer.classList.remove('hidden');
-        musicInputContainer.classList.remove('hidden');
-        photosContainer.classList.remove('slideshow-mode');
+        startDatePicker.classList.remove('hidden');
+        setStartDateButton.classList.remove('hidden');
+        dateInputContainer.querySelector('label').classList.remove('hidden');
+        colorPickerContainer.classList.remove('hidden');
+        musicInputContainer.classList.remove('hidden'); // Mostra inputs de música
+
+        photosContainer.classList.remove('slideshow-mode'); // Desativa o modo slideshow no CSS
 
         if (generateLinkButton) generateLinkButton.classList.remove('hidden');
 
         personalMessageInput.classList.remove('hidden');
         personalMessageDisplay.classList.remove('show');
 
-        clearInterval(slideshowInterval);
+        // Esconde o player de música no modo de edição
+        musicPlayerDisplay.classList.remove('show');
+        if (player) {
+            player.stopVideo(); // Para a música quando volta para o modo de edição
+        }
+
+        clearInterval(slideshowInterval); // Para o slideshow
 
         imagePreviews.forEach((img, index) => {
-            img.classList.remove('active');
+            img.classList.remove('active'); // Remove a classe active do slideshow
             img.style.opacity = '';
             img.style.zIndex = '';
+            // Se a imagem não for placeholder, mostra o botão de remover
             if (!img.src.includes('via.placeholder.com')) {
                 removePhotoButtons[index].classList.add('show-button');
             } else {
-                removePhotoButtons[index].classList.remove('show-button');
+                removePhotoButtons[index].classList.remove('show-button'); // Esconde se for placeholder
             }
         });
 
-        stopMusic(); // Para a música no modo de edição (se estava tocando)
+        // Garante que os uploaders estejam visíveis para edição
+        photoUploaders.forEach(uploader => {
+            uploader.style.opacity = '1';
+            uploader.style.position = 'relative';
+            uploader.style.transform = 'none';
+            uploader.style.zIndex = 'auto';
+        });
     }
 
-    // --- Lógica do Slideshow (mantida da versão anterior) ---
+    function hideDateInput() {
+        dateInputContainer.classList.add('hidden');
+        startDatePicker.classList.add('hidden');
+        setStartDateButton.classList.add('hidden');
+        dateInputContainer.querySelector('label').classList.add('hidden');
+    }
+
+    function showDateInput() {
+        dateInputContainer.classList.remove('hidden');
+        startDatePicker.classList.remove('hidden');
+        setStartDateButton.classList.remove('hidden');
+        dateInputContainer.querySelector('label').classList.remove('hidden');
+    }
+
+    // --- Lógica do Slideshow ---
     function startSlideshow() {
         clearInterval(slideshowInterval);
 
         if (activeImages.length === 0) {
+            console.log("Nenhuma imagem para o slideshow. Mostrando placeholders.");
             imagePreviews.forEach((img, index) => {
                 img.classList.remove('active');
                 img.src = 'https://via.placeholder.com/150x150?text=Sem+Fotos';
@@ -232,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         photoUploaders[imagePreviews.indexOf(activeImages[currentImageIndex])].style.opacity = '1';
         photoUploaders[imagePreviews.indexOf(activeImages[currentImageIndex])].style.zIndex = '2';
 
+
         slideshowInterval = setInterval(() => {
             activeImages[currentImageIndex].classList.remove('active');
             activeImages[currentImageIndex].style.opacity = '0';
@@ -252,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateActiveImages() {
         activeImages = imagePreviews.filter(img => !img.src.includes('via.placeholder.com'));
+        console.log("Imagens ativas para slideshow:", activeImages.map(img => img.src));
 
         if (!photosContainer.classList.contains('slideshow-mode')) {
             imagePreviews.forEach((img, index) => {
@@ -268,93 +250,135 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Lógica da Música ---
-    function getYouTubeVideoId(url) {
-        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?/i;
-        const match = url.match(youtubeRegex);
+    // --- Funções para MÚSICA (YouTube) ---
+    function extractYoutubeVideoId(url) {
+        const regex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?/i;
+        const match = url.match(regex);
         return match ? match[1] : null;
     }
 
-    function loadMusic(link, name) {
-        stopMusic(); // Para qualquer música tocando
-
-        if (!link) {
-            musicStatus.textContent = "Nenhuma música carregada.";
-            musicStatus.classList.add('show');
-            currentMusicLink = '';
-            currentMusicName = '';
-            localStorage.removeItem('musicLink');
-            localStorage.removeItem('musicName');
-            return;
+    function createYoutubePlayer(videoId, autoplay = false) {
+        if (player) {
+            player.destroy(); // Destrói o player existente para criar um novo
         }
 
-        const youtubeId = getYouTubeVideoId(link);
-        if (!youtubeId) {
-            musicStatus.textContent = "Por favor, insira um link válido do YouTube.";
-            musicStatus.classList.add('show');
-            setTimeout(() => musicStatus.classList.remove('show'), 3000);
-            return;
+        player = new YT.Player('player', {
+            videoId: videoId,
+            playerVars: {
+                'autoplay': autoplay ? 1 : 0, // 0 para não autoplay, 1 para autoplay
+                'controls': 0, // Esconde os controles
+                'disablekb': 1, // Desabilita controles de teclado
+                'fs': 0, // Desabilita tela cheia
+                'iv_load_policy': 3, // Esconde anotações
+                'modestbranding': 1, // Remove logo do YouTube
+                'rel': 0, // Não mostra vídeos relacionados ao final
+                'showinfo': 0, // Não mostra título do vídeo ou uploader
+                'loop': 1, // Habilita loop
+                'playlist': videoId // Essencial para o loop funcionar
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        console.log("Player is ready:", event.target);
+        if (event.target.getPlayerState() !== YT.PlayerState.PLAYING) {
+             event.target.playVideo(); // Tenta tocar se não estiver tocando
         }
+    }
 
-        currentMusicLink = link;
-        currentMusicName = name;
-        localStorage.setItem('musicLink', link);
-        localStorage.setItem('musicName', name);
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.ENDED) {
+            player.seekTo(0); // Reinicia o vídeo ao final
+            player.playVideo(); // Toca novamente para o loop manual
+        } else if (event.data === YT.PlayerState.PAUSED && currentYoutubeVideoId && photosContainer.classList.contains('slideshow-mode')) {
+            // Se estiver no modo slideshow e pausar, tenta tocar novamente
+            // Isso ajuda a garantir que a música continue tocando, mas não força autoplay em modo de edição
+            player.playVideo();
+        }
+    }
 
-        displayMusicName.textContent = name || "Música do YouTube"; // Atualiza o nome no player customizado
+    function loadMusic() {
+        const url = youtubeLinkInput.value.trim();
+        const videoId = extractYoutubeVideoId(url);
+        if (videoId) {
+            currentYoutubeVideoId = videoId;
+            currentMusicTitle = musicNameInput.value.trim() || "Música Selecionada";
+            localStorage.setItem('youtubeVideoId', currentYoutubeVideoId);
+            localStorage.setItem('musicTitle', currentMusicTitle);
 
-        if (youtubePlayerReady) {
-            initializeYouTubePlayer(youtubeId);
-            musicStatus.textContent = "Música do YouTube carregada!";
-            musicStatus.classList.add('show');
-            setTimeout(() => musicStatus.classList.remove('show'), 3000);
+            musicLoadedMessage.textContent = `Música carregada: ${currentMusicTitle}`;
+            musicLoadedMessage.classList.add('show');
+            setTimeout(() => {
+                musicLoadedMessage.classList.remove('show');
+            }, 3000);
+
+            // Cria o player, mas não inicia o autoplay imediatamente, a menos que esteja no modo de visualização
+            // Isso evita que a música comece a tocar assim que o usuário seleciona no modo de edição
+            createYoutubePlayer(currentYoutubeVideoId, false);
+
         } else {
-            musicStatus.textContent = "Carregando API do YouTube...";
-            musicStatus.classList.add('show');
+            alert("Por favor, insira um link de vídeo do YouTube válido.");
+            currentYoutubeVideoId = null;
+            currentMusicTitle = "";
+            localStorage.removeItem('youtubeVideoId');
+            localStorage.removeItem('musicTitle');
+            if (player) {
+                player.destroy(); // Destrói o player se o link for inválido
+                player = null;
+            }
+            musicLoadedMessage.textContent = "Link de música inválido.";
+            musicLoadedMessage.classList.add('show');
+            setTimeout(() => {
+                musicLoadedMessage.classList.remove('show');
+            }, 3000);
         }
     }
 
-    function stopMusic() {
-        if (player && typeof player.stopVideo === 'function') {
-            player.stopVideo();
+    function loadMusicFromStorageOrURL() {
+        // Tenta carregar do URL hash primeiro
+        const hashParams = window.location.hash.substring(1);
+        if (hashParams) {
+            try {
+                const decodedParams = decodeURIComponent(hashParams);
+                const data = JSON.parse(decodedParams);
+                if (data.youtubeVideoId) {
+                    currentYoutubeVideoId = data.youtubeVideoId;
+                    currentMusicTitle = data.musicTitle || "Música em Reprodução";
+                    youtubeLinkInput.value = `https://www.youtube.com/watch?v=${currentYoutubeVideoId}`; // Preenche o input
+                    musicNameInput.value = currentMusicTitle; // Preenche o nome
+                    // O player será criado e tocará em hideEditingElements se a data for válida
+                    return; // Sai, pois já carregou do URL
+                }
+            } catch (e) {
+                console.error("Erro ao analisar dados do hash para música:", e);
+            }
         }
-        playPauseIcon.classList.remove('fa-pause');
-        playPauseIcon.classList.add('fa-play');
-        isPlaying = false;
-        youtubePlayer.src = ''; // Limpa o src do iframe para parar o vídeo
+
+        // Se não carregou do URL, tenta carregar do localStorage
+        const storedVideoId = localStorage.getItem('youtubeVideoId');
+        const storedMusicTitle = localStorage.getItem('musicTitle');
+        if (storedVideoId) {
+            currentYoutubeVideoId = storedVideoId;
+            currentMusicTitle = storedMusicTitle || "Música Selecionada";
+            youtubeLinkInput.value = `https://www.youtube.com/watch?v=${currentYoutubeVideoId}`; // Preenche o input
+            musicNameInput.value = currentMusicTitle; // Preenche o nome
+            // Cria o player, mas sem autoplay, já que estamos no modo de edição
+            createYoutubePlayer(currentYoutubeVideoId, false);
+        }
     }
 
-    function playLoadedMusic() {
-        if (!currentMusicLink) {
-            stopMusic();
-            customAudioPlayer.classList.add('hidden'); // Esconde o player se não houver música
-            return;
-        }
+    // --- Lógica de Carregamento Inicial (Prioridade: URL Hash > localStorage) ---
+    // Esta parte foi modificada para chamar a `loadMusicFromStorageOrURL` no início
+    // e garantir que a lógica de "hideEditingElements" ou "showEditingElements" seja chamada corretamente.
+    const initialHashParams = window.location.hash.substring(1);
 
-        customAudioPlayer.classList.remove('hidden'); // Mostra o player se houver música
-
-        if (player && typeof player.playVideo === 'function') {
-            // Tenta tocar o vídeo. O navegador pode bloquear o autoplay.
-            player.playVideo().catch(error => {
-                console.warn("Autoplay do YouTube bloqueado:", error);
-                // Pode exibir uma mensagem para o usuário clicar no botão de play
-                musicStatus.textContent = "Clique no botão play para iniciar a música.";
-                musicStatus.classList.add('show');
-            });
-        } else if (youtubePlayerReady) {
-            // Se o player ainda não foi inicializado, inicializa e ele tentará tocar
-            initializeYouTubePlayer(getYouTubeVideoId(currentMusicLink));
-            // A reprodução ocorrerá no onPlayerReady ou quando o player for carregado.
-        }
-    }
-
-    // --- Lógica de Carregamento (Prioridade: URL Hash > localStorage) ---
-    const hashParams = window.location.hash.substring(1);
-
-    if (hashParams) {
-        // Modo de visualização (link gerado)
+    if (initialHashParams) {
         try {
-            const decodedParams = decodeURIComponent(hashParams);
+            const decodedParams = decodeURIComponent(initialHashParams);
             const data = JSON.parse(decodedParams);
 
             if (data.startDate) {
@@ -362,6 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isValidDate(startDate)) {
                     startCountdown();
                 } else {
+                    console.error("Data inválida no link.");
                     startDate = null;
                 }
             } else {
@@ -386,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             };
                             imagePreviews[index].src = imgData;
                         } else {
-                            imagePreviews[index].src = 'https://via.placeholder.com/150x150?text=Foto+' + (index + 1);
+                            imagePreviews[index].src = 'https://via.placeholder.com/150x150?text=Sem+Fotos';
                         }
                     }
                 });
@@ -409,39 +434,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 personalMessageDisplay.textContent = "";
             }
 
-            if (data.musicLink && typeof data.musicLink === 'string') {
-                currentMusicLink = data.musicLink;
-            } else {
-                currentMusicLink = '';
-            }
-            if (data.musicName && typeof data.musicName === 'string') { // NOVO: Carrega nome da música
-                currentMusicName = data.musicName;
-            } else {
-                currentMusicName = '';
+            // MÚSICA: Carrega do hash e prepara para autoplay se a data for válida
+            if (data.youtubeVideoId) {
+                currentYoutubeVideoId = data.youtubeVideoId;
+                currentMusicTitle = data.musicTitle || "Música em Reprodução";
             }
 
-            hideEditingElements(); // Esconde tudo de edição e inicia slideshow/música
+            if (isValidDate(startDate)) {
+                hideEditingElements(); // Chama hideEditingElements que cuidará do player
+            } else {
+                updateDisplayForNoDate();
+                showEditingElements();
+            }
 
         } catch (e) {
             console.error("Erro ao decodificar ou analisar o link:", e);
             alert("O link de personalização está inválido. Por favor, crie um novo.");
-            window.location.hash = '';
-            location.reload();
+            updateDisplayForNoDate();
+            showEditingElements();
         }
     } else {
-        // Modo de edição (sem hash na URL)
         const storedStartDate = localStorage.getItem('countdownStartDate');
         if (storedStartDate) {
             startDate = new Date(storedStartDate);
             startDatePicker.value = storedStartDate.substring(0, 16);
             if (isValidDate(startDate)) {
                 startCountdown();
+                hideDateInput();
             } else {
                 startDate = null;
                 updateDisplayForNoDate();
+                showDateInput();
             }
         } else {
             updateDisplayForNoDate();
+            showDateInput();
         }
 
         imagePreviews.forEach((imgElement, index) => {
@@ -466,23 +493,14 @@ document.addEventListener('DOMContentLoaded', () => {
             personalMessageInput.value = storedPersonalMessage;
         }
 
-        const storedMusicLink = localStorage.getItem('musicLink');
-        const storedMusicName = localStorage.getItem('musicName'); // NOVO: Carrega nome da música
-        if (storedMusicLink) {
-            musicLinkInput.value = storedMusicLink;
-            musicNameInput.value = storedMusicName || ''; // Preenche o input do nome
-            currentMusicLink = storedMusicLink;
-            currentMusicName = storedMusicName || '';
-            loadMusic(storedMusicLink, storedMusicName); // Carrega a música no player de edição
-        }
-
         showEditingElements();
+    }
 
-        // Carrega a API do YouTube Player
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    // Chama loadMusicFromStorageOrURL DENTRO do DOMContentLoaded, mas APÓS a lógica inicial de hash/localStorage.
+    // Isso garante que o input esteja preenchido e o player (invisível) seja carregado no modo de edição.
+    // Se onYouTubeIframeAPIReady já chamou, esta será redundante, mas segura.
+    if (typeof YT !== 'undefined' && YT.Player) {
+        loadMusicFromStorageOrURL();
     }
 
 
@@ -494,13 +512,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isValidDate(startDate)) {
                 localStorage.setItem('countdownStartDate', startDate.toISOString());
                 startCountdown();
+                hideDateInput();
             } else {
                 alert("Por favor, insira uma data e hora válidas.");
                 updateDisplayForNoDate();
+                showDateInput();
             }
         } else {
             alert("Por favor, selecione uma data e hora.");
             updateDisplayForNoDate();
+            showDateInput();
         }
     });
 
@@ -544,40 +565,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    loadMusicButton.addEventListener('click', () => {
-        const link = musicLinkInput.value.trim();
-        const name = musicNameInput.value.trim(); // Pega o nome da música
-        if (link) {
-            loadMusic(link, name);
-        } else {
-            musicStatus.textContent = "Por favor, insira um link de música.";
-            musicStatus.classList.add('show');
-            stopMusic();
-        }
-    });
+    // Listener para o botão de carregar música
+    loadMusicButton.addEventListener('click', loadMusic);
 
-    changeMusicButton.addEventListener('click', () => {
-        stopMusic();
-        showEditingElements();
-        window.location.hash = '';
-    });
-
-    // NOVO: Listener para o botão de play/pause do player customizado
-    playPauseButton.addEventListener('click', () => {
-        if (!player) return; // Se o player não está pronto, não faz nada
-
-        if (isPlaying) {
-            player.pauseVideo();
-        } else {
-            player.playVideo().catch(error => {
-                console.warn("Play manual do YouTube bloqueado (possível restrição):", error);
-                musicStatus.textContent = "Não foi possível iniciar a música. Tente novamente.";
-                musicStatus.classList.add('show');
-            });
-        }
-    });
-
-    // --- Gerar Link (Inclui a música e o nome) ---
+    // --- Gerar Link (Inclui a mensagem personalizada e a música) ---
     generateLinkButton.addEventListener('click', async () => {
         if (!startDate || !isValidDate(startDate)) {
             alert("Por favor, defina a data inicial antes de gerar o link.");
@@ -589,8 +580,8 @@ document.addEventListener('DOMContentLoaded', () => {
             images: imagePreviews.map(img => img.src.includes('via.placeholder.com') ? null : img.src),
             themeColor: currentThemeColor,
             personalMessage: personalMessageInput.value,
-            musicLink: currentMusicLink,
-            musicName: currentMusicName // NOVO: Adiciona o nome da música à configuração
+            youtubeVideoId: currentYoutubeVideoId, // Adiciona o ID do vídeo
+            musicTitle: currentMusicTitle // Adiciona o título da música
         };
 
         const configString = JSON.stringify(config);
@@ -613,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // --- Funções do Contador (mantidas da versão anterior) ---
+    // --- Funções do Contador (Mantidas) ---
     function startCountdown() {
         if (countdownInterval) {
             clearInterval(countdownInterval);
