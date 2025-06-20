@@ -56,11 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function hideEditingElements() {
+        // Esconde o container completo da data e cor
         dateInputContainer.classList.add('hidden');
-        startDatePicker.classList.add('hidden');
-        setStartDateButton.classList.add('hidden');
-        dateInputContainer.querySelector('label').classList.add('hidden');
-        colorPickerContainer.classList.add('hidden');
 
         // Adiciona a classe para ativar o modo slideshow no CSS
         photosContainer.classList.add('slideshow-mode');
@@ -84,11 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showEditingElements() {
+        // Mostra o container completo da data e cor
         dateInputContainer.classList.remove('hidden');
-        startDatePicker.classList.remove('hidden');
-        setStartDateButton.classList.remove('hidden');
-        dateInputContainer.querySelector('label').classList.remove('hidden');
-        colorPickerContainer.classList.remove('hidden');
 
         // Remove a classe para desativar o modo slideshow no CSS
         photosContainer.classList.remove('slideshow-mode');
@@ -118,19 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function hideDateInput() {
-        dateInputContainer.classList.add('hidden');
-        startDatePicker.classList.add('hidden');
-        setStartDateButton.classList.add('hidden');
-        dateInputContainer.querySelector('label').classList.add('hidden');
-    }
-
-    function showDateInput() {
-        dateInputContainer.classList.remove('hidden');
-        startDatePicker.classList.remove('hidden');
-        setStartDateButton.classList.remove('hidden');
-        dateInputContainer.querySelector('label').classList.remove('hidden');
-    }
+    // REMOVIDO: Funções hideDateInput() e showDateInput()
 
     // --- Lógica do Slideshow ---
     function startSlideshow() {
@@ -231,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hashParams = window.location.hash.substring(1);
 
     if (hashParams) {
+        // Modo de visualização (link gerado)
         try {
             const decodedParams = decodeURIComponent(hashParams);
             const data = JSON.parse(decodedParams);
@@ -260,23 +243,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             imagePreviews[index].onload = () => {
                                 loadedCount++;
                                 if (loadedCount === imagesToLoadCount) {
-                                    // Todas as imagens carregadas do hash, agora podemos atualizar o slideshow
                                     updateActiveImages();
                                 }
                             };
                             imagePreviews[index].src = imgData;
                         } else {
-                            // Carrega placeholder se o dado não for uma imagem válida no link
                             imagePreviews[index].src = 'https://via.placeholder.com/150x150?text=Foto+' + (index + 1);
                         }
                     }
                 });
             } else {
-                // Se não há imagens válidas no link, usa placeholders
                 imagePreviews.forEach((img, index) => {
-                    img.src = 'https://via.placeholder.com/150x150?text=Sem+Fotos'; // Mudar para Sem Fotos para visualização
+                    img.src = 'https://via.placeholder.com/150x150?text=Sem+Fotos';
                 });
-                updateActiveImages(); // Inicia slideshow com placeholders se não houver imagens
+                updateActiveImages();
             }
 
 
@@ -292,36 +272,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 personalMessageDisplay.textContent = "";
             }
 
-            if (isValidDate(startDate)) {
-                hideEditingElements();
-            } else {
-                updateDisplayForNoDate();
-                showEditingElements(); // Se a data for inválida, volta para o modo edição
-            }
+            // Sempre esconde os elementos de edição quando há um hash (modo de visualização)
+            hideEditingElements();
 
         } catch (e) {
             console.error("Erro ao decodificar ou analisar o link:", e);
             alert("O link de personalização está inválido. Por favor, crie um novo.");
             updateDisplayForNoDate();
-            showEditingElements();
+            showEditingElements(); // Se o link for inválido, volta para o modo edição
         }
     } else {
-        // Se não houver hash, tenta carregar do localStorage (modo editável)
+        // Modo de edição (sem hash na URL)
         const storedStartDate = localStorage.getItem('countdownStartDate');
         if (storedStartDate) {
             startDate = new Date(storedStartDate);
             startDatePicker.value = storedStartDate.substring(0, 16);
             if (isValidDate(startDate)) {
                 startCountdown();
-                hideDateInput();
             } else {
                 startDate = null;
                 updateDisplayForNoDate();
-                showDateInput();
             }
         } else {
             updateDisplayForNoDate();
-            showDateInput();
         }
 
         imagePreviews.forEach((imgElement, index) => {
@@ -332,7 +305,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 imgElement.src = 'https://via.placeholder.com/120x120?text=Foto ' + (index + 1);
             }
         });
-        // Pequeno atraso para garantir que as imagens sejam renderizadas antes de atualizar
         setTimeout(updateActiveImages, 100);
 
         const storedThemeColor = localStorage.getItem('themeColor');
@@ -347,7 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
             personalMessageInput.value = storedPersonalMessage;
         }
 
-        showEditingElements(); // Garante que todos os elementos de edição estejam visíveis por padrão no modo edição
+        // Sempre mostra os elementos de edição quando não há hash (modo de edição)
+        showEditingElements();
     }
 
 
@@ -359,16 +332,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isValidDate(startDate)) {
                 localStorage.setItem('countdownStartDate', startDate.toISOString());
                 startCountdown();
-                hideDateInput();
+                // Não chama hideDateInput() aqui, pois a data permanece visível na edição
             } else {
                 alert("Por favor, insira uma data e hora válidas.");
                 updateDisplayForNoDate();
-                showDateInput();
             }
         } else {
             alert("Por favor, selecione uma data e hora.");
             updateDisplayForNoDate();
-            showDateInput();
         }
     });
 
@@ -395,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 reader.readAsDataURL(file);
             }
-            // Não precisa de else aqui, a remoção será pelo botão "X"
         });
     });
 
@@ -410,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem(`uploadedImage${index + 1}`); // Remove do localStorage
             event.target.classList.remove('show-button'); // Esconde o próprio botão de remover
 
-            updateActiveImages(); // Atualiza a lista de imagens ativas (remove a imagem excluída do slideshow)
+            updateActiveImages(); // Atualiza a lista de imagens ativas (removendo a imagem excluída do slideshow)
         });
     });
 
@@ -423,7 +393,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const config = {
             startDate: startDate.toISOString(),
-            // Filtra URLs de placeholder antes de salvar
             images: imagePreviews.map(img => img.src.includes('via.placeholder.com') ? null : img.src),
             themeColor: currentThemeColor,
             personalMessage: personalMessageInput.value
