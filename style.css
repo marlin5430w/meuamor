@@ -45,12 +45,12 @@ body {
     gap: 10px;
     transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out;
     overflow: hidden;
-    max-height: 200px; /* Ajuste para ter certeza que o conteúdo fica visível */
+    max-height: 400px; /* Aumenta a altura máxima para acomodar os campos de música */
     opacity: 1;
     width: 100%; /* Ocupa toda a largura do container */
 }
 
-/* Classe para esconder o container de data e cor (ativada pelo JS no modo de visualização) */
+/* Classe para esconder o container de data e cor */
 .date-input-container.hidden {
     opacity: 0;
     max-height: 0;
@@ -60,148 +60,23 @@ body {
     pointer-events: none;
 }
 
-/* Estilos para o container de música (edição) */
-.music-input-container {
-    margin-bottom: 25px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out;
-    overflow: hidden;
-    max-height: 300px; /* Altura suficiente para os dois inputs e botão */
-    opacity: 1;
-}
-
-/* Classe para esconder o container de música */
-.music-input-container.hidden {
-    opacity: 0;
-    max-height: 0;
-    margin-bottom: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    pointer-events: none;
-}
-
-.music-input-container label {
-    font-size: 1em;
-    color: var(--main-color);
-    text-align: center;
-}
-
-.music-input-container .small-label {
-    font-size: 0.9em;
-    margin-top: 5px; /* Espaço entre os inputs */
-    color: #dedede;
-}
-
-.music-input-container input[type="url"],
-.music-input-container input[type="text"] {
-    width: calc(100% - 24px); /* Ocupa 100% da largura menos o padding */
-    padding: 12px;
-    border: 1px solid var(--main-color);
-    border-radius: 5px;
-    background-color: #2a2a2a;
-    color: #dedede;
-    font-size: 1.1em;
-    box-sizing: border-box;
-}
-
-/* NOVO: Estilos para o player de áudio customizado */
-.custom-audio-player {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background-color: #2a2a2a;
-    border: 1px solid var(--main-color);
-    border-radius: 50px; /* Borda arredondada */
-    padding: 10px 20px;
-    margin-top: 20px;
-    margin-bottom: 25px; /* Espaçamento com o próximo elemento */
-    width: calc(100% - 20px); /* Ajusta para padding do container */
-    max-width: 400px; /* Largura máxima */
-    box-shadow: 0 0 10px var(--main-color-shadow);
-    transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out;
-    overflow: hidden;
-    max-height: 80px; /* Altura do player */
-    opacity: 1;
-}
-
-.custom-audio-player.hidden {
-    opacity: 0;
-    max-height: 0;
-    margin-bottom: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    pointer-events: none;
-}
-
-.player-button {
-    background-color: var(--main-color);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 45px; /* Tamanho do botão */
-    height: 45px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: 1.2em; /* Tamanho do ícone */
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    flex-shrink: 0; /* Não permite que o botão encolha */
-}
-
-.player-button:hover {
-    background-color: var(--main-color-dark);
-}
-
-.player-button:active {
-    transform: scale(0.95);
-}
-
-.music-name-display {
-    color: #dedede;
-    font-size: 1em;
-    white-space: nowrap; /* Impede que o texto quebre linha */
-    overflow: hidden; /* Esconde o texto que transborda */
-    text-overflow: ellipsis; /* Adiciona "..." para texto longo */
-    flex-grow: 1; /* Permite que ocupe o espaço restante */
-    text-align: left;
-}
-
-
-/* Botão menor para carregar música e trocar música */
-.action-button-small {
-    background-color: var(--main-color);
-    color: white;
-    border: none;
-    padding: 8px 15px; /* Menor padding */
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em; /* Menor fonte */
-    transition: background-color 0.3s ease;
-    width: auto; /* Largura automática */
-    max-width: 150px; /* Largura máxima */
-    margin-top: 10px; /* Adiciona um pequeno espaço acima para o botão "Trocar Música" */
-}
-
-.action-button-small:hover {
-    background-color: var(--main-color-dark);
-}
-
-
 /* Classes para esconder elementos no modo "somente leitura" */
 .action-button.hidden,
+.date-input-container label.hidden,
+.date-picker.hidden,
+.color-picker-container.hidden,
 .message-slot textarea.hidden,
-#changeMusicButton.hidden,
-.custom-audio-player.hidden-when-editing /* Esconde o player customizado na edição */ {
+.music-input-container.hidden { /* Esconde o container de input de música */
     display: none !important; /* Força o ocultamento total */
 }
 
 /* Exibe o parágrafo de mensagem no modo somente leitura */
 .message-slot p.show {
+    display: block !important;
+}
+
+/* Exibe o player de música no modo somente leitura */
+.music-player-display.show {
     display: block !important;
 }
 
@@ -296,7 +171,80 @@ body {
 }
 
 
-/* Estilos para as fotos e upload */
+/* --- NOVOS ESTILOS PARA A MÚSICA --- */
+.music-input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+    border: 1px dashed var(--main-color-border-dash); /* Borda tracejada */
+    padding: 15px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.music-input-container label {
+    font-size: 1em;
+    color: var(--main-color);
+    margin-bottom: 0; /* Ajuste para espaçamento consistente */
+}
+
+.music-input-container input[type="text"] {
+    width: calc(100% - 24px); /* Ocupa 100% da largura menos o padding */
+    padding: 10px;
+    border: 1px solid var(--main-color);
+    border-radius: 5px;
+    background-color: #2a2a2a;
+    color: #dedede;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+#loadMusicButton {
+    margin-top: 10px; /* Espaço entre o último input e o botão */
+    width: auto; /* Deixa o botão se ajustar ao conteúdo */
+    max-width: 200px;
+}
+
+.music-player-display {
+    display: none; /* Inicia oculto, será exibido via JS no modo de visualização */
+    margin-top: 20px;
+    text-align: center;
+    width: 100%;
+    max-width: 450px;
+}
+
+.music-player-display p {
+    font-size: 1.1em;
+    color: var(--main-color);
+    margin-bottom: 10px;
+    word-wrap: break-word; /* Garante quebra de texto para nomes longos */
+}
+
+#player {
+    width: 100%;
+    max-width: 400px; /* Limita a largura do player no centro */
+    height: 100px; /* Altura menor para o player oculto */
+    margin: 0 auto; /* Centraliza o player */
+    /* Garante que o player fique invisível, mas carregado */
+    opacity: 0;
+    pointer-events: none; /* Desabilita interações com o player no modo oculto */
+    overflow: hidden;
+    position: absolute; /* Para que ele não afete o layout */
+    left: -9999px; /* Mover para fora da tela */
+}
+
+/* Mensagem de música carregada */
+#musicLoadedMessage {
+    color: #4CAF50; /* Verde de sucesso */
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+
+/* --- ESTILOS PARA AS FOTOS (AJUSTADOS) --- */
 .photos-container {
     display: flex;
     justify-content: center; /* Centraliza horizontalmente */
@@ -428,7 +376,7 @@ body {
 }
 
 
-/* Estilos para o slot de mensagem */
+/* NOVO: Estilos para o slot de mensagem */
 .message-slot {
     width: 100%;
     margin-bottom: 25px; /* Espaço abaixo das fotos e acima do título */
@@ -522,6 +470,35 @@ body {
         font-size: 1.5em;
     }
 
+    /* Ajusta a altura máxima do date-input-container para desktop */
+    .date-input-container {
+        max-height: 250px;
+        flex-direction: row; /* Volta a ser row em telas maiores */
+        flex-wrap: wrap; /* Permite quebrar linha se necessário */
+        justify-content: center;
+        gap: 20px;
+    }
+
+    /* Ajusta o layout do music-input-container em telas maiores */
+    .music-input-container {
+        flex-direction: row; /* Coloca os inputs lado a lado */
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap; /* Permite quebrar linha */
+    }
+
+    .music-input-container label {
+        flex-basis: 100%; /* Ocupa a largura total para o label */
+        text-align: center;
+    }
+
+    .music-input-container input[type="text"] {
+        width: 45%; /* Divide a largura entre os dois inputs */
+        max-width: 250px;
+    }
+
+
+    /* ESTILOS PARA AS FOTOS (REVISADO PARA MEDIA QUERY) */
     .photos-container {
         flex-direction: row; /* Volta a ser row em telas maiores para a edição */
         flex-wrap: nowrap; /* Não quebra linha em telas maiores, mantém 3 lado a lado */
@@ -531,21 +508,17 @@ body {
 
     /* Esconde os photo-uploaders no modo de visualização */
     .photos-container.slideshow-mode .photo-uploader {
-        position: absolute;
-        top: 50%;
-        left: 50%;
+        width: 150px;
+        height: 150px;
+        position: absolute; /* Para sobreposição no slideshow */
         transform: translate(-50%, -50%);
-        opacity: 0; /* Controlado pelo JS para o slideshow */
+        opacity: 0;
         transition: opacity 0.5s ease-in-out;
-        border: 2px dashed var(--main-color-border-dash); /* Mantém a borda no slideshow */
-        width: 150px; /* Tamanho fixo para o slideshow */
-        height: 150px; /* Tamanho fixo para o slideshow */
-        z-index: 1; /* Padrão para itens sobrepostos */
+        z-index: 1;
     }
 
-    /* Garante que o container de fotos tenha altura definida no modo slideshow */
     .photos-container.slideshow-mode {
-        height: 180px; /* Altura fixa para o contêiner no modo slideshow */
+        height: 180px; /* Altura fixa para o slideshow */
         gap: 0; /* Sem gap no slideshow */
     }
 
@@ -563,14 +536,6 @@ body {
     .photo-uploader img {
         position: relative; /* Imagem interna é relativa ao uploader no modo de edição */
         opacity: 1; /* Visível no modo de edição */
-    }
-
-
-    .date-input-container {
-        flex-direction: row;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
     }
 
     .date-input-container label {
@@ -610,5 +575,9 @@ body {
 @media (min-width: 768px) {
     .container {
         max-width: 600px;
+    }
+    .music-input-container input[type="text"] {
+        width: auto; /* Deixa o input se ajustar ao conteúdo */
+        flex-grow: 1; /* Permite que cresça para preencher espaço */
     }
 }
