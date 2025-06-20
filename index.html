@@ -8,13 +8,28 @@
 </head>
 <body>
     <div class="container">
-        <div class="placeholder-image">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiNERUREREQiPjxwYXRoIGQ9Ik04LjUgMTMuNWwyLjUgMyAzLjUtNC41IDQuNSA2SDVMOC41IDEzLjV6TTE5IDNDOC4xMjEgMyAzIDguMTIxIDMgMTljMCAxMC44NzkgNS4xMjEgMTYgMTYgMTZTMTkgOC4xMjEgMTkgM3ptMC0yQzcuMDA5IDFkMCAxMkwxMiAyMmMxMS4wMDkgMCAxMi0xMS4wMDkgMTItMTJTMTIuMDA5IDEtMTkgMXoiLz48L3N2Zz4=" alt="Placeholder de imagem">
+        <div class="date-input-container">
+            <label for="startDatePicker">Selecione a Data Inicial:</label>
+            <input type="datetime-local" id="startDatePicker" class="date-picker">
+            <button id="setStartDateButton">Definir Data</button>
         </div>
+
+        <div class="photos-container">
+            <div class="photo-placeholder">
+                <img src="https://via.placeholder.com/100x100?text=Foto+1" alt="Foto 1">
+                </div>
+            <div class="photo-placeholder">
+                <img src="https://via.placeholder.com/100x100?text=Foto+2" alt="Foto 2">
+                </div>
+            <div class="photo-placeholder">
+                <img src="https://via.placeholder.com/100x100?text=Foto+3" alt="Foto 3">
+                </div>
+        </div>
+
         <div class="text-content">
-            <p class="title">Tempo juntos</p>
-            <p class="counter-line" id="years-months-days"></p>
-            <p class="counter-line" id="hours-minutes-seconds"></p>
+            <p class="title">Juntos</p>
+            <p class="counter-line" id="years-months-days">0 anos, 0 meses, 0 dias</p>
+            <p class="counter-line" id="hours-minutes-seconds">0 horas, 0 minutos e 0 segundos</p>
         </div>
     </div>
 
