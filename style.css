@@ -6,90 +6,102 @@
     --main-color-hover-bg: rgba(255, 0, 127, 0.1); /* Fundo hover translúcido */
 }
 
-/* Garante que o HTML e o BODY ocupem 100% da viewport e não tenham margens/paddings extras */
+/* ** CRÍTICO: Garante que o HTML e o BODY ocupem 100% da viewport e não rolem ** */
 html, body {
-    height: 100%; /* Fixa a altura em 100% da viewport */
+    height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* IMPORTANTE: Esconde barras de rolagem globais. A rolagem será interna. */
+    overflow: hidden; /* Esconde barras de rolagem globais */
     -webkit-overflow-scrolling: touch; /* Melhora rolagem em iOS */
+    box-sizing: border-box; /* Garante que padding e borda não adicionem tamanho */
 }
 
 body {
-    background-color: #1a1a1a; /* Fundo escuro */
-    color: #dedede; /* Texto branco/claro */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte limpa */
+    background-color: #1a1a1a;
+    color: #dedede;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh; /* Ocupa a altura total da viewport */
-    margin: 0;
-    padding: 20px; /* Adicionado padding para garantir espaço nas bordas em mobile */
-    box-sizing: border-box; /* Garante que padding não adicione largura extra */
+    /* Remover min-height aqui, pois o app-wrapper vai controlar a altura */
 }
 
+/* ** NOVO: Wrapper para controlar o layout principal e garantir que o container fique visível ** */
+.app-wrapper {
+    width: 100vw; /* Ocupa 100% da largura da viewport */
+    height: 100vh; /* Ocupa 100% da altura da viewport */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Padding ao redor do container rosa */
+    box-sizing: border-box;
+    overflow: hidden; /* Essencial: Garante que se algo sair do app-wrapper, ele seja cortado */
+}
+
+
 .container {
-    background-color: #0d0d0d; /* Fundo ainda mais escuro para o container */
-    border: 2px solid var(--main-color); /* Usando a variável */
+    background-color: #0d0d0d;
+    border: 2px solid var(--main-color);
     border-radius: 10px;
     text-align: center;
-    box-shadow: 0 0 20px var(--main-color-shadow); /* Usando a variável */
+    box-shadow: 0 0 20px var(--main-color-shadow);
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%; /* Ocupa 100% da largura disponível */
-    max-width: 500px; /* Largura máxima para desktop */
+    width: 100%;
+    max-width: 500px;
     box-sizing: border-box;
-    margin: auto; /* Centraliza o container verticalmente se houver espaço extra */
     position: relative; /* PARA O POSICIONAMENTO ABSOLUTO DAS PÁGINAS */
-    height: auto; /* IMPORTANTE: Altura dinâmica, ajustada pelo JS */
-    min-height: 400px; /* Altura mínima para não encolher demais em mobile */
-    max-height: calc(100vh - 40px); /* Garante que o container não exceda a altura da viewport menos o padding do body */
+    /* ** CRÍTICO: A altura será sempre a altura restante do app-wrapper menos o padding ** */
+    height: 100%; /* Ocupa 100% da altura disponível no app-wrapper */
+    /* Removido max-height calc aqui, pois o app-wrapper já controla a altura total */
     transition: height 0.5s ease-in-out; /* Suaviza a mudança de altura */
     overflow: hidden; /* Oculta o conteúdo das páginas "hidden" fora dos limites do container */
-    flex-shrink: 0; /* Impede que o container encolha dentro do flexbox do body */
+    flex-shrink: 0;
 }
 
 /* Estilos para as páginas (abas) */
 .page {
     width: 100%;
-    /* Altura será dinâmica, garantindo que o conteúdo caiba e possa ser rolado */
-    min-height: 100%; /* Garante que a página tenha pelo menos 100% da altura do container */
+    height: 100%; /* ** CRÍTICO: Cada página tenta ocupar 100% da altura do seu pai (.container) ** */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px; /* Espaçamento entre os blocos dentro da página */
+    gap: 20px;
     transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
     position: absolute; /* Essencial para sobrepor as páginas e permitir transições */
     top: 0;
     left: 0;
-    padding: 30px; /* Padding interno para o conteúdo da página */
+    padding: 30px;
     box-sizing: border-box;
-    background-color: #0d0d0d; /* Mesma cor do container para transição suave */
-    border-radius: 10px; /* Mantém as bordas arredondadas */
-    overflow-y: auto; /* PERMITE ROLAGEM VERTICAL DENTRO DA PÁGINA SE O CONTEÚDO EXCEDER */
+    background-color: #0d0d0d;
+    border-radius: 10px;
+    /* ** CRÍTICO: Permite rolagem VERTICAL dentro da página se o conteúdo EXCEDER a altura de 100% ** */
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch; /* Melhora rolagem em iOS */
+    touch-action: pan-y; /* Ajuda a garantir que apenas a rolagem vertical seja manipulada pelo elemento */
 }
 
 .page.hidden {
     opacity: 0;
-    pointer-events: none; /* Desabilita cliques em elementos ocultos */
-    transform: translateX(100%); /* Move para fora da tela à direita */
-    z-index: 1; /* Garante que a página oculta esteja abaixo */
+    pointer-events: none;
+    transform: translateX(100%);
+    z-index: 1;
 }
 
 .page.active {
     opacity: 1;
-    pointer-events: auto; /* Habilita cliques */
-    transform: translateX(0); /* Posição normal */
-    z-index: 2; /* Garante que a página ativa esteja acima */
+    pointer-events: auto;
+    transform: translateX(0);
+    z-index: 2;
 }
 
-/* Estilos comuns para campos e botões */
+/* Restante do CSS permanece o mesmo (elementos internos, botões, fotos, etc.) */
+
 .title {
     font-size: 2em;
     color: var(--main-color);
-    margin-bottom: 20px; /* Espaço abaixo do título */
+    margin-bottom: 20px;
 }
 
 .date-input-container,
@@ -106,7 +118,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    margin-bottom: 0; /* Evitar margens que empurram o conteúdo para fora */
+    margin-bottom: 0;
 }
 
 .date-input-container label,
@@ -124,7 +136,7 @@ body {
 input[type="datetime-local"],
 input[type="text"],
 textarea {
-    width: calc(100% - 24px); /* Ajusta para padding */
+    width: calc(100% - 24px);
     padding: 10px;
     border: 1px solid var(--main-color);
     border-radius: 5px;
@@ -191,7 +203,7 @@ textarea::placeholder {
 
 /* Emojis */
 .emoji-input-container {
-    min-height: 180px; /* Altura mínima para garantir espaço */
+    min-height: 180px;
     justify-content: center;
 }
 
@@ -199,16 +211,16 @@ textarea::placeholder {
     display: flex;
     gap: 10px;
     justify-content: center;
-    flex-wrap: wrap; /* Permite quebrar linha */
+    flex-wrap: wrap;
     width: 100%;
-    max-width: 200px; /* Força quebra de linha em mobile se 3 não couberem */
+    max-width: 200px;
     margin: 0 auto;
 }
 
 .emoji-input {
-    flex-basis: 60px; /* Largura preferencial */
+    flex-basis: 60px;
     height: 60px;
-    max-width: 60px; /* Garante que não ultrapasse */
+    max-width: 60px;
     text-align: center;
     font-size: 2.2em;
     padding: 5px;
@@ -232,10 +244,10 @@ textarea::placeholder {
     width: 100%;
     position: relative;
     overflow: hidden;
-    flex-wrap: wrap; /* No modo de edição, permite quebrar linha */
+    flex-wrap: wrap;
     gap: 20px;
-    height: auto; /* Altura se adapta no modo edição */
-    padding: 15px; /* Adiciona padding para as fotos ficarem dentro da borda tracejada */
+    height: auto;
+    padding: 15px;
     border: 1px dashed var(--main-color-border-dash);
     border-radius: 8px;
     box-sizing: border-box;
@@ -253,12 +265,12 @@ textarea::placeholder {
     position: relative;
     transform: none;
     z-index: auto;
-    border: 2px dashed var(--main-color-border-dash); /* Borda visível para o uploader */
+    border: 2px dashed var(--main-color-border-dash);
 }
 
 .custom-file-upload {
     display: flex;
-    flex-direction: column; /* Para empilhar o texto "Foto X" e o ícone, se houver */
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
@@ -268,7 +280,7 @@ textarea::placeholder {
     border: none;
     border-radius: 8px;
     position: relative;
-    color: #dedede; /* Cor do texto "Foto X" */
+    color: #dedede;
     font-size: 0.9em;
 }
 .custom-file-upload:hover {
@@ -288,19 +300,16 @@ textarea::placeholder {
     left: 0;
     z-index: 1;
 }
-/* Imagem ativa no slideshow */
 .photos-container.slideshow-mode .photo-uploader img.active {
     opacity: 1;
     z-index: 2;
 }
-/* Esconde o input de arquivo padrão */
 .hidden-file-input { display: none; }
-/* Mostra o texto "Foto X" apenas quando a imagem não está visível */
 .photo-uploader .upload-text {
     display: block;
 }
 .photo-uploader img[style*="opacity: 1"] + .upload-text {
-    display: none; /* Esconde o texto se a imagem estiver visível */
+    display: none;
 }
 
 
@@ -317,7 +326,7 @@ textarea::placeholder {
     font-size: 0.9em;
     font-weight: bold;
     cursor: pointer;
-    display: none; /* Inicia escondido, só aparece no modo edição com foto */
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 10;
@@ -329,14 +338,14 @@ textarea::placeholder {
 
 /* Visualização Final */
 #viewModeDisplay {
-    padding: 30px; /* Mantém o padding para o modo de visualização */
-    gap: 15px; /* Espaçamento mais compacto para visualização */
+    padding: 30px;
+    gap: 15px;
 }
 
 #viewModeDisplay .title { margin-bottom: 5px; }
 
 .music-player-display {
-    display: none; /* Inicia oculto, será exibido via JS no modo de visualização */
+    display: none;
     margin-top: 20px;
     text-align: center;
     width: 100%;
@@ -351,11 +360,11 @@ textarea::placeholder {
 #player {
     width: 100%;
     max-width: 400px;
-    height: 100px; /* Altura padrão para o player visível */
+    height: 100px;
     margin: 0 auto;
-    opacity: 1; /* Visível quando em #viewModeDisplay */
-    pointer-events: auto; /* Interativo quando visível */
-    position: relative; /* Volta ao fluxo normal */
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
     left: auto;
 }
 
@@ -389,40 +398,39 @@ textarea::placeholder {
 
 
 .photos-container.slideshow-mode {
-    height: 250px; /* Altura fixa para o slideshow */
-    gap: 0; /* Sem gap entre as fotos no slideshow */
-    padding: 0; /* Remove padding extra no modo slideshow */
-    border: none; /* Remove a borda tracejada no modo slideshow */
-    position: relative; /* Essencial para o posicionamento das imagens */
-    overflow: hidden; /* Garante que fotos fora dos limites sejam cortadas */
-    margin-bottom: 20px; /* Espaço abaixo do slideshow */
+    height: 250px;
+    gap: 0;
+    padding: 0;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
 }
 
 .photos-container.slideshow-mode .photo-uploader {
-    position: absolute; /* Para sobrepor as imagens no slideshow */
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0; /* Controlado pelo JS */
+    opacity: 0;
     transition: opacity 0.5s ease-in-out;
-    border: none; /* Remove a borda tracejada no slideshow */
-    box-shadow: 0 0 15px var(--main-color-shadow); /* Sombra mais destacada */
+    border: none;
+    box-shadow: 0 0 15px var(--main-color-shadow);
 }
 
 .photos-container.slideshow-mode .photo-uploader img {
-    opacity: 0; /* Controlado pelo JS */
+    opacity: 0;
     transition: opacity 0.5s ease-in-out;
-    position: absolute; /* Para empilhar imagens internas */
+    position: absolute;
     top: 0;
     left: 0;
-    z-index: 1; /* Padrão, o JS vai ajustar */
+    z-index: 1;
 }
 
 .photos-container.slideshow-mode .photo-uploader img.active {
     opacity: 1;
-    z-index: 2; /* Garante que a imagem ativa esteja acima */
+    z-index: 2;
 }
-/* Esconde o texto "Foto X" e o botão remover no modo slideshow */
 .photos-container.slideshow-mode .upload-text,
 .photos-container.slideshow-mode .remove-photo-button {
     display: none !important;
@@ -479,12 +487,16 @@ textarea::placeholder {
 
 /* Media query para telas maiores (desktops e tablets) */
 @media (min-width: 600px) {
+    .app-wrapper {
+        padding: 40px; /* Mais padding em telas maiores */
+    }
     .container {
-        padding: 0; /* As páginas controlam o padding */
-        max-height: 90vh; /* Permite um pouco de margem em telas grandes */
+        /* No desktop, a altura pode ser um pouco mais flexível se o app-wrapper já tiver padding */
+        height: auto; /* Deixa o container ajustar-se ao conteúdo se o app-wrapper já tiver altura fixa */
+        max-height: calc(100vh - 80px); /* Ajusta para o padding do app-wrapper */
     }
     .page {
-        padding: 40px; /* Padding maior para as páginas em desktop */
+        padding: 40px;
     }
 
     .title {
@@ -494,7 +506,6 @@ textarea::placeholder {
         font-size: 1.5em;
     }
 
-    /* Em telas maiores, os inputs de data e cor podem ficar lado a lado */
     .date-input-container {
         flex-direction: row;
         flex-wrap: wrap;
@@ -514,7 +525,6 @@ textarea::placeholder {
         margin-top: 0;
     }
 
-    /* Música em desktop */
     .music-input-container {
         flex-direction: row;
         justify-content: center;
@@ -530,10 +540,9 @@ textarea::placeholder {
         max-width: 250px;
     }
 
-    /* Emojis em desktop */
     .emoji-inputs-wrapper {
-        max-width: none; /* Remove limitação de largura para desktop */
-        flex-wrap: nowrap; /* Não quebra linha no desktop */
+        max-width: none;
+        flex-wrap: nowrap;
     }
     .emoji-input {
         flex-basis: 70px;
@@ -542,9 +551,8 @@ textarea::placeholder {
         font-size: 2.5em;
     }
 
-    /* Fotos em desktop */
     .photos-container {
-        flex-wrap: nowrap; /* Não quebra linha em desktop */
+        flex-wrap: nowrap;
         gap: 20px;
     }
     .photo-uploader {
@@ -552,15 +560,14 @@ textarea::placeholder {
         height: 225px;
     }
     .photos-container.slideshow-mode {
-        height: 280px; /* Altura maior para fotos maiores no slideshow desktop */
+        height: 280px;
     }
     .photos-container.slideshow-mode .photo-uploader {
-        width: 150px; /* Tamanho maior para fotos no slideshow */
+        width: 150px;
         height: 225px;
     }
 }
 
-/* Media query para tablets em modo paisagem e alguns desktops */
 @media (min-width: 768px) {
     .container {
         max-width: 600px;
