@@ -1,13 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const root = document.documentElement; // Referência ao elemento <html> para CSS variables
     const dateInputContainer = document.getElementById('dateInputContainer');
     const startDatePicker = document.getElementById('startDatePicker');
     const setStartDateButton = document.getElementById('setStartDateButton');
     const yearsMonthsDaysElement = document.getElementById('years-months-days');
     const hoursMinutesSecondsElement = document.getElementById('hours-minutes-seconds');
-    const generateLinkButton = document.getElementById('generateLinkButton'); // Novo
-    const copyMessage = document.getElementById('copyMessage'); // Novo
+    const generateLinkButton = document.getElementById('generateLinkButton');
+    const copyMessage = document.getElementById('copyMessage');
 
-    const photoUploaders = [ // Nova referência para os containers dos uploaders
+    const themeColorPicker = document.getElementById('themeColorPicker'); // Novo
+    const colorPickerContainer = document.querySelector('.color-picker-container'); // Novo
+
+    const photoUploaders = [
         document.querySelector('.photos-container > .photo-uploader:nth-child(1)'),
         document.querySelector('.photos-container > .photo-uploader:nth-child(2)'),
         document.querySelector('.photos-container > .photo-uploader:nth-child(3)')
@@ -25,14 +29,31 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     let startDate = null;
+    let currentThemeColor = '#ff007f'; // Cor padrão inicial
     let countdownInterval;
 
-    // --- Funções de Visibilidade dos Elementos de Edição ---
+    // --- Funções de Aplicação de Tema e Visibilidade ---
+    function applyThemeColor(color) {
+        root.style.setProperty('--main-color', color);
+        // Calcula tons mais escuros e sombras programaticamente
+        // Isso é uma simplificação. Para cores complexas, talvez precise de uma lib ou cores fixas.
+        const hexToRgb = hex => hex.match(/\w\w/g).map(x => parseInt(x, 16));
+        const rgbToRgbA = (rgb, alpha) => `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+
+        const rgb = hexToRgb(color);
+        const darkerRgb = rgb.map(c => Math.max(0, c - 30)); // Escurece em 30 unidades
+        root.style.setProperty('--main-color-dark', `rgb(${darkerRgb[0]}, ${darkerRgb[1]}, ${darkerRgb[2]})`);
+        root.style.setProperty('--main-color-shadow', rgbToRgbA(rgb, 0.4));
+        root.style.setProperty('--main-color-border-dash', rgbToRgbA(rgb, 0.5));
+        root.style.setProperty('--main-color-hover-bg', rgbToRgbA(rgb, 0.1));
+    }
+
     function hideEditingElements() {
         dateInputContainer.classList.add('hidden');
         startDatePicker.classList.add('hidden');
         setStartDateButton.classList.add('hidden');
-        dateInputContainer.querySelector('label').classList.add('hidden'); // Esconde a label também
+        dateInputContainer.querySelector('label').classList.add('hidden');
+        colorPickerContainer.classList.add('hidden'); // Novo: Esconde o seletor de cor
 
         photoUploaders.forEach(uploader => {
             if (uploader) uploader.classList.add('hidden');
@@ -45,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startDatePicker.classList.remove('hidden');
         setStartDateButton.classList.remove('hidden');
         dateInputContainer.querySelector('label').classList.remove('hidden');
+        colorPickerContainer.classList.remove('hidden'); // Novo: Mostra o seletor de cor
 
         photoUploaders.forEach(uploader => {
             if (uploader) uploader.classList.remove('hidden');
@@ -52,8 +74,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (generateLinkButton) generateLinkButton.classList.remove('hidden');
     }
 
+    // A função para esconder SÓ o input de data é mantida para o caso de o usuário definir a data mas ainda querer editar outras coisas
+    function hideDateInput() {
+        dateInputContainer.classList.add('hidden');
+        // Mas os outros elementos de edição permanecem visíveis se o link não foi gerado
+        startDatePicker.classList.add('hidden'); // Esconde o input
+        setStartDateButton.classList.add('hidden'); // Esconde o botão
+        dateInputContainer.querySelector('label').classList.add('hidden'); // Esconde a label
+    }
+
+    function showDateInput() {
+        dateInputContainer.classList.remove('hidden');
+        startDatePicker.classList.remove('hidden');
+        setStartDateButton.classList.remove('hidden');
+        dateInputContainer.querySelector('label').classList.remove('hidden');
+    }
+
+
     // --- Lógica de Carregamento (Prioridade: URL Hash > localStorage) ---
-    const hashParams = window.location.hash.substring(1); // Pega o hash (sem o '#')
+    const hashParams = window.location.hash.substring(1);
 
     if (hashParams) {
         // Se houver hash, tenta carregar as configurações de lá (modo somente leitura)
@@ -65,15 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 startDate = new Date(data.startDate);
                 if (isValidDate(startDate)) {
                     startCountdown();
-                    hideEditingElements(); // Esconde tudo se carregou do link
                 } else {
                     console.error("Data inválida no link.");
-                    updateDisplayForNoDate();
-                    showEditingElements(); // Mostra edição se a data do link é inválida
+                    startDate = null; // Reseta se inválido
                 }
             } else {
-                updateDisplayForNoDate();
-                showEditingElements(); // Mostra edição se a data não está no link
+                startDate = null;
             }
 
             if (data.images && Array.isArray(data.images)) {
@@ -83,6 +119,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
+
+            if (data.themeColor && typeof data.themeColor === 'string' && data.themeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
+                currentThemeColor = data.themeColor;
+                applyThemeColor(currentThemeColor);
+            }
+
+            // Após carregar TUDO do link, decide se esconde
+            if (isValidDate(startDate)) { // Se a data do link é válida, esconde tudo.
+                hideEditingElements();
+            } else { // Se não há data válida no link, assume modo edição.
+                updateDisplayForNoDate();
+                showEditingElements();
+            }
+
 
         } catch (e) {
             console.error("Erro ao decodificar ou analisar o link:", e);
@@ -98,15 +148,15 @@ document.addEventListener('DOMContentLoaded', () => {
             startDatePicker.value = storedStartDate.substring(0, 16);
             if (isValidDate(startDate)) {
                 startCountdown();
-                hideDateInput(); // Apenas esconde o input de data
+                hideDateInput();
             } else {
                 startDate = null;
                 updateDisplayForNoDate();
-                showDateInput(); // Mostra o input de data
+                showDateInput();
             }
         } else {
             updateDisplayForNoDate();
-            showDateInput(); // Mostra o input de data
+            showDateInput();
         }
 
         imagePreviews.forEach((imgElement, index) => {
@@ -115,7 +165,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 imgElement.src = storedImage;
             }
         });
-        showEditingElements(); // Garante que todos os elementos de edição estejam visíveis por padrão
+
+        const storedThemeColor = localStorage.getItem('themeColor');
+        if (storedThemeColor && storedThemeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
+            currentThemeColor = storedThemeColor;
+            themeColorPicker.value = storedThemeColor; // Define o valor do input do picker
+        }
+        applyThemeColor(currentThemeColor); // Aplica a cor carregada ou a padrão
+
+        showEditingElements(); // Garante que todos os elementos de edição estejam visíveis por padrão no modo edição
     }
 
 
@@ -141,6 +199,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    themeColorPicker.addEventListener('input', (event) => { // Novo: Listener para o input de cor
+        currentThemeColor = event.target.value;
+        applyThemeColor(currentThemeColor);
+        localStorage.setItem('themeColor', currentThemeColor); // Salva a cor imediatamente
+    });
+
     imageUploads.forEach((inputElement, index) => {
         inputElement.addEventListener('change', (event) => {
             const file = event.target.files[0];
@@ -156,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Novo: Gerar Link ---
+    // --- Gerar Link (Inclui a cor do tema) ---
     generateLinkButton.addEventListener('click', async () => {
         if (!startDate || !isValidDate(startDate)) {
             alert("Por favor, defina a data inicial antes de gerar o link.");
@@ -165,15 +229,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const config = {
             startDate: startDate.toISOString(),
-            images: []
+            images: [],
+            themeColor: currentThemeColor // Inclui a cor do tema
         };
 
         imagePreviews.forEach(imgElement => {
-            // Verifica se a imagem não é um placeholder (data:image/svg+xml)
             if (imgElement.src && !imgElement.src.includes('via.placeholder.com') && imgElement.src.startsWith('data:image')) {
                 config.images.push(imgElement.src);
             } else {
-                config.images.push(null); // Mantém a posição se não houver imagem
+                config.images.push(null);
             }
         });
 
@@ -193,12 +257,11 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Falha ao copiar o link: ', err);
             copyMessage.textContent = "Erro ao copiar. Copie manualmente: " + link;
             copyMessage.classList.add('show');
-            // Você pode adicionar um campo de texto temporário para o usuário copiar manualmente aqui.
         }
     });
 
 
-    // --- Funções do Contador (inalteradas ou com pequenas otimizações) ---
+    // --- Funções do Contador ---
 
     function startCountdown() {
         if (countdownInterval) {
