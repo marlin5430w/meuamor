@@ -1,780 +1,556 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const root = document.documentElement;
-    const dateInputContainer = document.getElementById('dateInputContainer');
-    const startDatePicker = document.getElementById('startDatePicker');
-    const setStartDateButton = document.getElementById('setStartDateButton');
-    const yearsMonthsDaysElement = document.getElementById('years-months-days');
-    const hoursMinutesSecondsElement = document.getElementById('hours-minutes-seconds');
+    // === Seletores de Elementos ===
+    const page1 = document.getElementById('page1');
+    const page2 = document.getElementById('page2');
+    const viewModeDisplay = document.getElementById('viewModeDisplay');
+
+    const goToEmojiPageButton = document.getElementById('goToEmojiPageButton');
+    const backToConfigButton = document.getElementById('backToConfigButton');
     const generateLinkButton = document.getElementById('generateLinkButton');
+    const copyShareLinkButton = document.getElementById('copyShareLinkButton');
     const copyMessage = document.getElementById('copyMessage');
 
+    const startDatePicker = document.getElementById('startDatePicker');
+    const setStartDateButton = document.getElementById('setStartDateButton');
     const themeColorPicker = document.getElementById('themeColorPicker');
-    const colorPickerContainer = document.querySelector('.color-picker-container');
-
-    const photosContainer = document.querySelector('.photos-container');
-    const photoUploaders = [
-        document.querySelector('.photos-container > .photo-uploader:nth-child(1)'),
-        document.querySelector('.photos-container > .photo-uploader:nth-child(2)'),
-        document.querySelector('.photos-container > .photo-uploader:nth-child(3)')
-    ];
-
-    const imageUploads = [
-        document.getElementById('imageUpload1'),
-        document.getElementById('imageUpload2'),
-        document.getElementById('imageUpload3')
-    ];
-    const imagePreviews = [
-        document.getElementById('imagePreview1'),
-        document.getElementById('imagePreview2'),
-        document.getElementById('imagePreview3')
-    ];
-
-    const removePhotoButtons = document.querySelectorAll('.remove-photo-button');
-
-    const personalMessageInput = document.getElementById('personalMessageInput');
-    const personalMessageDisplay = document.getElementById('personalMessageDisplay');
-    const messageSlot = document.getElementById('messageSlot');
-
-    // ELEMENTOS PARA MÚSICA
-    const musicInputContainer = document.querySelector('.music-input-container');
-    const youtubeLinkInput = document.getElementById('youtubeLinkInput');
+    const musicLinkInput = document.getElementById('musicLinkInput');
     const musicNameInput = document.getElementById('musicNameInput');
     const loadMusicButton = document.getElementById('loadMusicButton');
-    const musicPlayerDisplay = document.getElementById('musicPlayerDisplay');
-    const currentMusicNameElement = document.getElementById('currentMusicName');
     const musicLoadedMessage = document.getElementById('musicLoadedMessage');
 
-    // NOVOS ELEMENTOS PARA EMOJIS
-    const emojiInputContainer = document.querySelector('.emoji-input-container');
-    const emojiInput1 = document.getElementById('emojiInput1');
-    const emojiInput2 = document.getElementById('emojiInput2');
-    const emojiInput3 = document.getElementById('emojiInput3');
+    const emojiInputs = [
+        document.getElementById('emojiInput1'),
+        document.getElementById('emojiInput2'),
+        document.getElementById('emojiInput3')
+    ];
+
+    const photoUploads = [
+        { input: document.getElementById('photoUpload1'), img: document.getElementById('uploadedPhoto1'), button: document.querySelector('.remove-photo-button[data-photo-id="1"]') },
+        { input: document.getElementById('photoUpload2'), img: document.getElementById('uploadedPhoto2'), button: document.querySelector('.remove-photo-button[data-photo-id="2"]') },
+        { input: document.getElementById('photoUpload3'), img: document.getElementById('uploadedPhoto3'), button: document.querySelector('.remove-photo-button[data-photo-id="3"]') }
+    ];
+
+    const personalMessageInput = document.getElementById('personalMessageInput');
+
+    const countdownMessage = document.getElementById('countdownMessage');
+    const exactTimeMessage = document.getElementById('exactTimeMessage');
+    const displayedMusicName = document.getElementById('displayedMusicName');
+    const player = document.getElementById('player');
+    const displayedPersonalMessage = document.getElementById('displayedPersonalMessage');
+    const photosContainer = document.querySelector('.photos-container.slideshow-mode');
     const emojiRainContainer = document.getElementById('emojiRainContainer');
 
+    // === Variáveis Globais de Estado ===
     let startDate = null;
-    let currentThemeColor = '#ff007f';
     let countdownInterval;
     let slideshowInterval;
-    let currentImageIndex = 0;
-    let activeImages = [];
+    let currentSlide = 0;
+    let uploadedPhotoData = []; // Para armazenar base64 das imagens
+    let musicId = '';
+    let musicTitle = '';
+    let selectedEmojis = ['', '', ''];
 
-    // Variáveis da Música
-    let player;
-    let currentYoutubeVideoId = null;
-    let currentMusicTitle = "";
-
-    // Variáveis dos Emojis
-    let selectedEmojis = [];
-    let emojiRainInterval;
-
-    // A função que a API do YouTube chama quando está pronta
-    window.onYouTubeIframeAPIReady = function() {
-        console.log("YouTube IFrame API is ready.");
-        loadMusicFromStorageOrURL();
-    };
-
-    // --- Funções de Aplicação de Tema e Visibilidade ---
-    function applyThemeColor(color) {
-        root.style.setProperty('--main-color', color);
-        const hexToRgb = hex => hex.match(/\w\w/g).map(x => parseInt(x, 16));
-        const rgb = hexToRgb(color);
-        const darkerRgb = rgb.map(c => Math.max(0, c - 30));
-        root.style.setProperty('--main-color-dark', `rgb(${darkerRgb.join(',')})`);
-        root.style.setProperty('--main-color-shadow', `rgba(${rgb.join(',')}, 0.4)`);
-        root.style.setProperty('--main-color-border-dash', `rgba(${rgb.join(',')}, 0.5)`);
-        root.style.setProperty('--main-color-hover-bg', `rgba(${rgb.join(',')}, 0.1)`);
-    }
-
-    function hideEditingElements() {
-        dateInputContainer.classList.add('hidden');
-        startDatePicker.classList.add('hidden');
-        setStartDateButton.classList.add('hidden');
-        colorPickerContainer.classList.add('hidden');
-        musicInputContainer.classList.add('hidden');
-        emojiInputContainer.classList.add('hidden'); // Esconde inputs de emoji
-
-        photosContainer.classList.add('slideshow-mode');
-
-        if (generateLinkButton) generateLinkButton.classList.add('hidden');
-
-        personalMessageInput.classList.add('hidden');
-        personalMessageDisplay.classList.add('show');
-
-        removePhotoButtons.forEach(button => button.classList.remove('show-button'));
-
-        // Lógica de Música (Mantida)
-        if (currentYoutubeVideoId) {
-            musicPlayerDisplay.classList.add('show');
-            currentMusicNameElement.textContent = currentMusicTitle || "Música em Reprodução";
-            if (player) {
-                player.playVideo();
+    // === Funções de Navegação entre Páginas ===
+    function showPage(pageToShow) {
+        const pages = [page1, page2, viewModeDisplay];
+        pages.forEach(page => {
+            if (page === pageToShow) {
+                page.classList.add('active');
+                page.classList.remove('hidden');
             } else {
-                createYoutubePlayer(currentYoutubeVideoId, true);
-            }
-        } else {
-            musicPlayerDisplay.classList.remove('show');
-            if (player) player.stopVideo();
-        }
-
-        updateActiveImages();
-        startSlideshow();
-
-        // Lógica de Emojis (Ativar chuva de emojis)
-        if (selectedEmojis.length > 0) {
-            emojiRainContainer.style.display = 'block'; // Mostra o contêiner
-            startEmojiRain();
-        }
-    }
-
-    function showEditingElements() {
-        dateInputContainer.classList.remove('hidden');
-        startDatePicker.classList.remove('hidden');
-        setStartDateButton.classList.remove('hidden');
-        colorPickerContainer.classList.remove('hidden');
-        musicInputContainer.classList.remove('hidden');
-        emojiInputContainer.classList.remove('hidden'); // Mostra inputs de emoji
-
-        photosContainer.classList.remove('slideshow-mode');
-
-        if (generateLinkButton) generateLinkButton.classList.remove('hidden');
-
-        personalMessageInput.classList.remove('hidden');
-        personalMessageDisplay.classList.remove('show');
-
-        // Lógica de Música (Pausar/Esconder)
-        musicPlayerDisplay.classList.remove('show');
-        if (player) {
-            player.stopVideo();
-        }
-
-        clearInterval(slideshowInterval);
-
-        imagePreviews.forEach((img, index) => {
-            img.classList.remove('active');
-            img.style.opacity = '';
-            img.style.zIndex = '';
-            if (!img.src.includes('via.placeholder.com')) {
-                removePhotoButtons[index].classList.add('show-button');
-            } else {
-                removePhotoButtons[index].classList.remove('show-button');
+                page.classList.add('hidden');
+                page.classList.remove('active');
             }
         });
-
-        photoUploaders.forEach(uploader => {
-            uploader.style.opacity = '1';
-            uploader.style.position = 'relative';
-            uploader.style.transform = 'none';
-            uploader.style.zIndex = 'auto';
-        });
-
-        // Lógica de Emojis (Parar chuva de emojis)
-        emojiRainContainer.style.display = 'none'; // Esconde o contêiner
-        stopEmojiRain();
+        // Ajusta o padding do container principal quando as páginas ativas controlam o padding
+        document.querySelector('.container').classList.add('page-active');
     }
 
-    // --- Lógica do Slideshow (Mantida) ---
-    function startSlideshow() {
-        clearInterval(slideshowInterval);
+    // === Funções de Utilitário ===
+    function parseURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            date: params.get('date'),
+            color: params.get('color'),
+            music: params.get('music'),
+            musicName: params.get('musicName'),
+            emoji1: params.get('emoji1'),
+            emoji2: params.get('emoji2'),
+            emoji3: params.get('emoji3'),
+            msg: params.get('msg'),
+            photos: params.getAll('photo')
+        };
+    }
 
-        if (activeImages.length === 0) {
-            console.log("Nenhuma imagem para o slideshow. Mostrando placeholders.");
-            imagePreviews.forEach((img, index) => {
-                img.classList.remove('active');
-                img.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
-                img.style.opacity = '1';
-                img.style.zIndex = '1';
-                photoUploaders[index].style.opacity = '1';
-                photoUploaders[index].style.position = 'relative';
-                photoUploaders[index].style.transform = 'none';
-            });
-            photosContainer.classList.add('slideshow-mode');
+    function formatTimeDifference(ms) {
+        if (isNaN(ms) || ms < 0) {
+            return { display: "Tempo não definido.", exact: "" };
+        }
+
+        const seconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        const months = Math.floor(days / 30.44); // Média de dias por mês
+        const years = Math.floor(days / 365.25); // Média de dias por ano
+
+        const remainingDays = days % 365.25;
+        const remainingMonths = Math.floor(remainingDays / 30.44);
+        const remainingHours = hours % 24;
+        const remainingMinutes = minutes % 60;
+        const remainingSeconds = seconds % 60;
+
+        let displayParts = [];
+        if (years > 0) displayParts.push(`${years} ano${years !== 1 ? 's' : ''}`);
+        if (remainingMonths > 0) displayParts.push(`${remainingMonths} mês${remainingMonths !== 1 ? 'es' : ''}`);
+        if (displayParts.length < 2 && days % 30.44 < 1 && days > 0) displayParts.push(`${days} dia${days !== 1 ? 's' : ''}`); // Mostra dias se não houver meses/anos e for relevante
+
+        const displayString = displayParts.length > 0 ? displayParts.join(', ') : '0 dias';
+
+        const exactTimeString = `${years} ano${years !== 1 ? 's' : ''}, ${remainingMonths} mês${remainingMonths !== 1 ? 'es' : ''}, ${Math.floor(days % 30.44)} dia${Math.floor(days % 30.44) !== 1 ? 's' : ''}\n${remainingHours} hora${remainingHours !== 1 ? 's' : ''}, ${remainingMinutes} minuto${remainingMinutes !== 1 ? 's' : ''} e ${remainingSeconds} segundo${remainingSeconds !== 1 ? 's' : ''}`;
+
+        return { display: displayString, exact: exactTimeString };
+    }
+
+    function updateCountdown() {
+        if (!startDate) {
+            countdownMessage.textContent = "Selecione a data inicial acima";
+            exactTimeMessage.textContent = "";
             return;
-        } else {
-            photoUploaders.forEach(uploader => {
-                 uploader.style.position = 'absolute';
-                 uploader.style.transform = 'translate(-50%, -50%)';
-                 uploader.style.opacity = '0';
-                 uploader.style.zIndex = '1';
-            });
-            photosContainer.classList.add('slideshow-mode');
         }
 
-        imagePreviews.forEach(img => {
-            img.classList.remove('active');
-            img.style.opacity = '0';
-            img.style.zIndex = '1';
-        });
+        const now = new Date();
+        const diff = now.getTime() - startDate.getTime();
 
-        currentImageIndex = 0;
+        if (diff < 0) { // Se a data inicial ainda não chegou
+            countdownMessage.textContent = "Ainda não chegamos lá...";
+            exactTimeMessage.textContent = "";
+            return;
+        }
 
-        activeImages[currentImageIndex].classList.add('active');
-        activeImages[currentImageIndex].style.opacity = '1';
-        activeImages[currentImageIndex].style.zIndex = '2';
-        photoUploaders[imagePreviews.indexOf(activeImages[currentImageIndex])].style.opacity = '1';
-        photoUploaders[imagePreviews.indexOf(activeImages[currentImageIndex])].style.zIndex = '2';
-
-
-        slideshowInterval = setInterval(() => {
-            activeImages[currentImageIndex].classList.remove('active');
-            activeImages[currentImageIndex].style.opacity = '0';
-            activeImages[currentImageIndex].style.zIndex = '1';
-            photoUploaders[imagePreviews.indexOf(activeImages[currentImageIndex])].style.opacity = '0';
-            photoUploaders[imagePreviews.indexOf(activeImages[currentImageIndex])].style.zIndex = '1';
-
-            currentImageIndex = (currentImageIndex + 1) % activeImages.length;
-
-            activeImages[currentImageIndex].classList.add('active');
-            activeImages[currentImageIndex].style.opacity = '1';
-            activeImages[currentImageIndex].style.zIndex = '2';
-            photoUploaders[imagePreviews.indexOf(activeImages[currentImageIndex])].style.opacity = '1';
-            photoUploaders[imagePreviews.indexOf(activeImages[currentImageIndex])].style.zIndex = '2';
-
-        }, 1000);
+        const { display, exact } = formatTimeDifference(diff);
+        countdownMessage.textContent = `Juntos há: ${display}`;
+        exactTimeMessage.textContent = exact;
     }
 
-    function updateActiveImages() {
-        activeImages = imagePreviews.filter(img => !img.src.includes('via.placeholder.com'));
-        console.log("Imagens ativas para slideshow:", activeImages.map(img => img.src));
-
-        if (!dateInputContainer.classList.contains('hidden')) {
-            imagePreviews.forEach((img, index) => {
-                if (!img.src.includes('via.placeholder.com')) {
-                    removePhotoButtons[index].classList.add('show-button');
-                } else {
-                    removePhotoButtons[index].classList.remove('show-button');
-                }
-            });
-        }
-
-        if (dateInputContainer.classList.contains('hidden')) {
-            startSlideshow();
-        }
-    }
-
-    // --- Funções para MÚSICA (YouTube) (Mantidas) ---
-    function extractYoutubeVideoId(url) {
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?/i;
+    function isValidYouTubeUrl(url) {
+        const regex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?$/;
         const match = url.match(regex);
         return match ? match[1] : null;
     }
 
-    function createYoutubePlayer(videoId, autoplay = false) {
-        if (player) {
-            player.destroy();
-        }
-
-        player = new YT.Player('player', {
-            videoId: videoId,
-            playerVars: {
-                'autoplay': autoplay ? 1 : 0,
-                'controls': 0,
-                'disablekb': 1,
-                'fs': 0,
-                'iv_load_policy': 3,
-                'modestbranding': 1,
-                'rel': 0,
-                'showinfo': 0,
-                'loop': 1,
-                'playlist': videoId
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
-        });
-    }
-
-    function onPlayerReady(event) {
-        console.log("Player is ready:", event.target);
-        if (event.target.getPlayerState() !== YT.PlayerState.PLAYING && event.target.getPlaylistId()) {
-             event.target.playVideo();
-        }
-    }
-
-    function onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.ENDED) {
-            player.seekTo(0);
-            player.playVideo();
-        } else if (event.data === YT.PlayerState.PAUSED && currentYoutubeVideoId && photosContainer.classList.contains('slideshow-mode')) {
-            player.playVideo();
-        }
-    }
-
-    function loadMusic() {
-        const url = youtubeLinkInput.value.trim();
-        const videoId = extractYoutubeVideoId(url);
+    function loadYouTubePlayer(videoId) {
         if (videoId) {
-            currentYoutubeVideoId = videoId;
-            currentMusicTitle = musicNameInput.value.trim() || "Música Selecionada";
-            localStorage.setItem('youtubeVideoId', currentYoutubeVideoId);
-            localStorage.setItem('musicTitle', currentMusicTitle);
-
-            musicLoadedMessage.textContent = `Música carregada: ${currentMusicTitle}`;
-            musicLoadedMessage.classList.add('show');
-            setTimeout(() => {
-                musicLoadedMessage.classList.remove('show');
-            }, 3000);
-
-            createYoutubePlayer(currentYoutubeVideoId, false);
-
+            player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&enablejsapi=1&iv_load_policy=3&loop=1&playlist=${videoId}`;
+            player.style.display = 'block'; // Garante que o player seja visível
+            player.style.opacity = '1';
+            player.style.position = 'relative'; // Volta ao fluxo normal do documento
+            player.style.left = 'auto';
+            player.style.height = '100px'; // Altura visível
         } else {
-            alert("Por favor, insira um link de vídeo do YouTube válido.");
-            currentYoutubeVideoId = null;
-            currentMusicTitle = "";
-            localStorage.removeItem('youtubeVideoId');
-            localStorage.removeItem('musicTitle');
-            if (player) {
-                player.destroy();
-                player = null;
-            }
-            musicLoadedMessage.textContent = "Link de música inválido.";
-            musicLoadedMessage.classList.add('show');
-            setTimeout(() => {
-                musicLoadedMessage.classList.remove('show');
-            }, 3000);
+            player.src = '';
+            player.style.display = 'none';
         }
     }
 
-    function loadMusicFromStorageOrURL() {
-        const hashParams = window.location.hash.substring(1);
-        if (hashParams) {
-            try {
-                const decodedParams = decodeURIComponent(hashParams);
-                const data = JSON.parse(decodedParams);
-                if (data.youtubeVideoId) {
-                    currentYoutubeVideoId = data.youtubeVideoId;
-                    currentMusicTitle = data.musicTitle || "Música em Reprodução";
-                    youtubeLinkInput.value = `https://www.youtube.com/watch?v=${currentYoutubeVideoId}`;
-                    musicNameInput.value = currentMusicTitle;
-                    return;
-                }
-            } catch (e) {
-                console.error("Erro ao analisar dados do hash para música:", e);
-            }
+    function startSlideshow() {
+        const photos = photosContainer.querySelectorAll('img');
+        if (photos.length === 0) {
+            photosContainer.style.display = 'none'; // Esconde se não houver fotos
+            return;
         }
+        photosContainer.style.display = 'flex'; // Garante que o container esteja visível
 
-        const storedVideoId = localStorage.getItem('youtubeVideoId');
-        const storedMusicTitle = localStorage.getItem('musicTitle');
-        if (storedVideoId) {
-            currentYoutubeVideoId = storedVideoId;
-            currentMusicTitle = storedMusicTitle || "Música Selecionada";
-            youtubeLinkInput.value = `https://www.youtube.com/watch?v=${currentYoutubeVideoId}`;
-            musicNameInput.value = currentMusicTitle;
-            createYoutubePlayer(currentYoutubeVideoId, false);
-        }
+        photos.forEach(img => img.classList.remove('active'));
+        photos[currentSlide].classList.add('active');
+
+        slideshowInterval = setInterval(() => {
+            photos[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % photos.length;
+            photos[currentSlide].classList.add('active');
+        }, 5000); // Muda a cada 5 segundos
     }
 
-    // --- NOVAS FUNÇÕES PARA EMOJIS ---
-    function isValidEmoji(str) {
-        // Verifica se a string contém pelo menos um caractere de emoji
-        // Isso é uma verificação básica, pode não cobrir todos os casos complexos de emojis combinados
-        const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
-        return emojiRegex.test(str);
-    }
-
-    function getSelectedEmojis() {
-        const emojis = [
-            emojiInput1.value.trim(),
-            emojiInput2.value.trim(),
-            emojiInput3.value.trim()
-        ].filter(emoji => emoji && isValidEmoji(emoji)); // Filtra vazios e inválidos
-        return emojis.length > 0 ? emojis : null; // Retorna null se nenhum emoji válido for selecionado
-    }
-
-    function createFallingEmoji() {
-        if (selectedEmojis.length === 0) return;
-
-        const emoji = selectedEmojis[Math.floor(Math.random() * selectedEmojis.length)];
-        const emojiElement = document.createElement('span');
-        emojiElement.classList.add('falling-emoji');
-        emojiElement.textContent = emoji;
-
-        const startX = Math.random() * (window.innerWidth - 50); // Posição X aleatória
-        const animationDuration = Math.random() * 5 + 5; // Duração entre 5 e 10 segundos
-        const delay = Math.random() * 3; // Delay de início para espalhar os emojis
-
-        emojiElement.style.left = `${startX}px`;
-        emojiElement.style.animationDuration = `${animationDuration}s`;
-        emojiElement.style.animationDelay = `${delay}s`;
-
-        emojiRainContainer.appendChild(emojiElement);
-
-        // Remove o emoji após a animação para evitar acúmulo de elementos no DOM
-        emojiElement.addEventListener('animationend', () => {
-            emojiElement.remove();
-        });
+    function stopSlideshow() {
+        clearInterval(slideshowInterval);
     }
 
     function startEmojiRain() {
-        stopEmojiRain(); // Garante que não há múltiplos intervalos rodando
-        emojiRainInterval = setInterval(createFallingEmoji, 300); // Cria um emoji a cada 300ms
+        if (selectedEmojis.filter(e => e).length === 0) return; // Não inicia se não houver emojis
+        emojiRainContainer.style.display = 'block';
+
+        setInterval(() => {
+            const emoji = selectedEmojis[Math.floor(Math.random() * selectedEmojis.length)];
+            if (!emoji) return; // Não crie emoji se for vazio
+
+            const span = document.createElement('span');
+            span.classList.add('falling-emoji');
+            span.textContent = emoji;
+            span.style.left = `${Math.random() * 100}vw`; // Posição horizontal aleatória
+            span.style.animationDuration = `${Math.random() * 3 + 2}s`; // Duração aleatória (2-5s)
+            span.style.animationDelay = `${Math.random() * 2}s`; // Atraso aleatório
+            emojiRainContainer.appendChild(span);
+
+            // Remove o emoji depois que ele cair para não sobrecarregar o DOM
+            span.addEventListener('animationend', () => {
+                span.remove();
+            });
+        }, 300); // Cria um emoji a cada 300ms
     }
 
     function stopEmojiRain() {
-        clearInterval(emojiRainInterval);
-        // Opcional: Limpar todos os emojis existentes imediatamente
-        while (emojiRainContainer.firstChild) {
-            emojiRainContainer.removeChild(emojiRainContainer.firstChild);
-        }
+        emojiRainContainer.style.display = 'none';
+        // Remove todos os emojis existentes
+        emojiRainContainer.innerHTML = '';
     }
 
-    // --- Lógica de Carregamento Inicial (Prioridade: URL Hash > localStorage) ---
-    const initialHashParams = window.location.hash.substring(1);
-
-    if (initialHashParams) {
-        try {
-            const decodedParams = decodeURIComponent(initialHashParams);
-            const data = JSON.parse(decodedParams);
-
-            if (data.startDate) {
-                startDate = new Date(data.startDate);
-                if (isValidDate(startDate)) {
-                    startCountdown();
-                } else {
-                    console.error("Data inválida no link.");
-                    startDate = null;
-                }
-            } else {
-                startDate = null;
-            }
-
-            let imagesToLoadCount = 0;
-            if (data.images && Array.isArray(data.images)) {
-                 imagesToLoadCount = data.images.filter(imgData => imgData && typeof imgData === 'string' && imgData.startsWith('data:image')).length;
-            }
-
-            if (imagesToLoadCount > 0) {
-                let loadedCount = 0;
-                data.images.forEach((imgData, index) => {
-                    if (imagePreviews[index]) {
-                        if (imgData && typeof imgData === 'string' && imgData.startsWith('data:image')) {
-                            imagePreviews[index].onload = () => {
-                                loadedCount++;
-                                if (loadedCount === imagesToLoadCount) {
-                                    updateActiveImages();
-                                }
-                            };
-                            imagePreviews[index].src = imgData;
-                        } else {
-                            imagePreviews[index].src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
-                        }
-                    }
-                });
-            } else {
-                imagePreviews.forEach((img, index) => {
-                    img.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
-                });
-                updateActiveImages();
-            }
-
-            if (data.themeColor && typeof data.themeColor === 'string' && data.themeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
-                currentThemeColor = data.themeColor;
-                themeColorPicker.value = currentThemeColor;
-                applyThemeColor(currentThemeColor);
-            }
-
-            if (data.personalMessage && typeof data.personalMessage === 'string') {
-                personalMessageDisplay.textContent = data.personalMessage;
-            } else {
-                personalMessageDisplay.textContent = "";
-            }
-
-            // MÚSICA: Carrega do hash e prepara para autoplay se a data for válida
-            if (data.youtubeVideoId) {
-                currentYoutubeVideoId = data.youtubeVideoId;
-                currentMusicTitle = data.musicTitle || "Música em Reprodução";
-            }
-
-            // EMOJIS: Carrega do hash
-            if (data.selectedEmojis && Array.isArray(data.selectedEmojis)) {
-                selectedEmojis = data.selectedEmojis.filter(emoji => isValidEmoji(emoji));
-                if (selectedEmojis[0]) emojiInput1.value = selectedEmojis[0];
-                if (selectedEmojis[1]) emojiInput2.value = selectedEmojis[1];
-                if (selectedEmojis[2]) emojiInput3.value = selectedEmojis[2];
-            }
-
-
-            if (isValidDate(startDate)) {
-                hideEditingElements();
-            } else {
-                updateDisplayForNoDate();
-                showEditingElements();
-            }
-
-        } catch (e) {
-            console.error("Erro ao decodificar ou analisar o link:", e);
-            alert("O link de personalização está inválido. Por favor, crie um novo.");
-            updateDisplayForNoDate();
-            showEditingElements();
-        }
-    } else {
-        const storedStartDate = localStorage.getItem('countdownStartDate');
-        if (storedStartDate) {
-            startDate = new Date(storedStartDate);
-            startDatePicker.value = storedStartDate.substring(0, 16);
-            if (isValidDate(startDate)) {
-                startCountdown();
-            } else {
-                startDate = null;
-                updateDisplayForNoDate();
-            }
-        } else {
-            updateDisplayForNoDate();
-        }
-
-        imagePreviews.forEach((imgElement, index) => {
-            const storedImage = localStorage.getItem(`uploadedImage${index + 1}`);
-            if (storedImage) {
-                imgElement.src = storedImage;
-            } else {
-                imgElement.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
-            }
-        });
-        setTimeout(updateActiveImages, 100);
-
-        const storedThemeColor = localStorage.getItem('themeColor');
-        if (storedThemeColor && storedThemeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
-            currentThemeColor = storedThemeColor;
-            themeColorPicker.value = storedThemeColor;
-        }
-        applyThemeColor(currentThemeColor);
-
-        const storedPersonalMessage = localStorage.getItem('personalMessage');
-        if (storedPersonalMessage) {
-            personalMessageInput.value = storedPersonalMessage;
-        }
-
-        // EMOJIS: Carrega do localStorage no modo de edição
-        const storedEmojis = JSON.parse(localStorage.getItem('selectedEmojis')) || [];
-        if (storedEmojis.length > 0) {
-            selectedEmojis = storedEmojis.filter(emoji => isValidEmoji(emoji)); // Garante que apenas emojis válidos são armazenados
-            if (selectedEmojis[0]) emojiInput1.value = selectedEmojis[0];
-            if (selectedEmojis[1]) emojiInput2.value = selectedEmojis[1];
-            if (selectedEmojis[2]) emojiInput3.value = selectedEmojis[2];
-        }
-
-        showEditingElements();
-    }
-
-    if (typeof YT !== 'undefined' && YT.Player) {
-        loadMusicFromStorageOrURL();
-    }
-
-
-    // --- Listeners de Eventos ---
+    // === Event Listeners de Edição ===
     setStartDateButton.addEventListener('click', () => {
-        const inputDateValue = startDatePicker.value;
-        if (inputDateValue) {
-            startDate = new Date(inputDateValue);
-            if (isValidDate(startDate)) {
-                localStorage.setItem('countdownStartDate', startDate.toISOString());
-                startCountdown();
-            } else {
-                alert("Por favor, insira uma data e hora válidas.");
-                updateDisplayForNoDate();
-            }
+        if (startDatePicker.value) {
+            startDate = new Date(startDatePicker.value);
+            localStorage.setItem('startDate', startDate.toISOString());
+            updateCountdown();
+            alert('Data inicial definida!');
         } else {
-            alert("Por favor, selecione uma data e hora.");
-            updateDisplayForNoDate();
+            alert('Por favor, selecione uma data e hora.');
         }
     });
 
     themeColorPicker.addEventListener('input', (event) => {
-        currentThemeColor = event.target.value;
-        applyThemeColor(currentThemeColor);
-        localStorage.setItem('themeColor', currentThemeColor);
+        const newColor = event.target.value;
+        document.documentElement.style.setProperty('--main-color', newColor);
+        document.documentElement.style.setProperty('--main-color-dark', tinycolor(newColor).darken(10).toString());
+        document.documentElement.style.setProperty('--main-color-shadow', tinycolor(newColor).setAlpha(0.4).toString());
+        document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(newColor).setAlpha(0.5).toString());
+        document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(newColor).setAlpha(0.1).toString());
+        localStorage.setItem('themeColor', newColor);
+    });
+
+    loadMusicButton.addEventListener('click', () => {
+        const url = musicLinkInput.value;
+        musicId = isValidYouTubeUrl(url);
+        if (musicId) {
+            musicTitle = musicNameInput.value || `Música: ${musicId}`;
+            musicLoadedMessage.textContent = `Música: "${musicTitle}" carregada!`;
+            musicLoadedMessage.style.display = 'block';
+            localStorage.setItem('musicId', musicId);
+            localStorage.setItem('musicTitle', musicTitle);
+        } else {
+            musicLoadedMessage.textContent = 'Link inválido do YouTube.';
+            musicLoadedMessage.style.color = '#ff4444'; // Cor de erro
+            musicLoadedMessage.style.display = 'block';
+            localStorage.removeItem('musicId');
+            localStorage.removeItem('musicTitle');
+        }
+        setTimeout(() => {
+            musicLoadedMessage.style.display = 'none';
+            musicLoadedMessage.style.color = '#4CAF50'; // Volta para cor de sucesso
+        }, 3000);
+    });
+
+    emojiInputs.forEach((input, index) => {
+        input.addEventListener('input', (event) => {
+            let value = event.target.value;
+            // Remove caracteres que não são emojis
+            value = value.replace(/[^\p{Emoji}\p{Emoji_Modifier}\p{Emoji_Component}\p{Emoji_Presentation}]/gu, '');
+            // Limita a 1 ou 2 caracteres para a maioria dos emojis
+            if (value.length > 2) {
+                value = value.slice(0, 2);
+            }
+            event.target.value = value;
+            selectedEmojis[index] = value;
+            localStorage.setItem(`emoji${index + 1}`, value);
+        });
+    });
+
+    photoUploads.forEach((photoSlot, index) => {
+        photoSlot.input.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    photoSlot.img.src = e.target.result;
+                    photoSlot.img.style.display = 'block';
+                    photoSlot.img.style.opacity = '1';
+                    photoSlot.button.classList.add('show-button');
+                    uploadedPhotoData[index] = e.target.result; // Armazena o Base64
+                    localStorage.setItem(`uploadedPhoto${index + 1}`, e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        photoSlot.button.addEventListener('click', (event) => {
+            event.preventDefault(); // Impede o envio do formulário ou clique no label
+            photoSlot.img.src = '';
+            photoSlot.img.style.display = 'none';
+            photoSlot.img.style.opacity = '0';
+            photoSlot.button.classList.remove('show-button');
+            uploadedPhotoData[index] = ''; // Limpa o Base64
+            localStorage.removeItem(`uploadedPhoto${index + 1}`);
+            // Volta a exibir o texto "Foto X"
+            photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'block';
+        });
     });
 
     personalMessageInput.addEventListener('input', (event) => {
         localStorage.setItem('personalMessage', event.target.value);
     });
 
-    // Atualiza os emojis selecionados no localStorage sempre que um input de emoji muda
-    [emojiInput1, emojiInput2, emojiInput3].forEach(input => {
-        input.addEventListener('input', () => {
-            const currentEmojis = [
-                emojiInput1.value.trim(),
-                emojiInput2.value.trim(),
-                emojiInput3.value.trim()
-            ].filter(emoji => emoji && isValidEmoji(emoji));
-            localStorage.setItem('selectedEmojis', JSON.stringify(currentEmojis));
+
+    // === Event Listeners de Navegação ===
+    goToEmojiPageButton.addEventListener('click', () => {
+        showPage(page2);
+    });
+
+    backToConfigButton.addEventListener('click', () => {
+        showPage(page1);
+    });
+
+    generateLinkButton.addEventListener('click', () => {
+        // Coleta todos os dados para o link
+        const params = new URLSearchParams();
+
+        if (startDate) {
+            params.set('date', startDate.toISOString());
+        }
+        const themeColor = themeColorPicker.value;
+        params.set('color', themeColor.substring(1)); // Remove o #
+
+        if (musicId) {
+            params.set('music', musicId);
+            if (musicNameInput.value) {
+                params.set('musicName', encodeURIComponent(musicNameInput.value));
+            }
+        }
+
+        selectedEmojis.forEach((emoji, index) => {
+            if (emoji) params.set(`emoji${index + 1}`, encodeURIComponent(emoji));
         });
+
+        if (personalMessageInput.value) {
+            params.set('msg', encodeURIComponent(personalMessageInput.value));
+        }
+
+        // Adiciona as fotos em Base64 como múltiplos parâmetros 'photo'
+        uploadedPhotoData.forEach(data => {
+            if (data) params.append('photo', encodeURIComponent(data));
+        });
+
+        const shareLink = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+
+        // Altera para o modo de visualização diretamente
+        renderViewMode(params);
+        showPage(viewModeDisplay);
+
+        // Atualiza o histórico do navegador para refletir o novo URL
+        window.history.pushState({}, '', shareLink);
+    });
+
+    copyShareLinkButton.addEventListener('click', () => {
+        const currentUrl = window.location.href;
+        navigator.clipboard.writeText(currentUrl)
+            .then(() => {
+                copyMessage.textContent = 'Link copiado!';
+                copyMessage.classList.add('show');
+                setTimeout(() => {
+                    copyMessage.classList.remove('show');
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Falha ao copiar o link: ', err);
+                copyMessage.textContent = 'Erro ao copiar!';
+                copyMessage.classList.add('show');
+                setTimeout(() => {
+                    copyMessage.classList.remove('show');
+                }, 2000);
+            });
     });
 
 
-    imageUploads.forEach((inputElement, index) => {
-        inputElement.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const imageDataUrl = e.target.result;
-                    imagePreviews[index].src = imageDataUrl;
-                    localStorage.setItem(`uploadedImage${index + 1}`, imageDataUrl);
-                    updateActiveImages();
-                };
-                reader.readAsDataURL(file);
+    // === Inicialização da Aplicação ===
+    function initialize() {
+        const urlParams = parseURLParams();
+
+        if (urlParams.date) {
+            // Se houver parâmetros na URL, entra no modo de visualização
+            renderViewMode(urlParams);
+            showPage(viewModeDisplay);
+        } else {
+            // Caso contrário, carrega do localStorage e fica no modo de edição (Página 1)
+            loadFromLocalStorage();
+            showPage(page1);
+        }
+
+        // Atualiza a contagem a cada segundo
+        clearInterval(countdownInterval); // Limpa qualquer intervalo anterior
+        countdownInterval = setInterval(updateCountdown, 1000);
+
+        // Garante que o player esteja invisível no início se não for modo de visualização com música
+        if (!urlParams.music) {
+            player.style.display = 'none';
+        }
+    }
+
+    function loadFromLocalStorage() {
+        // Carregar data
+        const storedStartDate = localStorage.getItem('startDate');
+        if (storedStartDate) {
+            startDate = new Date(storedStartDate);
+            startDatePicker.value = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
+        }
+
+        // Carregar cor
+        const storedThemeColor = localStorage.getItem('themeColor');
+        if (storedThemeColor) {
+            themeColorPicker.value = storedThemeColor;
+            document.documentElement.style.setProperty('--main-color', storedThemeColor);
+            document.documentElement.style.setProperty('--main-color-dark', tinycolor(storedThemeColor).darken(10).toString());
+            document.documentElement.style.setProperty('--main-color-shadow', tinycolor(storedStartDate).setAlpha(0.4).toString());
+            document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(storedStartDate).setAlpha(0.5).toString());
+            document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(storedStartDate).setAlpha(0.1).toString());
+        }
+
+        // Carregar música
+        musicId = localStorage.getItem('musicId') || '';
+        musicTitle = localStorage.getItem('musicTitle') || '';
+        musicLinkInput.value = musicId ? `https://www.youtube.com/watch?v=${musicId}` : '';
+        musicNameInput.value = musicTitle;
+        if (musicId) {
+            musicLoadedMessage.textContent = `Música: "${musicTitle}" carregada!`;
+            musicLoadedMessage.style.display = 'block';
+            setTimeout(() => musicLoadedMessage.style.display = 'none', 3000);
+        }
+
+        // Carregar emojis
+        emojiInputs.forEach((input, index) => {
+            const storedEmoji = localStorage.getItem(`emoji${index + 1}`);
+            if (storedEmoji) {
+                input.value = storedEmoji;
+                selectedEmojis[index] = storedEmoji;
             }
         });
-    });
 
-    removePhotoButtons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            event.preventDefault();
-            const index = parseInt(event.target.dataset.index);
-            const defaultPlaceholderSrc = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
-
-            imagePreviews[index].src = defaultPlaceholderSrc;
-            localStorage.removeItem(`uploadedImage${index + 1}`);
-            event.target.classList.remove('show-button');
-
-            updateActiveImages();
-        });
-    });
-
-    loadMusicButton.addEventListener('click', loadMusic);
-
-    // --- Gerar Link (Inclui a mensagem personalizada, a música e os EMOJIS) ---
-    generateLinkButton.addEventListener('click', async () => {
-        if (!startDate || !isValidDate(startDate)) {
-            alert("Por favor, defina a data inicial antes de gerar o link.");
-            return;
+        // Carregar mensagem
+        const storedMessage = localStorage.getItem('personalMessage');
+        if (storedMessage) {
+            personalMessageInput.value = storedMessage;
         }
 
-        // Obtém os emojis selecionados no momento da geração do link
-        const currentSelectedEmojis = getSelectedEmojis();
-
-        const config = {
-            startDate: startDate.toISOString(),
-            images: imagePreviews.map(img => img.src.includes('via.placeholder.com') ? null : img.src),
-            themeColor: currentThemeColor,
-            personalMessage: personalMessageInput.value,
-            youtubeVideoId: currentYoutubeVideoId,
-            musicTitle: currentMusicTitle,
-            selectedEmojis: currentSelectedEmojis // Adiciona os emojis ao config
-        };
-
-        const configString = JSON.stringify(config);
-        const encodedConfig = encodeURIComponent(configString);
-        const link = window.location.origin + window.location.pathname + '#' + encodedConfig;
-
-        try {
-            await navigator.clipboard.writeText(link);
-            copyMessage.textContent = "Link copiado!";
-            copyMessage.classList.add('show');
-            setTimeout(() => {
-                copyMessage.classList.remove('show');
-                copyMessage.textContent = "";
-            }, 3000);
-
-            // APÓS GERAR E COPIAR O LINK, ESCONDER OS ELEMENTOS DE EDIÇÃO
-            hideEditingElements();
-
-        } catch (err) {
-            console.error('Falha ao copiar o link: ', err);
-            copyMessage.textContent = "Erro ao copiar. Copie manualmente: " + link;
-            copyMessage.classList.add('show');
-        }
-    });
-
-
-    // --- Funções do Contador (Mantidas) ---
-    function startCountdown() {
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-        }
-        updateCounter();
-        countdownInterval = setInterval(updateCounter, 1000);
-    }
-
-    function updateDisplayForNoDate() {
-        yearsMonthsDaysElement.textContent = "Selecione a data inicial acima";
-        hoursMinutesSecondsElement.textContent = "";
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-        }
-    }
-
-    function isValidDate(date) {
-        return date instanceof Date && !isNaN(date);
-    }
-
-    function updateCounter() {
-        if (!startDate || !isValidDate(startDate)) {
-            updateDisplayForNoDate();
-            return;
-        }
-
-        const now = new Date();
-        let diff = now.getTime() - startDate.getTime();
-
-        if (diff < 0) {
-            yearsMonthsDaysElement.textContent = "Aguardando o início...";
-            let futureDiff = startDate.getTime() - now.getTime();
-            let futureSeconds = Math.floor(futureDiff / 1000);
-            let futureMinutes = Math.floor(futureSeconds / 60);
-            let futureHours = Math.floor(futureMinutes / 60);
-            let futureDays = Math.floor(futureHours / 24);
-
-            futureSeconds %= 60;
-            futureMinutes %= 60;
-            futureHours %= 24;
-
-            hoursMinutesSecondsElement.textContent =
-                `Faltam: ${futureDays} dias, ${futureHours} horas, ${futureMinutes} minutos e ${futureSeconds} segundos`;
-            return;
-        }
-
-        let seconds = Math.floor(diff / 1000);
-        let minutes = Math.floor(seconds / 60);
-        let hours = Math.floor(minutes / 60);
-        let days = Math.floor(hours / 24);
-
-        seconds %= 60;
-        minutes %= 60;
-        hours %= 24;
-
-        let years = 0;
-        let months = 0;
-        let tempDate = new Date(startDate);
-
-        while (tempDate < now) {
-            const nextMonth = new Date(tempDate);
-            nextMonth.setMonth(tempDate.getMonth() + 1);
-
-            if (nextMonth.getDate() !== tempDate.getDate()) {
-                const lastDayOfNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).getDate();
-                if (tempDate.getDate() > lastDayOfNextMonth) {
-                    nextMonth.setDate(lastDayOfNextMonth);
-                }
-            }
-
-            if (nextMonth <= now) {
-                months++;
-                tempDate = nextMonth;
+        // Carregar fotos
+        uploadedPhotoData = [];
+        photoUploads.forEach((photoSlot, index) => {
+            const storedPhoto = localStorage.getItem(`uploadedPhoto${index + 1}`);
+            if (storedPhoto) {
+                photoSlot.img.src = storedPhoto;
+                photoSlot.img.style.display = 'block';
+                photoSlot.img.style.opacity = '1';
+                photoSlot.button.classList.add('show-button');
+                uploadedPhotoData[index] = storedPhoto;
+                // Esconde o texto "Foto X"
+                photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'none';
             } else {
-                break;
+                 // Garante que o texto "Foto X" esteja visível se não houver foto
+                photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'block';
+            }
+        });
+    }
+
+    function renderViewMode(params) {
+        // Limpa intervalos antigos
+        clearInterval(countdownInterval);
+        clearInterval(slideshowInterval);
+        stopEmojiRain();
+
+        // Aplicar cor do tema
+        if (params.color) {
+            const newColor = `#${params.color}`;
+            document.documentElement.style.setProperty('--main-color', newColor);
+            // Certifique-se de que tinycolor esteja carregado para estas funções
+            if (typeof tinycolor !== 'undefined') {
+                document.documentElement.style.setProperty('--main-color-dark', tinycolor(newColor).darken(10).toString());
+                document.documentElement.style.setProperty('--main-color-shadow', tinycolor(newColor).setAlpha(0.4).toString());
+                document.documentElement.style.setProperty('--main-color-border-dash', tinycolor(newColor).setAlpha(0.5).toString());
+                document.documentElement.style.setProperty('--main-color-hover-bg', tinycolor(newColor).setAlpha(0.1).toString());
             }
         }
 
-        years = Math.floor(months / 12);
-        months %= 12;
+        // Data Inicial
+        if (params.date) {
+            startDate = new Date(params.date);
+            countdownInterval = setInterval(updateCountdown, 1000); // Inicia o contador
+            updateCountdown(); // Atualiza imediatamente
+        } else {
+            countdownMessage.textContent = "Data inicial não definida.";
+            exactTimeMessage.textContent = "";
+        }
 
-        const adjustedStartDateForDays = new Date(startDate);
-        adjustedStartDateForDays.setFullYear(startDate.getFullYear() + years);
-        adjustedStartDateForDays.setMonth(startDate.getMonth() + months);
+        // Música
+        musicId = params.music || '';
+        musicTitle = decodeURIComponent(params.musicName || '') || 'Música de Amor'; // Padrão se não houver nome
+        if (musicId) {
+            displayedMusicName.textContent = musicTitle;
+            loadYouTubePlayer(musicId);
+            displayedMusicName.parentElement.style.display = 'block'; // Mostra o container da música
+        } else {
+            displayedMusicName.parentElement.style.display = 'none'; // Esconde se não houver música
+        }
 
-        let totalDaysFromAdjusted = Math.floor((now.getTime() - adjustedStartDateForDays.getTime()) / (1000 * 60 * 60 * 24));
-        if (totalDaysFromAdjusted < 0) totalDaysFromAdjusted = 0;
 
-        yearsMonthsDaysElement.textContent =
-            `${years} ano${years !== 1 ? 's' : ''}, ` +
-            `${months} mês${months !== 1 ? 'es' : ''}, ` +
-            `${totalDaysFromAdjusted} dia${totalDaysFromAdjusted !== 1 ? 's' : ''}`;
+        // Mensagem Personalizada
+        if (params.msg) {
+            displayedPersonalMessage.textContent = decodeURIComponent(params.msg);
+            displayedPersonalMessage.classList.remove('hidden');
+            displayedPersonalMessage.classList.add('show');
+        } else {
+            displayedPersonalMessage.classList.add('hidden');
+            displayedPersonalMessage.classList.remove('show');
+        }
 
-        hoursMinutesSecondsElement.textContent =
-            `${hours} hora${hours !== 1 ? 's' : ''}, ` +
-            `${minutes} minuto${minutes !== 1 ? 's' : ''} e ` +
-            `${seconds} segundo${seconds !== 1 ? 's' : ''}`;
+        // Emojis
+        selectedEmojis = [
+            decodeURIComponent(params.emoji1 || ''),
+            decodeURIComponent(params.emoji2 || ''),
+            decodeURIComponent(params.emoji3 || '')
+        ].filter(e => e); // Remove vazios
+        if (selectedEmojis.length > 0) {
+            startEmojiRain();
+        }
+
+        // Fotos
+        // Limpa fotos antigas do slideshow
+        photosContainer.innerHTML = '';
+        const photosInUrl = params.photos;
+
+        if (photosInUrl && photosInUrl.length > 0) {
+            photosInUrl.forEach((base64Data) => {
+                const imgElement = document.createElement('img');
+                imgElement.src = decodeURIComponent(base64Data);
+                // Adiciona a imagem a um uploader fictício para manter a estrutura do slideshow CSS
+                const uploaderDiv = document.createElement('div');
+                uploaderDiv.classList.add('photo-uploader');
+                uploaderDiv.appendChild(imgElement);
+                photosContainer.appendChild(uploaderDiv);
+            });
+            photosContainer.style.display = 'flex'; // Garante que o contêiner de fotos esteja visível
+            startSlideshow();
+        } else {
+            photosContainer.style.display = 'none'; // Esconde se não houver fotos
+        }
+
+        // Exibe o botão de copiar link
+        copyShareLinkButton.style.display = 'block';
+    }
+
+
+    // --- Carregamento inicial ---
+    // Verifica se tinycolor.js está carregado, se não, carrega
+    if (typeof tinycolor === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.6.0/tinycolor.min.js';
+        script.onload = initialize; // Inicializa depois que tinycolor for carregado
+        document.head.appendChild(script);
+    } else {
+        initialize(); // tinycolor já está carregado, inicializa diretamente
     }
 });
