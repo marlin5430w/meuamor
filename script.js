@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const personalMessageDisplay = document.getElementById('personalMessageDisplay');
     const messageSlot = document.getElementById('messageSlot');
 
-    // NOVOS ELEMENTOS DE MÚSICA
+    // ELEMENTOS PARA MÚSICA
     const musicInputContainer = document.querySelector('.music-input-container');
     const youtubeLinkInput = document.getElementById('youtubeLinkInput');
     const musicNameInput = document.getElementById('musicNameInput');
@@ -43,6 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const musicPlayerDisplay = document.getElementById('musicPlayerDisplay');
     const currentMusicNameElement = document.getElementById('currentMusicName');
     const musicLoadedMessage = document.getElementById('musicLoadedMessage');
+
+    // NOVOS ELEMENTOS PARA EMOJIS
+    const emojiInputContainer = document.querySelector('.emoji-input-container');
+    const emojiInput1 = document.getElementById('emojiInput1');
+    const emojiInput2 = document.getElementById('emojiInput2');
+    const emojiInput3 = document.getElementById('emojiInput3');
+    const emojiRainContainer = document.getElementById('emojiRainContainer');
 
     let startDate = null;
     let currentThemeColor = '#ff007f';
@@ -52,9 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeImages = [];
 
     // Variáveis da Música
-    let player; // Objeto do player do YouTube
+    let player;
     let currentYoutubeVideoId = null;
     let currentMusicTitle = "";
+
+    // Variáveis dos Emojis
+    let selectedEmojis = [];
+    let emojiRainInterval;
 
     // A função que a API do YouTube chama quando está pronta
     window.onYouTubeIframeAPIReady = function() {
@@ -78,11 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
         dateInputContainer.classList.add('hidden');
         startDatePicker.classList.add('hidden');
         setStartDateButton.classList.add('hidden');
-        // dateInputContainer.querySelector('label').classList.add('hidden'); // Removido para esconder toda a div pai
         colorPickerContainer.classList.add('hidden');
-        musicInputContainer.classList.add('hidden'); // Esconde inputs de música
+        musicInputContainer.classList.add('hidden');
+        emojiInputContainer.classList.add('hidden'); // Esconde inputs de emoji
 
-        photosContainer.classList.add('slideshow-mode'); // Ativa o modo slideshow no CSS
+        photosContainer.classList.add('slideshow-mode');
 
         if (generateLinkButton) generateLinkButton.classList.add('hidden');
 
@@ -91,91 +102,77 @@ document.addEventListener('DOMContentLoaded', () => {
 
         removePhotoButtons.forEach(button => button.classList.remove('show-button'));
 
-        // Mostra o player de música no modo de visualização
+        // Lógica de Música (Mantida)
         if (currentYoutubeVideoId) {
             musicPlayerDisplay.classList.add('show');
             currentMusicNameElement.textContent = currentMusicTitle || "Música em Reprodução";
             if (player) {
-                // Se o player já existe, tenta tocar.
-                // Se o vídeo estiver pausado, playVideo() irá resumir.
-                // Se estiver em outro estado, também tentará tocar.
                 player.playVideo();
             } else {
-                // Se o player ainda não foi criado (primeiro carregamento da página no modo de visualização), cria e ele deve tocar automaticamente
                 createYoutubePlayer(currentYoutubeVideoId, true);
             }
         } else {
             musicPlayerDisplay.classList.remove('show');
-            if (player) player.stopVideo(); // Para o player se não houver música
+            if (player) player.stopVideo();
         }
 
-        updateActiveImages(); // Garante que a lista de imagens para o slideshow esteja atualizada
-        startSlideshow(); // Força o início do slideshow
+        updateActiveImages();
+        startSlideshow();
+
+        // Lógica de Emojis (Ativar chuva de emojis)
+        if (selectedEmojis.length > 0) {
+            emojiRainContainer.style.display = 'block'; // Mostra o contêiner
+            startEmojiRain();
+        }
     }
 
     function showEditingElements() {
         dateInputContainer.classList.remove('hidden');
         startDatePicker.classList.remove('hidden');
         setStartDateButton.classList.remove('hidden');
-        // dateInputContainer.querySelector('label').classList.remove('hidden'); // Removido
         colorPickerContainer.classList.remove('hidden');
-        musicInputContainer.classList.remove('hidden'); // Mostra inputs de música
+        musicInputContainer.classList.remove('hidden');
+        emojiInputContainer.classList.remove('hidden'); // Mostra inputs de emoji
 
-        photosContainer.classList.remove('slideshow-mode'); // Desativa o modo slideshow no CSS
+        photosContainer.classList.remove('slideshow-mode');
 
-        if (generateLinkButton) generateLinkButton.classList.remove('hidden'); // Garante que o botão esteja visível
+        if (generateLinkButton) generateLinkButton.classList.remove('hidden');
 
         personalMessageInput.classList.remove('hidden');
         personalMessageDisplay.classList.remove('show');
 
-        // Esconde o player de música no modo de edição
+        // Lógica de Música (Pausar/Esconder)
         musicPlayerDisplay.classList.remove('show');
         if (player) {
-            player.stopVideo(); // Para a música quando volta para o modo de edição
+            player.stopVideo();
         }
 
-        clearInterval(slideshowInterval); // Para o slideshow
+        clearInterval(slideshowInterval);
 
         imagePreviews.forEach((img, index) => {
-            img.classList.remove('active'); // Remove a classe active do slideshow
+            img.classList.remove('active');
             img.style.opacity = '';
             img.style.zIndex = '';
-            // Se a imagem não for placeholder, mostra o botão de remover
             if (!img.src.includes('via.placeholder.com')) {
                 removePhotoButtons[index].classList.add('show-button');
             } else {
-                removePhotoButtons[index].classList.remove('show-button'); // Esconde se for placeholder
+                removePhotoButtons[index].classList.remove('show-button');
             }
         });
 
-        // Garante que os uploaders estejam visíveis para edição
         photoUploaders.forEach(uploader => {
             uploader.style.opacity = '1';
             uploader.style.position = 'relative';
             uploader.style.transform = 'none';
             uploader.style.zIndex = 'auto';
         });
+
+        // Lógica de Emojis (Parar chuva de emojis)
+        emojiRainContainer.style.display = 'none'; // Esconde o contêiner
+        stopEmojiRain();
     }
 
-    // Estas funções foram removidas da lógica de setStartDateButton e não são mais necessárias como funções separadas para esconder/mostrar apenas a data.
-    // A visibilidade da área de edição completa será gerenciada por hideEditingElements/showEditingElements.
-    /*
-    function hideDateInput() {
-        dateInputContainer.classList.add('hidden');
-        startDatePicker.classList.add('hidden');
-        setStartDateButton.classList.add('hidden');
-        dateInputContainer.querySelector('label').classList.add('hidden');
-    }
-
-    function showDateInput() {
-        dateInputContainer.classList.remove('hidden');
-        startDatePicker.classList.remove('hidden');
-        setStartDateButton.classList.remove('hidden');
-        dateInputContainer.querySelector('label').classList.remove('hidden');
-    }
-    */
-
-    // --- Lógica do Slideshow ---
+    // --- Lógica do Slideshow (Mantida) ---
     function startSlideshow() {
         clearInterval(slideshowInterval);
 
@@ -183,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Nenhuma imagem para o slideshow. Mostrando placeholders.");
             imagePreviews.forEach((img, index) => {
                 img.classList.remove('active');
-                img.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`; // Usando as novas dimensões
+                img.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
                 img.style.opacity = '1';
                 img.style.zIndex = '1';
                 photoUploaders[index].style.opacity = '1';
@@ -239,9 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeImages = imagePreviews.filter(img => !img.src.includes('via.placeholder.com'));
         console.log("Imagens ativas para slideshow:", activeImages.map(img => img.src));
 
-        // A lógica de mostrar/esconder o botão de remover agora depende do modo de edição/visualização
-        // e se a imagem é um placeholder.
-        if (!dateInputContainer.classList.contains('hidden')) { // Se estiver no modo de edição
+        if (!dateInputContainer.classList.contains('hidden')) {
             imagePreviews.forEach((img, index) => {
                 if (!img.src.includes('via.placeholder.com')) {
                     removePhotoButtons[index].classList.add('show-button');
@@ -251,14 +246,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-
-        // Se a página já está no modo de visualização, inicie o slideshow
         if (dateInputContainer.classList.contains('hidden')) {
             startSlideshow();
         }
     }
 
-    // --- Funções para MÚSICA (YouTube) ---
+    // --- Funções para MÚSICA (YouTube) (Mantidas) ---
     function extractYoutubeVideoId(url) {
         const regex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?/i;
         const match = url.match(regex);
@@ -267,22 +260,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createYoutubePlayer(videoId, autoplay = false) {
         if (player) {
-            player.destroy(); // Destrói o player existente para criar um novo
+            player.destroy();
         }
 
         player = new YT.Player('player', {
             videoId: videoId,
             playerVars: {
-                'autoplay': autoplay ? 1 : 0, // 0 para não autoplay, 1 para autoplay
-                'controls': 0, // Esconde os controles
-                'disablekb': 1, // Desabilita controles de teclado
-                'fs': 0, // Desabilita tela cheia
-                'iv_load_policy': 3, // Esconde anotações
-                'modestbranding': 1, // Remove logo do YouTube
-                'rel': 0, // Não mostra vídeos relacionados ao final
-                'showinfo': 0, // Não mostra título do vídeo ou uploader
-                'loop': 1, // Habilita loop
-                'playlist': videoId // Essencial para o loop funcionar
+                'autoplay': autoplay ? 1 : 0,
+                'controls': 0,
+                'disablekb': 1,
+                'fs': 0,
+                'iv_load_policy': 3,
+                'modestbranding': 1,
+                'rel': 0,
+                'showinfo': 0,
+                'loop': 1,
+                'playlist': videoId
             },
             events: {
                 'onReady': onPlayerReady,
@@ -294,17 +287,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function onPlayerReady(event) {
         console.log("Player is ready:", event.target);
         if (event.target.getPlayerState() !== YT.PlayerState.PLAYING && event.target.getPlaylistId()) {
-             event.target.playVideo(); // Tenta tocar se não estiver tocando
+             event.target.playVideo();
         }
     }
 
     function onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.ENDED) {
-            player.seekTo(0); // Reinicia o vídeo ao final
-            player.playVideo(); // Toca novamente para o loop manual
+            player.seekTo(0);
+            player.playVideo();
         } else if (event.data === YT.PlayerState.PAUSED && currentYoutubeVideoId && photosContainer.classList.contains('slideshow-mode')) {
-            // Se estiver no modo slideshow e pausar, tenta tocar novamente
-            // Isso ajuda a garantir que a música continue tocando, mas não força autoplay em modo de edição
             player.playVideo();
         }
     }
@@ -324,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 musicLoadedMessage.classList.remove('show');
             }, 3000);
 
-            // Cria o player, mas não inicia o autoplay imediatamente, a menos que esteja no modo de visualização
             createYoutubePlayer(currentYoutubeVideoId, false);
 
         } else {
@@ -334,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('youtubeVideoId');
             localStorage.removeItem('musicTitle');
             if (player) {
-                player.destroy(); // Destrói o player se o link for inválido
+                player.destroy();
                 player = null;
             }
             musicLoadedMessage.textContent = "Link de música inválido.";
@@ -346,7 +336,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadMusicFromStorageOrURL() {
-        // Tenta carregar do URL hash primeiro
         const hashParams = window.location.hash.substring(1);
         if (hashParams) {
             try {
@@ -355,26 +344,77 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.youtubeVideoId) {
                     currentYoutubeVideoId = data.youtubeVideoId;
                     currentMusicTitle = data.musicTitle || "Música em Reprodução";
-                    youtubeLinkInput.value = `https://www.youtube.com/watch?v=${currentYoutubeVideoId}`; // Preenche o input
-                    musicNameInput.value = currentMusicTitle; // Preenche o nome
-                    // O player será criado e tocará em hideEditingElements se a data for válida
-                    return; // Sai, pois já carregou do URL
+                    youtubeLinkInput.value = `https://www.youtube.com/watch?v=${currentYoutubeVideoId}`;
+                    musicNameInput.value = currentMusicTitle;
+                    return;
                 }
             } catch (e) {
                 console.error("Erro ao analisar dados do hash para música:", e);
             }
         }
 
-        // Se não carregou do URL, tenta carregar do localStorage
         const storedVideoId = localStorage.getItem('youtubeVideoId');
         const storedMusicTitle = localStorage.getItem('musicTitle');
         if (storedVideoId) {
             currentYoutubeVideoId = storedVideoId;
             currentMusicTitle = storedMusicTitle || "Música Selecionada";
-            youtubeLinkInput.value = `https://www.youtube.com/watch?v=${currentYoutubeVideoId}`; // Preenche o input
-            musicNameInput.value = currentMusicTitle; // Preenche o nome
-            // Cria o player, mas sem autoplay, já que estamos no modo de edição
+            youtubeLinkInput.value = `https://www.youtube.com/watch?v=${currentYoutubeVideoId}`;
+            musicNameInput.value = currentMusicTitle;
             createYoutubePlayer(currentYoutubeVideoId, false);
+        }
+    }
+
+    // --- NOVAS FUNÇÕES PARA EMOJIS ---
+    function isValidEmoji(str) {
+        // Verifica se a string contém pelo menos um caractere de emoji
+        // Isso é uma verificação básica, pode não cobrir todos os casos complexos de emojis combinados
+        const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
+        return emojiRegex.test(str);
+    }
+
+    function getSelectedEmojis() {
+        const emojis = [
+            emojiInput1.value.trim(),
+            emojiInput2.value.trim(),
+            emojiInput3.value.trim()
+        ].filter(emoji => emoji && isValidEmoji(emoji)); // Filtra vazios e inválidos
+        return emojis.length > 0 ? emojis : null; // Retorna null se nenhum emoji válido for selecionado
+    }
+
+    function createFallingEmoji() {
+        if (selectedEmojis.length === 0) return;
+
+        const emoji = selectedEmojis[Math.floor(Math.random() * selectedEmojis.length)];
+        const emojiElement = document.createElement('span');
+        emojiElement.classList.add('falling-emoji');
+        emojiElement.textContent = emoji;
+
+        const startX = Math.random() * (window.innerWidth - 50); // Posição X aleatória
+        const animationDuration = Math.random() * 5 + 5; // Duração entre 5 e 10 segundos
+        const delay = Math.random() * 3; // Delay de início para espalhar os emojis
+
+        emojiElement.style.left = `${startX}px`;
+        emojiElement.style.animationDuration = `${animationDuration}s`;
+        emojiElement.style.animationDelay = `${delay}s`;
+
+        emojiRainContainer.appendChild(emojiElement);
+
+        // Remove o emoji após a animação para evitar acúmulo de elementos no DOM
+        emojiElement.addEventListener('animationend', () => {
+            emojiElement.remove();
+        });
+    }
+
+    function startEmojiRain() {
+        stopEmojiRain(); // Garante que não há múltiplos intervalos rodando
+        emojiRainInterval = setInterval(createFallingEmoji, 300); // Cria um emoji a cada 300ms
+    }
+
+    function stopEmojiRain() {
+        clearInterval(emojiRainInterval);
+        // Opcional: Limpar todos os emojis existentes imediatamente
+        while (emojiRainContainer.firstChild) {
+            emojiRainContainer.removeChild(emojiRainContainer.firstChild);
         }
     }
 
@@ -411,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             imagePreviews[index].onload = () => {
                                 loadedCount++;
                                 if (loadedCount === imagesToLoadCount) {
-                                    updateActiveImages(); // Inicia o slideshow após carregar todas as imagens
+                                    updateActiveImages();
                                 }
                             };
                             imagePreviews[index].src = imgData;
@@ -424,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 imagePreviews.forEach((img, index) => {
                     img.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
                 });
-                updateActiveImages(); // Inicia o slideshow mesmo sem imagens carregadas
+                updateActiveImages();
             }
 
             if (data.themeColor && typeof data.themeColor === 'string' && data.themeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -445,13 +485,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentMusicTitle = data.musicTitle || "Música em Reprodução";
             }
 
-            // A lógica de esconder elementos de edição é apenas se a data for válida E já estiver no modo de visualização.
-            // Para links gerados, sempre será modo de visualização.
+            // EMOJIS: Carrega do hash
+            if (data.selectedEmojis && Array.isArray(data.selectedEmojis)) {
+                selectedEmojis = data.selectedEmojis.filter(emoji => isValidEmoji(emoji));
+                if (selectedEmojis[0]) emojiInput1.value = selectedEmojis[0];
+                if (selectedEmojis[1]) emojiInput2.value = selectedEmojis[1];
+                if (selectedEmojis[2]) emojiInput3.value = selectedEmojis[2];
+            }
+
+
             if (isValidDate(startDate)) {
-                hideEditingElements(); // Chama hideEditingElements que cuidará do player
+                hideEditingElements();
             } else {
                 updateDisplayForNoDate();
-                showEditingElements(); // Se o link for inválido, volta para o modo de edição
+                showEditingElements();
             }
 
         } catch (e) {
@@ -461,14 +508,12 @@ document.addEventListener('DOMContentLoaded', () => {
             showEditingElements();
         }
     } else {
-        // Se não há hash na URL, então é o modo de edição por padrão.
         const storedStartDate = localStorage.getItem('countdownStartDate');
         if (storedStartDate) {
             startDate = new Date(storedStartDate);
             startDatePicker.value = storedStartDate.substring(0, 16);
             if (isValidDate(startDate)) {
                 startCountdown();
-                // Não esconde a área de data aqui, ela permanece visível para edição
             } else {
                 startDate = null;
                 updateDisplayForNoDate();
@@ -482,10 +527,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (storedImage) {
                 imgElement.src = storedImage;
             } else {
-                imgElement.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`; // Usando as novas dimensões
+                imgElement.src = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
             }
         });
-        setTimeout(updateActiveImages, 100); // Garante que as imagens e botões de remover sejam atualizados
+        setTimeout(updateActiveImages, 100);
 
         const storedThemeColor = localStorage.getItem('themeColor');
         if (storedThemeColor && storedThemeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -499,11 +544,18 @@ document.addEventListener('DOMContentLoaded', () => {
             personalMessageInput.value = storedPersonalMessage;
         }
 
-        showEditingElements(); // Garante que todos os elementos de edição estejam visíveis
+        // EMOJIS: Carrega do localStorage no modo de edição
+        const storedEmojis = JSON.parse(localStorage.getItem('selectedEmojis')) || [];
+        if (storedEmojis.length > 0) {
+            selectedEmojis = storedEmojis.filter(emoji => isValidEmoji(emoji)); // Garante que apenas emojis válidos são armazenados
+            if (selectedEmojis[0]) emojiInput1.value = selectedEmojis[0];
+            if (selectedEmojis[1]) emojiInput2.value = selectedEmojis[1];
+            if (selectedEmojis[2]) emojiInput3.value = selectedEmojis[2];
+        }
+
+        showEditingElements();
     }
 
-    // Chama loadMusicFromStorageOrURL DENTRO do DOMContentLoaded, mas APÓS a lógica inicial de hash/localStorage.
-    // Isso garante que o input esteja preenchido e o player (invisível) seja carregado no modo de edição.
     if (typeof YT !== 'undefined' && YT.Player) {
         loadMusicFromStorageOrURL();
     }
@@ -517,16 +569,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isValidDate(startDate)) {
                 localStorage.setItem('countdownStartDate', startDate.toISOString());
                 startCountdown();
-                // Não chama hideDateInput() aqui. A área de edição permanece visível.
             } else {
                 alert("Por favor, insira uma data e hora válidas.");
                 updateDisplayForNoDate();
-                // Permanece no modo de edição
             }
         } else {
             alert("Por favor, selecione uma data e hora.");
             updateDisplayForNoDate();
-            // Permanece no modo de edição
         }
     });
 
@@ -540,6 +589,19 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('personalMessage', event.target.value);
     });
 
+    // Atualiza os emojis selecionados no localStorage sempre que um input de emoji muda
+    [emojiInput1, emojiInput2, emojiInput3].forEach(input => {
+        input.addEventListener('input', () => {
+            const currentEmojis = [
+                emojiInput1.value.trim(),
+                emojiInput2.value.trim(),
+                emojiInput3.value.trim()
+            ].filter(emoji => emoji && isValidEmoji(emoji));
+            localStorage.setItem('selectedEmojis', JSON.stringify(currentEmojis));
+        });
+    });
+
+
     imageUploads.forEach((inputElement, index) => {
         inputElement.addEventListener('change', (event) => {
             const file = event.target.files[0];
@@ -549,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const imageDataUrl = e.target.result;
                     imagePreviews[index].src = imageDataUrl;
                     localStorage.setItem(`uploadedImage${index + 1}`, imageDataUrl);
-                    updateActiveImages(); // Re-avalia as imagens ativas e seus botões de remover
+                    updateActiveImages();
                 };
                 reader.readAsDataURL(file);
             }
@@ -560,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', (event) => {
             event.preventDefault();
             const index = parseInt(event.target.dataset.index);
-            const defaultPlaceholderSrc = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`; // Usando as novas dimensões
+            const defaultPlaceholderSrc = `https://via.placeholder.com/120x180?text=Foto+${index + 1}`;
 
             imagePreviews[index].src = defaultPlaceholderSrc;
             localStorage.removeItem(`uploadedImage${index + 1}`);
@@ -570,23 +632,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Listener para o botão de carregar música
     loadMusicButton.addEventListener('click', loadMusic);
 
-    // --- Gerar Link (Inclui a mensagem personalizada e a música) ---
+    // --- Gerar Link (Inclui a mensagem personalizada, a música e os EMOJIS) ---
     generateLinkButton.addEventListener('click', async () => {
         if (!startDate || !isValidDate(startDate)) {
             alert("Por favor, defina a data inicial antes de gerar o link.");
             return;
         }
 
+        // Obtém os emojis selecionados no momento da geração do link
+        const currentSelectedEmojis = getSelectedEmojis();
+
         const config = {
             startDate: startDate.toISOString(),
             images: imagePreviews.map(img => img.src.includes('via.placeholder.com') ? null : img.src),
             themeColor: currentThemeColor,
             personalMessage: personalMessageInput.value,
-            youtubeVideoId: currentYoutubeVideoId, // Adiciona o ID do vídeo
-            musicTitle: currentMusicTitle // Adiciona o título da música
+            youtubeVideoId: currentYoutubeVideoId,
+            musicTitle: currentMusicTitle,
+            selectedEmojis: currentSelectedEmojis // Adiciona os emojis ao config
         };
 
         const configString = JSON.stringify(config);
@@ -603,7 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 3000);
 
             // APÓS GERAR E COPIAR O LINK, ESCONDER OS ELEMENTOS DE EDIÇÃO
-            hideEditingElements(); // Esta função agora será chamada apenas aqui!
+            hideEditingElements();
 
         } catch (err) {
             console.error('Falha ao copiar o link: ', err);
