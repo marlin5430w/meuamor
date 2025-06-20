@@ -8,14 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadMusicButton = document.getElementById('loadMusicButton');
     const nextPage1Button = document.getElementById('nextPage1Button');
     const generateLinkButton = document.getElementById('generateLinkButton');
-    const backToPage1Button = document.getElementById('backToPage1Button');
-    const backToPage2Button = document.getElementById('backToPage2Button');
+    const backToPage1Button = document.getElementById('backToPage1Button'); // Novo botão "Voltar" na page2
+    const backToPage2Button = document.getElementById('backToPage2Button'); // Botão "Voltar para Edição" na page3
     const customMessageInput = document.getElementById('customMessage');
     const copyMessage = document.getElementById('copyMessage');
     const photoUploaders = document.querySelectorAll('.photo-uploader');
     const emojiInputs = document.querySelectorAll('.emoji-input');
     const shareLinkDisplay = document.getElementById('shareLinkDisplay');
     const copyLinkButton = document.getElementById('copyLinkButton');
+    const shareLinkSection = document.getElementById('shareLinkSection'); // Nova seção para o link
 
     // Elementos da Página de Visualização (Page 3)
     const counterDisplay = document.getElementById('counterDisplay');
@@ -36,28 +37,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentThemeColor = themeColorInput.value;
     let musicData = { link: '', name: '' };
     let photos = ['', '', '']; // Armazena URLs de imagens (base64)
-    let photoFiles = [null, null, null]; // Armazena os objetos File (para o slideshow)
     let currentPhotoIndex = 0;
     let photoSlideshowInterval;
     let player; // Variável global para o player do YouTube
     let generatedShareLink = ''; // Para armazenar o link gerado
+    let counterInterval; // Para controlar o intervalo do contador
 
     // --- Funções Auxiliares ---
 
     // Função para alternar páginas
     function showPage(pageToShow) {
-        console.log('Tentando mostrar página:', pageToShow.id); // Log para depuração
+        console.log('Tentando mostrar página:', pageToShow.id);
+        // Esconde todas as páginas primeiro
         [page1, page2, page3].forEach(page => {
-            if (page === pageToShow) {
-                page.classList.remove('hidden');
-                page.classList.add('active');
-                console.log(page.id, 'agora é ATIVA');
-            } else {
-                page.classList.add('hidden');
-                page.classList.remove('active');
-                console.log(page.id, 'agora é ESCONDIDA');
-            }
+            page.classList.add('hidden');
+            page.classList.remove('active');
         });
+        // Mostra a página desejada
+        pageToShow.classList.remove('hidden');
+        // Pequeno atraso para a transição CSS funcionar
+        setTimeout(() => {
+            pageToShow.classList.add('active');
+        }, 10); // Adiciona um pequeno delay
+        
         // Scrolla para o topo da nova página ativa
         if (pageToShow) {
             pageToShow.scrollTop = 0;
@@ -102,7 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (uploadText) {
                          uploadText.style.display = 'none';
                     }
-                    const removeBtn = photoUploaders[index].querySelector('.remove-photo-button');
+                    const uploaderElement = photoUploaders[index];
+                    const removeBtn = uploaderElement ? uploaderElement.querySelector('.remove-photo-button') : null;
                     if (removeBtn) removeBtn.classList.add('show-button');
                 }
             }
@@ -220,11 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const videoId = getYouTubeVideoId(musicData.link);
         if (videoId) {
             if (player) {
-                player.destroy();
+                player.destroy(); // Destroi player existente se houver
             }
             // Garante que o div do player esteja visível antes de criar o player
             playerDiv.style.display = 'block'; 
-            musicPlayerDisplay.style.display = 'block'; // Mostra o container do player
+            musicPlayerDisplay.classList.remove('hidden'); // Mostra o container do player
 
             player = new YT.Player('player', {
                 height: '100',
@@ -249,15 +252,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } else {
             playerDiv.innerHTML = ''; // Limpa o div do player
-            musicPlayerDisplay.style.display = 'none'; // Esconde o container do player
+            musicPlayerDisplay.classList.add('hidden'); // Esconde o container do player
             musicInfoDisplay.classList.add('hidden');
         }
     }
-    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady; // Garante que a função esteja no escopo global para a API do YouTube
+    // Adiciona onYouTubeIframeAPIReady ao escopo global (necessário para a API do YouTube)
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady; 
 
     function onPlayerReady(event) {
         event.target.playVideo();
-        musicPlayerDisplay.style.display = 'block';
+        musicPlayerDisplay.classList.remove('hidden');
         musicInfoDisplay.textContent = musicData.name || "Música Carregada";
         musicInfoDisplay.classList.remove('hidden');
     }
@@ -311,10 +315,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                photoFiles[index] = file;
+                // Não precisamos de photoFiles, apenas o base64 para a URL
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    photos[index] = e.target.result;
+                    photos[index] = e.target.result; // Armazena a URL base64
                     imgPreview.src = e.target.result;
                     imgPreview.style.opacity = '1';
                     if (uploadText) {
@@ -331,9 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (removeBtn) {
             removeBtn.addEventListener('click', (event) => {
-                event.stopPropagation();
+                event.stopPropagation(); // Evita que o clique no botão de remover ative o input de arquivo
                 photos[index] = '';
-                photoFiles[index] = null;
                 imgPreview.src = '';
                 imgPreview.style.opacity = '0';
                 if (uploadText) {
@@ -368,7 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backToPage2Button.addEventListener('click', () => {
-        showPage(page2);
+        showPage(page1); // Volta para a página 1 (edição principal)
+
         // Limpa e para tudo relacionado à visualização ao voltar para edição
         clearInterval(photoSlideshowInterval);
         photoSlideshowInterval = null;
@@ -376,25 +380,25 @@ document.addEventListener('DOMContentLoaded', () => {
             player.destroy();
             player = null;
         }
+        clearInterval(counterInterval); // Para o contador
+        counterInterval = null;
+
         emojiRainContainer.style.display = 'none';
         slideshowContainer.innerHTML = ''; // Limpa o slideshow
         musicInfoDisplay.classList.add('hidden');
         playerDiv.innerHTML = ''; // Limpa o div do player
-        musicPlayerDisplay.style.display = 'none'; // Esconde o container do player
+        musicPlayerDisplay.classList.add('hidden'); // Esconde o container do player
         
-        if (shareLinkDisplay) {
-            shareLinkDisplay.textContent = '';
-            shareLinkDisplay.classList.add('hidden');
-        }
-        if (copyLinkButton) {
-            copyLinkButton.classList.add('hidden');
+        if (shareLinkSection) { // Esconde a seção do link na edição
+            shareLinkSection.classList.add('hidden');
         }
     });
 
     // --- Botão Gerar Link Compartilhável (CRÍTICO) ---
     generateLinkButton.addEventListener('click', async () => {
         await generateShareLink();
-        // A transição para page3 é feita dentro de generateShareLink()
+        showPage(page3); // Transição para a página 3 (visualização)
+        updateViewModeContent(); // Atualiza o conteúdo da página 3 com os dados do link
     });
 
     // Botão Copiar Link
@@ -450,40 +454,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Adiciona fotos (Base64)
-        const photosBase64 = photos.filter(Boolean);
+        const photosBase64 = photos.filter(Boolean); // Filtra fotos vazias
         if (photosBase64.length > 0) {
             params.append('photos', JSON.stringify(photosBase64));
         }
 
         generatedShareLink = `${baseUrl}?${params.toString()}`;
 
-        // Exibe o link na interface e o botão de copiar
-        if (shareLinkDisplay) {
-            shareLinkDisplay.textContent = generatedShareLink;
-            shareLinkDisplay.classList.remove('hidden');
+        // Exibe o link na interface e o botão de copiar na página 3
+        if (shareLinkDisplay && copyLinkButton && shareLinkSection) {
+            shareLinkDisplay.value = generatedShareLink; // Usa .value para textarea
+            shareLinkSection.classList.remove('hidden'); // Mostra a seção inteira
         }
-        if (copyLinkButton) {
-            copyLinkButton.classList.remove('hidden');
-        }
-        
-        // Após gerar o link, muda para a página de visualização
-        showPage(page3);
-        updateViewModeContent(); // Atualiza o conteúdo da página 3 com os dados do link
     }
 
     // --- Funções para a Página de Visualização (Page 3) ---
     function updateViewModeContent() {
         const urlParams = new URLSearchParams(window.location.search);
 
+        // Limpa estado anterior de visualização
+        clearInterval(counterInterval);
+        clearInterval(photoSlideshowInterval);
+        if (player) {
+            player.destroy();
+            player = null;
+        }
+        slideshowContainer.innerHTML = '';
+        emojiRainContainer.innerHTML = ''; // Limpa emojis antigos
+        emojiRainContainer.style.display = 'none'; // Esconde por padrão
+        musicPlayerDisplay.classList.add('hidden'); // Esconde por padrão
+        musicInfoDisplay.classList.add('hidden');
+        playerDiv.innerHTML = '';
+        counterDisplay.classList.add('hidden'); // Esconde por padrão
+        viewModeMessageElement.classList.add('hidden'); // Esconde por padrão
+        shareLinkSection.classList.add('hidden'); // Garante que a seção do link esteja escondida no modo de visualização limpo
+
         // Data e Contador
         const dateParam = urlParams.get('date');
         if (dateParam) {
             startDate = new Date(dateParam);
             updateCounter();
-            setInterval(updateCounter, 1000);
+            counterInterval = setInterval(updateCounter, 1000); // Inicia o contador
             counterDisplay.classList.remove('hidden');
-        } else {
-            counterDisplay.classList.add('hidden'); // Esconde se não houver data
         }
 
         // Cor do Tema
@@ -498,29 +510,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (messageParam) {
             viewModeMessageElement.textContent = messageParam;
             viewModeMessageElement.classList.remove('hidden');
-        } else {
-            viewModeMessageElement.classList.add('hidden');
         }
 
         // Emojis (para chuva de emojis)
         const emojisParam = urlParams.get('emojis');
         if (emojisParam) {
             const loadedEmojis = emojisParam.split(',');
-            emojiInputs.forEach((input, index) => { // Atualiza inputs para a chuva usar os da URL
+            // Certifica-se de que os inputs de emoji no editor reflitam os emojis do link
+            emojiInputs.forEach((input, index) => {
                 input.value = loadedEmojis[index] || '';
             });
             startEmojiRain();
-        } else {
-            emojiRainContainer.style.display = 'none';
         }
 
         // Fotos (para slideshow)
         const photosParam = urlParams.get('photos');
-        slideshowContainer.innerHTML = '';
         if (photosParam) {
             const loadedPhotos = JSON.parse(photosParam);
             if (loadedPhotos.length > 0) {
-                photoFiles = loadedPhotos; // Usa as URLs Base64 para o slideshow
+                photos = loadedPhotos; // Atualiza a lista de fotos com as do link
                 startSlideshow();
                 slideshowContainer.classList.remove('hidden'); // Mostra o container do slideshow
             } else {
@@ -538,67 +546,62 @@ document.addEventListener('DOMContentLoaded', () => {
             musicData.link = musicLinkParam;
             musicData.name = musicNameParam || '';
             if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
+                // Carrega a API do YouTube apenas se não estiver carregada
                 const tag = document.createElement('script');
                 tag.src = "https://www.youtube.com/iframe_api"; // URL CORRETA DA API DO YOUTUBE
                 const firstScriptTag = document.getElementsByTagName('script')[0];
                 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
             } else {
-                onYouTubeIframeAPIReady();
+                onYouTubeIframeAPIReady(); // Se já estiver carregada, chama a função para criar o player
             }
         } else {
             playerDiv.innerHTML = '';
-            musicPlayerDisplay.style.display = 'none';
+            musicPlayerDisplay.classList.add('hidden');
             musicInfoDisplay.classList.add('hidden');
         }
-
-        // Esconde os elementos da página de edição (Páginas 1 e 2)
-        // Isso é feito controlando as classes 'hidden' das divs de pagina
-        // O HTML deve estar estruturado para que page1, page2 e page3 sejam as principais divs
-        // e os elementos de edição fiquem dentro de page1 e page2.
-        // A page3 conterá apenas os elementos de visualização.
     }
 
     // Iniciar Slideshow de Fotos
     function startSlideshow() {
-        if (photoFiles.length === 0) {
-            slideshowContainer.style.display = 'none';
+        if (photos.length === 0 || photos.every(p => !p)) { // Verifica se há fotos válidas
+            slideshowContainer.classList.add('hidden');
             return;
         }
 
-        slideshowContainer.style.display = 'block';
-        slideshowContainer.innerHTML = '';
+        slideshowContainer.classList.remove('hidden');
+        slideshowContainer.innerHTML = ''; // Limpa antes de adicionar
 
-        photoFiles.forEach((photoSrc, index) => {
-            const imgWrapper = document.createElement('div');
-            imgWrapper.classList.add('photo-wrapper'); // Nova classe para os wrappers de imagem do slideshow
-            const img = document.createElement('img');
-            img.src = photoSrc;
-            img.alt = `Foto ${index + 1}`;
-            img.classList.add('slideshow-photo');
-            if (index === 0) {
-                img.classList.add('active');
+        photos.forEach((photoSrc, index) => {
+            if (photoSrc) { // Adiciona apenas fotos que existem
+                const imgWrapper = document.createElement('div');
+                imgWrapper.classList.add('photo-wrapper'); // Nova classe para os wrappers de imagem do slideshow
+                const img = document.createElement('img');
+                img.src = photoSrc;
+                img.alt = `Foto ${index + 1}`;
+                img.classList.add('slideshow-photo');
+                imgWrapper.appendChild(img);
+                slideshowContainer.appendChild(imgWrapper);
             }
-            imgWrapper.appendChild(img);
-            slideshowContainer.appendChild(imgWrapper);
         });
 
         currentPhotoIndex = 0;
         const slideshowPhotos = slideshowContainer.querySelectorAll('.slideshow-photo');
 
-        clearInterval(photoSlideshowInterval);
+        clearInterval(photoSlideshowInterval); // Limpa qualquer intervalo anterior
 
-        if (slideshowPhotos.length > 1) {
-            photoSlideshowInterval = setInterval(() => {
-                slideshowPhotos[currentPhotoIndex].classList.remove('active');
-                currentPhotoIndex = (currentPhotoIndex + 1) % slideshowPhotos.length;
-                slideshowPhotos[currentPhotoIndex].classList.add('active');
-            }, 3000); // Troca a cada 3 segundos
-        } else if (slideshowPhotos.length === 1) {
-            slideshowPhotos[0].classList.add('active');
+        if (slideshowPhotos.length > 0) {
+            slideshowPhotos[0].classList.add('active'); // Ativa a primeira foto
+            if (slideshowPhotos.length > 1) {
+                photoSlideshowInterval = setInterval(() => {
+                    slideshowPhotos[currentPhotoIndex].classList.remove('active');
+                    currentPhotoIndex = (currentPhotoIndex + 1) % slideshowPhotos.length;
+                    slideshowPhotos[currentPhotoIndex].classList.add('active');
+                }, 3000); // Troca a cada 3 segundos
+            }
         }
     }
 
-    // Polyfill básico para tinycolor, caso não esteja carregado
+    // Polyfill básico para tinycolor, caso não esteja carregado (Mantenha este polyfill)
     if (typeof tinycolor === 'undefined') {
         window.tinycolor = function(color) {
             let r, g, b, a = 1;
