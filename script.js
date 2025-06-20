@@ -13,10 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const customMessageInput = document.getElementById('customMessage');
     const copyMessage = document.getElementById('copyMessage');
     const photoUploaders = document.querySelectorAll('.photo-uploader');
-    const removePhotoButtons = document.querySelectorAll('.remove-photo-button'); // Esta linha é redundante se você acessa via photoUploaders
     const emojiInputs = document.querySelectorAll('.emoji-input');
-    const shareLinkDisplay = document.getElementById('shareLinkDisplay'); // Novo elemento para exibir o link
-    const copyLinkButton = document.getElementById('copyLinkButton'); // Novo botão para copiar o link
+    const shareLinkDisplay = document.getElementById('shareLinkDisplay');
+    const copyLinkButton = document.getElementById('copyLinkButton');
+
+    // Elementos da Página de Visualização (Page 3)
+    const counterDisplay = document.getElementById('counterDisplay');
+    const viewModeMessageElement = document.getElementById('viewModeMessage');
+    const slideshowContainer = document.getElementById('slideshowContainer');
+    const musicPlayerDisplay = document.querySelector('.music-player-display');
+    const musicInfoDisplay = document.getElementById('musicInfoDisplay');
+    const emojiRainContainer = document.getElementById('emojiRainContainer');
+    const playerDiv = document.getElementById('player'); // Onde o player do YouTube será incorporado
 
     // Páginas
     const page1 = document.getElementById('page1');
@@ -27,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let startDate = new Date('2023-10-14T00:00:00'); // Data inicial padrão
     let currentThemeColor = themeColorInput.value;
     let musicData = { link: '', name: '' };
-    let photos = ['', '', '']; // Armazena URLs de imagens (base64 ou URL)
-    let photoFiles = [null, null, null]; // Armazena os objetos File para Slideshow (usado para gerar o link)
+    let photos = ['', '', '']; // Armazena URLs de imagens (base64)
+    let photoFiles = [null, null, null]; // Armazena os objetos File (para o slideshow)
     let currentPhotoIndex = 0;
     let photoSlideshowInterval;
     let player; // Variável global para o player do YouTube
@@ -87,12 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (photo) {
                 photos[index] = photo;
                 const imgPreview = document.getElementById(`photoPreview${index + 1}`);
-                const uploadText = document.getElementById(`uploadText${index + 1}`); // Pega o texto "Foto X"
+                const uploadText = document.getElementById(`uploadText${index + 1}`);
                 if (imgPreview) {
                     imgPreview.src = photo;
                     imgPreview.style.opacity = '1';
                     if (uploadText) {
-                         uploadText.style.display = 'none'; // Esconde o texto "Foto X"
+                         uploadText.style.display = 'none';
                     }
                     const removeBtn = photoUploaders[index].querySelector('.remove-photo-button');
                     if (removeBtn) removeBtn.classList.add('show-button');
@@ -121,8 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Aplica a cor do tema a todas as variáveis CSS
     function applyThemeColor(color) {
         document.documentElement.style.setProperty('--main-color', color);
-        // Atualiza as cores secundárias baseadas na cor principal
-        // Garante que tinycolor está definido antes de usá-lo
         if (typeof tinycolor !== 'undefined') {
             document.documentElement.style.setProperty('--main-color-dark', tinycolor(color).darken(10).toString());
             document.documentElement.style.setProperty('--main-color-shadow', tinycolor(color).setAlpha(0.4).toRgbString());
@@ -148,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const diff = now.getTime() - startDate.getTime(); // Diferença em milissegundos
 
         if (diff < 0) { // Se a data for no futuro
-            document.getElementById('counterDisplay').textContent = "Ainda não chegou a data!";
+            counterDisplay.textContent = "Ainda não chegou a data!";
             return;
         }
 
@@ -165,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const remainingMinutes = minutes % 60;
         const remainingSeconds = seconds % 60;
 
-        document.getElementById('counterDisplay').textContent =
+        counterDisplay.textContent =
             `${years} ano${years !== 1 ? 's' : ''}, ` +
             `${remainingMonths} mês${remainingMonths !== 1 ? 'es' : ''}, ` +
             `${remainingDays} dia${remainingDays !== 1 ? 's' : ''}\n` +
@@ -176,7 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Chuva de Emojis
     function startEmojiRain() {
-        const emojiRainContainer = document.getElementById('emojiRainContainer');
         const emojisToRain = Array.from(emojiInputs).map(input => input.value).filter(Boolean); // Pega emojis preenchidos
         if (emojisToRain.length === 0) {
             emojiRainContainer.style.display = 'none';
@@ -214,9 +219,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function onYouTubeIframeAPIReady() {
         const videoId = getYouTubeVideoId(musicData.link);
         if (videoId) {
-            if (player) { // Se o player já existe, destruí-lo antes de criar um novo
+            if (player) {
                 player.destroy();
             }
+            // Garante que o div do player esteja visível antes de criar o player
+            playerDiv.style.display = 'block'; 
+            musicPlayerDisplay.style.display = 'block'; // Mostra o container do player
+
             player = new YT.Player('player', {
                 height: '100',
                 width: '100%',
@@ -239,20 +248,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         } else {
-             // Esconde o player se não houver música
-            document.getElementById('player').innerHTML = ''; // Limpa o div do player
-            document.querySelector('.music-player-display').style.display = 'none';
-            document.getElementById('musicInfoDisplay').classList.add('hidden');
+            playerDiv.innerHTML = ''; // Limpa o div do player
+            musicPlayerDisplay.style.display = 'none'; // Esconde o container do player
+            musicInfoDisplay.classList.add('hidden');
         }
     }
-    // Garante que a função esteja no escopo global para a API do YouTube
-    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady; 
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady; // Garante que a função esteja no escopo global para a API do YouTube
 
     function onPlayerReady(event) {
         event.target.playVideo();
-        document.querySelector('.music-player-display').style.display = 'block';
-        document.getElementById('musicInfoDisplay').textContent = musicData.name || "Música Carregada";
-        document.getElementById('musicInfoDisplay').classList.remove('hidden');
+        musicPlayerDisplay.style.display = 'block';
+        musicInfoDisplay.textContent = musicData.name || "Música Carregada";
+        musicInfoDisplay.classList.remove('hidden');
     }
 
     function onPlayerStateChange(event) {
@@ -273,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     themeColorInput.addEventListener('input', (event) => {
         currentThemeColor = event.target.value;
-        applyThemeColor(currentThemeColor); // Aplica a cor imediatamente
+        applyThemeColor(currentThemeColor);
         saveAllData();
     });
 
@@ -298,21 +305,20 @@ document.addEventListener('DOMContentLoaded', () => {
     photoUploaders.forEach((uploader, index) => {
         const fileInput = uploader.querySelector('.hidden-file-input');
         const imgPreview = uploader.querySelector('img');
-        const uploadText = uploader.querySelector('.upload-text'); // Garante que você está pegando o elemento de texto
+        const uploadText = uploader.querySelector('.upload-text');
         const removeBtn = uploader.querySelector('.remove-photo-button');
 
-        // Adiciona listener para o input de arquivo (o que realmente recebe o arquivo)
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                photoFiles[index] = file; // Salva o objeto File para potencial upload (se necessário)
+                photoFiles[index] = file;
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    photos[index] = e.target.result; // Salva o Base64 para exibição e link
+                    photos[index] = e.target.result;
                     imgPreview.src = e.target.result;
                     imgPreview.style.opacity = '1';
                     if (uploadText) {
-                        uploadText.style.display = 'none'; // Esconde o texto
+                        uploadText.style.display = 'none';
                     }
                     if (removeBtn) {
                         removeBtn.classList.add('show-button');
@@ -323,27 +329,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Adiciona listener para o botão de remover foto
         if (removeBtn) {
             removeBtn.addEventListener('click', (event) => {
-                event.stopPropagation(); // Impede que o clique no botão de remover acione o uploader de arquivo
+                event.stopPropagation();
                 photos[index] = '';
-                photoFiles[index] = null; // Limpa o objeto File
+                photoFiles[index] = null;
                 imgPreview.src = '';
                 imgPreview.style.opacity = '0';
                 if (uploadText) {
-                    uploadText.style.display = 'block'; // Mostra o texto novamente
+                    uploadText.style.display = 'block';
                 }
                 removeBtn.classList.remove('show-button');
                 saveAllData();
             });
         }
 
-        // Adiciona listener para o custom-file-upload (o label)
         const customUploadLabel = uploader.querySelector('.custom-file-upload');
         if (customUploadLabel) {
             customUploadLabel.addEventListener('click', () => {
-                fileInput.click(); // Redireciona o clique do label para o input file real
+                fileInput.click();
             });
         }
     });
@@ -356,29 +360,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Navegação entre Páginas ---
     nextPage1Button.addEventListener('click', () => {
-        console.log('Clicou em Próximo: Emojis e Fotos'); // Log de depuração
         showPage(page2);
     });
 
     backToPage1Button.addEventListener('click', () => {
-        console.log('Clicou em Voltar para Página 1'); // Log de depuração
         showPage(page1);
     });
 
     backToPage2Button.addEventListener('click', () => {
-        console.log('Clicou em Voltar para Edição'); // Log de depuração
         showPage(page2);
-        clearInterval(photoSlideshowInterval); // Para o slideshow ao voltar para edição
-        photoSlideshowInterval = null; // Zera a variável do intervalo
+        // Limpa e para tudo relacionado à visualização ao voltar para edição
+        clearInterval(photoSlideshowInterval);
+        photoSlideshowInterval = null;
         if (player) {
-            player.destroy(); // Destrói o player do YouTube
+            player.destroy();
             player = null;
         }
-        document.getElementById('emojiRainContainer').style.display = 'none'; // Esconde a chuva de emojis
-        document.getElementById('slideshowContainer').innerHTML = ''; // Limpa o slideshow
-        document.getElementById('musicInfoDisplay').classList.add('hidden'); // Esconde info da musica
+        emojiRainContainer.style.display = 'none';
+        slideshowContainer.innerHTML = ''; // Limpa o slideshow
+        musicInfoDisplay.classList.add('hidden');
+        playerDiv.innerHTML = ''; // Limpa o div do player
+        musicPlayerDisplay.style.display = 'none'; // Esconde o container do player
         
-        // Esconde o display do link e o botão de copiar ao voltar para edição
         if (shareLinkDisplay) {
             shareLinkDisplay.textContent = '';
             shareLinkDisplay.classList.add('hidden');
@@ -390,8 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Botão Gerar Link Compartilhável (CRÍTICO) ---
     generateLinkButton.addEventListener('click', async () => {
-        console.log('Clicou em Gerar Link Compartilhável'); // Log de depuração
         await generateShareLink();
+        // A transição para page3 é feita dentro de generateShareLink()
     });
 
     // Botão Copiar Link
@@ -400,11 +403,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (generatedShareLink) {
                 try {
                     await navigator.clipboard.writeText(generatedShareLink);
-                    copyMessage.textContent = 'Link copiado!'; // Altera a mensagem para algo mais claro
+                    copyMessage.textContent = 'Link copiado!';
                     copyMessage.classList.add('show');
                     setTimeout(() => {
                         copyMessage.classList.remove('show');
-                        copyMessage.textContent = 'Copiado!'; // Volta a mensagem original se preferir
+                        copyMessage.textContent = 'Copiado!';
                     }, 3000);
                 } catch (err) {
                     console.error('Falha ao copiar o link: ', err);
@@ -418,14 +421,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para gerar o link compartilhável
     async function generateShareLink() {
-        const baseUrl = window.location.origin + window.location.pathname; // marlin5430w.github.io/index.html
+        const baseUrl = window.location.origin + window.location.pathname;
         const params = new URLSearchParams();
 
         // Adiciona a data
         params.append('date', startDate.toISOString());
 
         // Adiciona a cor do tema
-        params.append('color', currentThemeColor.replace('#', '')); // Remove o # para a URL
+        params.append('color', currentThemeColor.replace('#', ''));
 
         // Adiciona link e nome da música, se existirem
         if (musicData.link) {
@@ -446,13 +449,13 @@ document.addEventListener('DOMContentLoaded', () => {
             params.append('message', customMessageInput.value);
         }
 
-        // Adiciona fotos (converta para Base64 ou armazene de forma eficiente se for muita coisa)
+        // Adiciona fotos (Base64)
         const photosBase64 = photos.filter(Boolean);
         if (photosBase64.length > 0) {
             params.append('photos', JSON.stringify(photosBase64));
         }
 
-        generatedShareLink = `${baseUrl}?${params.toString()}`; // Armazena o link gerado
+        generatedShareLink = `${baseUrl}?${params.toString()}`;
 
         // Exibe o link na interface e o botão de copiar
         if (shareLinkDisplay) {
@@ -465,35 +468,33 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Após gerar o link, muda para a página de visualização
         showPage(page3);
-        updateViewModeContent(); // Atualiza o conteúdo da página 3
+        updateViewModeContent(); // Atualiza o conteúdo da página 3 com os dados do link
     }
 
     // --- Funções para a Página de Visualização (Page 3) ---
     function updateViewModeContent() {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Data
+        // Data e Contador
         const dateParam = urlParams.get('date');
         if (dateParam) {
             startDate = new Date(dateParam);
             updateCounter();
             setInterval(updateCounter, 1000);
+            counterDisplay.classList.remove('hidden');
         } else {
-            // Se não houver data na URL, usa a data do local storage
-            updateCounter();
-            setInterval(updateCounter, 1000);
+            counterDisplay.classList.add('hidden'); // Esconde se não houver data
         }
 
         // Cor do Tema
         const colorParam = urlParams.get('color');
         if (colorParam) {
             const loadedColor = '#' + colorParam;
-            applyThemeColor(loadedColor); // Aplica a cor carregada da URL
+            applyThemeColor(loadedColor);
         }
 
         // Mensagem Personalizada
         const messageParam = urlParams.get('message');
-        const viewModeMessageElement = document.getElementById('viewModeMessage');
         if (messageParam) {
             viewModeMessageElement.textContent = messageParam;
             viewModeMessageElement.classList.remove('hidden');
@@ -505,27 +506,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const emojisParam = urlParams.get('emojis');
         if (emojisParam) {
             const loadedEmojis = emojisParam.split(',');
-            // Atualiza os inputs de emoji para a chuva de emojis usar os da URL
-            emojiInputs.forEach((input, index) => {
+            emojiInputs.forEach((input, index) => { // Atualiza inputs para a chuva usar os da URL
                 input.value = loadedEmojis[index] || '';
             });
             startEmojiRain();
+        } else {
+            emojiRainContainer.style.display = 'none';
         }
 
         // Fotos (para slideshow)
         const photosParam = urlParams.get('photos');
-        const slideshowContainer = document.getElementById('slideshowContainer');
-        slideshowContainer.innerHTML = ''; // Limpa qualquer conteúdo anterior
+        slideshowContainer.innerHTML = '';
         if (photosParam) {
             const loadedPhotos = JSON.parse(photosParam);
             if (loadedPhotos.length > 0) {
-                photoFiles = loadedPhotos; // Usa as URLs Base64 diretamente para o slideshow
+                photoFiles = loadedPhotos; // Usa as URLs Base64 para o slideshow
                 startSlideshow();
+                slideshowContainer.classList.remove('hidden'); // Mostra o container do slideshow
             } else {
-                slideshowContainer.style.display = 'none'; // Esconde se não houver fotos
+                slideshowContainer.classList.add('hidden');
             }
         } else {
-            slideshowContainer.style.display = 'none'; // Esconde se não houver fotos na URL
+            slideshowContainer.classList.add('hidden');
         }
 
         // Música (YouTube Embed)
@@ -535,45 +537,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (musicLinkParam) {
             musicData.link = musicLinkParam;
             musicData.name = musicNameParam || '';
-            // Carrega o script da API do YouTube se ainda não foi carregado
             if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
                 const tag = document.createElement('script');
                 tag.src = "https://www.youtube.com/iframe_api"; // URL CORRETA DA API DO YOUTUBE
                 const firstScriptTag = document.getElementsByTagName('script')[0];
                 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-                // A função onYouTubeIframeAPIReady será chamada automaticamente
             } else {
-                onYouTubeIframeAPIReady(); // Se já estiver pronto, chama imediatamente
+                onYouTubeIframeAPIReady();
             }
         } else {
-            // Esconde o player se não houver música na URL
-            document.getElementById('player').innerHTML = '';
-            document.querySelector('.music-player-display').style.display = 'none';
-            document.getElementById('musicInfoDisplay').classList.add('hidden');
+            playerDiv.innerHTML = '';
+            musicPlayerDisplay.style.display = 'none';
+            musicInfoDisplay.classList.add('hidden');
         }
+
+        // Esconde os elementos da página de edição (Páginas 1 e 2)
+        // Isso é feito controlando as classes 'hidden' das divs de pagina
+        // O HTML deve estar estruturado para que page1, page2 e page3 sejam as principais divs
+        // e os elementos de edição fiquem dentro de page1 e page2.
+        // A page3 conterá apenas os elementos de visualização.
     }
 
     // Iniciar Slideshow de Fotos
     function startSlideshow() {
         if (photoFiles.length === 0) {
-            document.getElementById('slideshowContainer').style.display = 'none';
+            slideshowContainer.style.display = 'none';
             return;
         }
 
-        document.getElementById('slideshowContainer').style.display = 'block';
-        const slideshowContainer = document.getElementById('slideshowContainer');
-        slideshowContainer.innerHTML = ''; // Limpa o container antes de adicionar imagens
+        slideshowContainer.style.display = 'block';
+        slideshowContainer.innerHTML = '';
 
-        // Cria os elementos de imagem para o slideshow
         photoFiles.forEach((photoSrc, index) => {
             const imgWrapper = document.createElement('div');
-            imgWrapper.classList.add('photo-uploader'); // Reutiliza o estilo do uploader
+            imgWrapper.classList.add('photo-wrapper'); // Nova classe para os wrappers de imagem do slideshow
             const img = document.createElement('img');
             img.src = photoSrc;
             img.alt = `Foto ${index + 1}`;
-            img.classList.add('slideshow-photo'); // Nova classe para as imagens do slideshow
+            img.classList.add('slideshow-photo');
             if (index === 0) {
-                img.classList.add('active'); // Primeira imagem ativa
+                img.classList.add('active');
             }
             imgWrapper.appendChild(img);
             slideshowContainer.appendChild(imgWrapper);
@@ -582,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPhotoIndex = 0;
         const slideshowPhotos = slideshowContainer.querySelectorAll('.slideshow-photo');
 
-        clearInterval(photoSlideshowInterval); // Garante que nenhum intervalo anterior esteja rodando
+        clearInterval(photoSlideshowInterval);
 
         if (slideshowPhotos.length > 1) {
             photoSlideshowInterval = setInterval(() => {
@@ -591,22 +594,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 slideshowPhotos[currentPhotoIndex].classList.add('active');
             }, 3000); // Troca a cada 3 segundos
         } else if (slideshowPhotos.length === 1) {
-            slideshowPhotos[0].classList.add('active'); // Garante que a única foto seja exibida
+            slideshowPhotos[0].classList.add('active');
         }
     }
 
     // Polyfill básico para tinycolor, caso não esteja carregado
-    // (Útil se você não estiver usando um CDN para tinycolor.js)
     if (typeof tinycolor === 'undefined') {
         window.tinycolor = function(color) {
             let r, g, b, a = 1;
-            // Tenta parsear hex
             if (color && typeof color === 'string' && color.startsWith('#') && color.length === 7) {
                 r = parseInt(color.substring(1, 3), 16);
                 g = parseInt(color.substring(3, 5), 16);
                 b = parseInt(color.substring(5, 7), 16);
             }
-            // Retorna um objeto com métodos essenciais
             return {
                 _r: r, _g: g, _b: b, _a: a,
                 darken: function(amount) {
@@ -621,7 +621,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     return `rgba(${this._r}, ${this._g}, ${this._b}, ${this._a})`;
                 },
                 toString: function() {
-                    // Para garantir que o toString retorne o hex para o input color se necessário
                     if (this._a === 1 && this._r !== undefined) {
                         const toHex = (c) => `0${c.toString(16)}`.slice(-2);
                         return `#${toHex(this._r)}${toHex(this._g)}${toHex(this._b)}`;
@@ -634,16 +633,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Inicialização ---
 
-    loadSavedData(); // Carrega os dados salvos ao iniciar
-    applyThemeColor(currentThemeColor); // Aplica a cor do tema salva ou padrão
+    loadSavedData();
+    applyThemeColor(currentThemeColor);
 
     // Verifica se há parâmetros na URL (indicando que a página foi compartilhada)
     if (window.location.search) {
-        showPage(page3); // Mostra a página de visualização se houver parâmetros
+        showPage(page3);
         updateViewModeContent();
     } else {
-        showPage(page1); // Caso contrário, mostra a página de configuração inicial
+        showPage(page1);
     }
-
-    // A função onYouTubeIframeAPIReady é definida globalmente acima para ser chamada pela API do YouTube
 });
