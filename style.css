@@ -101,7 +101,7 @@ body {
     box-sizing: border-box;
 }
 
-/* Botão menor para carregar música */
+/* Botão menor para carregar música e trocar música */
 .action-button-small {
     background-color: var(--main-color);
     color: white;
@@ -113,6 +113,7 @@ body {
     transition: background-color 0.3s ease;
     width: auto; /* Largura automática */
     max-width: 150px; /* Largura máxima */
+    margin-top: 10px; /* Adiciona um pequeno espaço acima para o botão "Trocar Música" */
 }
 
 .action-button-small:hover {
@@ -122,7 +123,8 @@ body {
 
 /* Classes para esconder elementos no modo "somente leitura" */
 .action-button.hidden,
-.message-slot textarea.hidden {
+.message-slot textarea.hidden,
+#changeMusicButton.hidden /* NOVO: Esconde o botão trocar música na edição */ {
     display: none !important; /* Força o ocultamento total */
 }
 
@@ -457,13 +459,16 @@ body {
 
     /* Esconde os photo-uploaders no modo de visualização */
     .photos-container.slideshow-mode .photo-uploader {
-        width: 150px;
-        height: 150px;
-        position: absolute; /* Para sobreposição no slideshow */
+        position: absolute;
+        top: 50%;
+        left: 50%;
         transform: translate(-50%, -50%);
-        opacity: 0;
+        opacity: 0; /* Controlado pelo JS para o slideshow */
         transition: opacity 0.5s ease-in-out;
-        z-index: 1;
+        border: 2px dashed var(--main-color-border-dash); /* Mantém a borda no slideshow */
+        width: 150px; /* Tamanho fixo para o slideshow */
+        height: 150px; /* Tamanho fixo para o slideshow */
+        z-index: 1; /* Padrão para itens sobrepostos */
     }
 
     .photos-container.slideshow-mode {
