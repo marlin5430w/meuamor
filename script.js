@@ -1,9 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const dateInputContainer = document.getElementById('dateInputContainer'); // Novo
+    const dateInputContainer = document.getElementById('dateInputContainer');
     const startDatePicker = document.getElementById('startDatePicker');
     const setStartDateButton = document.getElementById('setStartDateButton');
     const yearsMonthsDaysElement = document.getElementById('years-months-days');
     const hoursMinutesSecondsElement = document.getElementById('hours-minutes-seconds');
+    const generateLinkButton = document.getElementById('generateLinkButton'); // Novo
+    const copyMessage = document.getElementById('copyMessage'); // Novo
+
+    const photoUploaders = [ // Nova referência para os containers dos uploaders
+        document.querySelector('.photos-container > .photo-uploader:nth-child(1)'),
+        document.querySelector('.photos-container > .photo-uploader:nth-child(2)'),
+        document.querySelector('.photos-container > .photo-uploader:nth-child(3)')
+    ];
 
     const imageUploads = [
         document.getElementById('imageUpload1'),
@@ -19,40 +27,97 @@ document.addEventListener('DOMContentLoaded', () => {
     let startDate = null;
     let countdownInterval;
 
-    // --- Funções de Carregamento Inicial e Salvamento ---
+    // --- Funções de Visibilidade dos Elementos de Edição ---
+    function hideEditingElements() {
+        dateInputContainer.classList.add('hidden');
+        startDatePicker.classList.add('hidden');
+        setStartDateButton.classList.add('hidden');
+        dateInputContainer.querySelector('label').classList.add('hidden'); // Esconde a label também
 
-    const storedStartDate = localStorage.getItem('countdownStartDate');
-    if (storedStartDate) {
-        startDate = new Date(storedStartDate);
-        startDatePicker.value = storedStartDate.substring(0, 16);
-        if (isValidDate(startDate)) {
-            startCountdown();
-            hideDateInput(); // Esconde se a data é válida e carregada
-        } else {
-            startDate = null;
+        photoUploaders.forEach(uploader => {
+            if (uploader) uploader.classList.add('hidden');
+        });
+        if (generateLinkButton) generateLinkButton.classList.add('hidden');
+    }
+
+    function showEditingElements() {
+        dateInputContainer.classList.remove('hidden');
+        startDatePicker.classList.remove('hidden');
+        setStartDateButton.classList.remove('hidden');
+        dateInputContainer.querySelector('label').classList.remove('hidden');
+
+        photoUploaders.forEach(uploader => {
+            if (uploader) uploader.classList.remove('hidden');
+        });
+        if (generateLinkButton) generateLinkButton.classList.remove('hidden');
+    }
+
+    // --- Lógica de Carregamento (Prioridade: URL Hash > localStorage) ---
+    const hashParams = window.location.hash.substring(1); // Pega o hash (sem o '#')
+
+    if (hashParams) {
+        // Se houver hash, tenta carregar as configurações de lá (modo somente leitura)
+        try {
+            const decodedParams = decodeURIComponent(hashParams);
+            const data = JSON.parse(decodedParams);
+
+            if (data.startDate) {
+                startDate = new Date(data.startDate);
+                if (isValidDate(startDate)) {
+                    startCountdown();
+                    hideEditingElements(); // Esconde tudo se carregou do link
+                } else {
+                    console.error("Data inválida no link.");
+                    updateDisplayForNoDate();
+                    showEditingElements(); // Mostra edição se a data do link é inválida
+                }
+            } else {
+                updateDisplayForNoDate();
+                showEditingElements(); // Mostra edição se a data não está no link
+            }
+
+            if (data.images && Array.isArray(data.images)) {
+                data.images.forEach((imgData, index) => {
+                    if (imagePreviews[index] && typeof imgData === 'string' && imgData.startsWith('data:image')) {
+                        imagePreviews[index].src = imgData;
+                    }
+                });
+            }
+
+        } catch (e) {
+            console.error("Erro ao decodificar ou analisar o link:", e);
+            alert("O link de personalização está inválido. Por favor, crie um novo.");
             updateDisplayForNoDate();
-            showDateInput(); // Mostra se a data carregada é inválida
+            showEditingElements(); // Se o hash for inválido, mostra os elementos de edição
         }
     } else {
-        updateDisplayForNoDate();
-        showDateInput(); // Mostra se não há data salva
-    }
-
-    imagePreviews.forEach((imgElement, index) => {
-        const storedImage = localStorage.getItem(`uploadedImage${index + 1}`);
-        if (storedImage) {
-            imgElement.src = storedImage;
+        // Se não houver hash, tenta carregar do localStorage (modo editável)
+        const storedStartDate = localStorage.getItem('countdownStartDate');
+        if (storedStartDate) {
+            startDate = new Date(storedStartDate);
+            startDatePicker.value = storedStartDate.substring(0, 16);
+            if (isValidDate(startDate)) {
+                startCountdown();
+                hideDateInput(); // Apenas esconde o input de data
+            } else {
+                startDate = null;
+                updateDisplayForNoDate();
+                showDateInput(); // Mostra o input de data
+            }
+        } else {
+            updateDisplayForNoDate();
+            showDateInput(); // Mostra o input de data
         }
-    });
 
-    // --- Funções para Esconder/Mostrar o Slot de Data ---
-    function hideDateInput() {
-        dateInputContainer.classList.add('hidden');
+        imagePreviews.forEach((imgElement, index) => {
+            const storedImage = localStorage.getItem(`uploadedImage${index + 1}`);
+            if (storedImage) {
+                imgElement.src = storedImage;
+            }
+        });
+        showEditingElements(); // Garante que todos os elementos de edição estejam visíveis por padrão
     }
 
-    function showDateInput() {
-        dateInputContainer.classList.remove('hidden');
-    }
 
     // --- Listeners de Eventos ---
 
@@ -63,16 +128,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isValidDate(startDate)) {
                 localStorage.setItem('countdownStartDate', startDate.toISOString());
                 startCountdown();
-                hideDateInput(); // Esconde depois de definir a data
+                hideDateInput();
             } else {
                 alert("Por favor, insira uma data e hora válidas.");
                 updateDisplayForNoDate();
-                showDateInput(); // Garante que esteja visível se a data for inválida
+                showDateInput();
             }
         } else {
             alert("Por favor, selecione uma data e hora.");
             updateDisplayForNoDate();
-            showDateInput(); // Garante que esteja visível se nenhuma data for selecionada
+            showDateInput();
         }
     });
 
@@ -91,7 +156,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Funções do Contador ---
+    // --- Novo: Gerar Link ---
+    generateLinkButton.addEventListener('click', async () => {
+        if (!startDate || !isValidDate(startDate)) {
+            alert("Por favor, defina a data inicial antes de gerar o link.");
+            return;
+        }
+
+        const config = {
+            startDate: startDate.toISOString(),
+            images: []
+        };
+
+        imagePreviews.forEach(imgElement => {
+            // Verifica se a imagem não é um placeholder (data:image/svg+xml)
+            if (imgElement.src && !imgElement.src.includes('via.placeholder.com') && imgElement.src.startsWith('data:image')) {
+                config.images.push(imgElement.src);
+            } else {
+                config.images.push(null); // Mantém a posição se não houver imagem
+            }
+        });
+
+        const configString = JSON.stringify(config);
+        const encodedConfig = encodeURIComponent(configString);
+        const link = window.location.origin + window.location.pathname + '#' + encodedConfig;
+
+        try {
+            await navigator.clipboard.writeText(link);
+            copyMessage.textContent = "Link copiado!";
+            copyMessage.classList.add('show');
+            setTimeout(() => {
+                copyMessage.classList.remove('show');
+                copyMessage.textContent = "";
+            }, 3000);
+        } catch (err) {
+            console.error('Falha ao copiar o link: ', err);
+            copyMessage.textContent = "Erro ao copiar. Copie manualmente: " + link;
+            copyMessage.classList.add('show');
+            // Você pode adicionar um campo de texto temporário para o usuário copiar manualmente aqui.
+        }
+    });
+
+
+    // --- Funções do Contador (inalteradas ou com pequenas otimizações) ---
 
     function startCountdown() {
         if (countdownInterval) {
