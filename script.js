@@ -65,12 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Ajusta a altura do container para se adaptar à altura da página ativa
-        // Usa setTimeout para garantir que a página ativa já tenha calculado sua altura final
-        // Um atraso um pouco maior (e.g., 100ms) pode ser necessário dependendo do conteúdo
+        // Aumenta um pouco o setTimeout para garantir que o layout seja renderizado antes do cálculo
         setTimeout(() => {
             const activePageHeight = pageToShow.scrollHeight; // Inclui o padding da página
             container.style.height = `${activePageHeight}px`;
-        }, 100); // Atraso ligeiramente maior para garantir o cálculo correto da altura
+            // Para garantir que o container não exceda a altura da viewport, especialmente em mobile com teclado
+            container.style.maxHeight = `calc(100vh - 40px)`; // 40px para o padding do body
+        }, 150); // Atraso um pouco maior (150ms)
     }
 
     // === Funções de Utilitário ===
@@ -602,6 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const activePage = document.querySelector('.page.active');
         if (activePage) {
             container.style.height = `${activePage.scrollHeight}px`;
+            container.style.maxHeight = `calc(100vh - 40px)`; // Reajusta max-height em redimensionamento
         }
     });
 });
