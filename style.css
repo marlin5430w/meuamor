@@ -1,3 +1,11 @@
+:root {
+    --main-color: #ff007f; /* Variável CSS para a cor principal */
+    --main-color-dark: #e6006e; /* Cor mais escura para hover */
+    --main-color-shadow: rgba(255, 0, 127, 0.4); /* Sombra */
+    --main-color-border-dash: rgba(255, 0, 127, 0.5); /* Borda tracejada */
+    --main-color-hover-bg: rgba(255, 0, 127, 0.1); /* Fundo hover translúcido */
+}
+
 body {
     background-color: #1a1a1a; /* Fundo escuro */
     color: #dedede; /* Texto branco/claro */
@@ -12,39 +20,39 @@ body {
 
 .container {
     background-color: #0d0d0d; /* Fundo ainda mais escuro para o container */
-    border: 2px solid #ff007f; /* Contorno rosa vibrante */
+    border: 2px solid var(--main-color); /* Usando a variável */
     border-radius: 10px;
     padding: 30px;
     text-align: center;
-    box-shadow: 0 0 20px rgba(255, 0, 127, 0.4); /* Sombra suave rosa */
+    box-shadow: 0 0 20px var(--main-color-shadow); /* Usando a variável */
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 90%; /* Ajusta a largura para ser responsiva */
-    max-width: 500px; /* Largura máxima um pouco maior para as fotos */
-    box-sizing: border-box; /* Inclui padding e border na largura total */
+    width: 90%;
+    max-width: 500px;
+    box-sizing: border-box;
 }
 
-/* Estilos para o input de data */
+/* Estilos para o input de data e cor */
 .date-input-container {
     margin-bottom: 25px;
     display: flex;
-    flex-direction: column; /* Em coluna para telas pequenas */
+    flex-direction: column;
     align-items: center;
-    gap: 10px; /* Espaço entre os elementos */
-    transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out; /* Adicionado padding */
+    gap: 10px;
+    transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out;
     overflow: hidden;
     max-height: 200px;
     opacity: 1;
 }
 
-/* Nova classe para esconder o container de data */
+/* Nova classe para esconder o container de data e cor */
 .date-input-container.hidden {
     opacity: 0;
     max-height: 0;
     margin-bottom: 0;
-    padding-top: 0; /* Adicionado */
-    padding-bottom: 0; /* Adicionado */
+    padding-top: 0;
+    padding-bottom: 0;
     pointer-events: none;
 }
 
@@ -52,31 +60,75 @@ body {
 .photo-uploader.hidden,
 .action-button.hidden,
 .date-input-container label.hidden, /* Esconder label também */
-.date-picker.hidden {
+.date-picker.hidden,
+.color-picker-container.hidden { /* Esconder o contêiner do color picker */
     display: none !important; /* Força o ocultamento total */
 }
-
 
 .date-input-container label {
     font-size: 0.9em;
     margin-bottom: 5px;
-    color: #ff007f;
+    color: var(--main-color); /* Usando a variável */
 }
 
 .date-picker {
     padding: 10px;
-    border: 1px solid #ff007f;
+    border: 1px solid var(--main-color); /* Usando a variável */
     border-radius: 5px;
     background-color: #2a2a2a;
     color: #dedede;
     font-size: 1em;
-    width: 220px; /* Largura fixa para o input */
-    box-sizing: border-box; /* Inclui padding na largura */
+    width: 220px;
+    box-sizing: border-box;
 }
+
+/* Estilo para o seletor de cores */
+.color-picker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px; /* Espaçamento acima */
+    /* Adicionado para ocultar */
+    transition: opacity 0.5s ease-in-out;
+    opacity: 1;
+}
+
+.color-picker {
+    -webkit-appearance: none; /* Remove o estilo padrão do navegador para WebKit */
+    -moz-appearance: none; /* Remove o estilo padrão do navegador para Mozilla */
+    appearance: none; /* Remove o estilo padrão do navegador */
+    width: 80px; /* Largura menor para o seletor */
+    height: 30px; /* Altura */
+    border: 1px solid var(--main-color); /* Borda com a cor do tema */
+    background-color: #2a2a2a; /* Fundo do input */
+    padding: 0; /* Remove padding padrão */
+    cursor: pointer;
+    border-radius: 5px; /* Cantos arredondados */
+    overflow: hidden; /* Garante que a cor preencha o box */
+}
+
+/* Estiliza a cor dentro do seletor (compatibilidade de navegador varia) */
+.color-picker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+.color-picker::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+.color-picker::-moz-color-swatch-wrapper {
+    border: none;
+    padding: 0;
+}
+.color-picker::-moz-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+
 
 /* Estilo para os botões gerais */
 .action-button {
-    background-color: #ff007f;
+    background-color: var(--main-color); /* Usando a variável */
     color: white;
     border: none;
     padding: 10px 15px;
@@ -84,41 +136,39 @@ body {
     cursor: pointer;
     font-size: 1em;
     transition: background-color 0.3s ease;
-    margin-top: 20px; /* Espaço acima do botão */
+    margin-top: 20px;
 }
 
 .action-button:hover {
-    background-color: #e6006e;
+    background-color: var(--main-color-dark); /* Usando a variável */
 }
 
-/* Estilo específico para o botão de definir data */
 #setStartDateButton {
-    margin-top: 0; /* Remove a margem extra do botão de data */
+    margin-top: 0;
 }
 
 
 /* Estilos para as fotos e upload */
 .photos-container {
     display: flex;
-    justify-content: space-around; /* Distribui as fotos igualmente */
+    justify-content: space-around;
     align-items: center;
-    flex-wrap: wrap; /* Quebra para a linha de baixo em telas pequenas */
-    gap: 15px; /* Espaço entre as fotos */
+    flex-wrap: wrap;
+    gap: 15px;
     margin-bottom: 25px;
     width: 100%;
 }
 
 .photo-uploader {
-    width: 120px; /* Largura para cada foto */
-    height: 120px; /* Altura para cada foto */
-    background-color: #2a2a2a; /* Fundo para a área da foto */
-    border-radius: 8px; /* Cantos arredondados */
-    overflow: hidden; /* Garante que a imagem não saia dos limites */
-    box-shadow: 0 0 10px rgba(255, 0, 127, 0.2); /* Sombra suave */
-    position: relative; /* Para posicionar elementos filhos */
-    /* Adicionado transição para esconder/mostrar */
+    width: 120px;
+    height: 120px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px var(--main-color-shadow); /* Usando a variável */
+    position: relative;
     transition: opacity 0.5s ease-in-out;
-    opacity: 1; /* Começa visível */
+    opacity: 1;
 }
 
 /* Esconde o input de arquivo padrão */
@@ -135,20 +185,20 @@ body {
     height: 100%;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    border: 2px dashed rgba(255, 0, 127, 0.5); /* Borda tracejada para indicar clicável */
-    border-radius: 8px; /* Cantos arredondados para a borda tracejada */
+    border: 2px dashed var(--main-color-border-dash); /* Usando a variável */
+    border-radius: 8px;
 }
 
 .custom-file-upload:hover {
-    background-color: rgba(255, 0, 127, 0.1); /* Efeito hover */
+    background-color: var(--main-color-hover-bg); /* Usando a variável */
 }
 
 .photo-uploader img {
-    width: 100%; /* Imagem ocupa 100% da largura do placeholder */
-    height: 100%; /* Imagem ocupa 100% da altura do placeholder */
-    object-fit: cover; /* Recorta a imagem para preencher o espaço, mantendo a proporção */
-    display: block; /* Remove espaço extra que alguns navegadores adicionam */
-    border-radius: 8px; /* Cantos arredondados para a imagem */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 8px;
 }
 
 .text-content {
@@ -159,20 +209,20 @@ body {
     font-size: 1.8em;
     font-weight: bold;
     margin-bottom: 15px;
-    color: #ff007f; /* Título em rosa */
+    color: var(--main-color); /* Usando a variável */
 }
 
 .counter-line {
     font-size: 1.2em;
     margin: 8px 0;
-    line-height: 1.4; /* Espaçamento entre linhas */
+    line-height: 1.4;
 }
 
 .copy-message {
-    color: #4CAF50; /* Verde para mensagem de sucesso */
+    color: #4CAF50;
     font-size: 0.9em;
     margin-top: 10px;
-    opacity: 0; /* Começa invisível */
+    opacity: 0;
     transition: opacity 0.3s ease-in-out;
 }
 
@@ -196,18 +246,18 @@ body {
     }
 
     .photos-container {
-        flex-direction: column; /* Fotos em coluna em telas pequenas */
+        flex-direction: column;
     }
 
     .photo-uploader {
-        width: 150px; /* Fotos um pouco maiores em coluna */
+        width: 150px;
         height: 150px;
     }
 
     .date-input-container {
-        width: 100%; /* Ocupa a largura total */
+        width: 100%;
     }
     .date-picker {
-        width: calc(100% - 20px); /* Ajusta a largura para o padding */
+        width: calc(100% - 20px);
     }
 }
