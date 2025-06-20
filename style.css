@@ -45,7 +45,7 @@ body {
     gap: 10px;
     transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out;
     overflow: hidden;
-    max-height: 550px; /* Aumenta a altura máxima para acomodar os campos de música e emoji */
+    max-height: 650px; /* Aumenta a altura máxima para acomodar os campos de música e emoji */
     opacity: 1;
     width: 100%; /* Ocupa toda a largura do container */
 }
@@ -247,7 +247,7 @@ body {
 /* --- NOVOS ESTILOS PARA EMOJIS --- */
 .emoji-input-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Padrão: empilha em mobile */
     align-items: center;
     gap: 10px;
     margin-top: 20px;
@@ -262,22 +262,42 @@ body {
     font-size: 1em;
     color: var(--main-color);
     margin-bottom: 5px;
+    text-align: center; /* Centraliza o label em mobile */
+    width: 100%; /* Garante que o label ocupe a largura para centralizar */
+}
+
+/* Container flexbox para os próprios inputs de emoji */
+.emoji-inputs-wrapper {
+    display: flex;
+    gap: 10px; /* Espaçamento entre os inputs */
+    justify-content: center; /* Centraliza os inputs */
+    flex-wrap: wrap; /* Permite quebrar linha se não couberem todos (improvável aqui, mas boa prática) */
+    width: 100%; /* Ocupa a largura total do container pai */
 }
 
 .emoji-input {
-    width: 50px; /* Largura pequena para um emoji */
+    width: 60px; /* Largura fixa maior para o input */
+    height: 60px; /* Altura igual à largura para um quadrado */
     text-align: center;
-    font-size: 1.8em; /* Emojis maiores */
+    font-size: 2.2em; /* Emojis maiores */
     padding: 5px;
     border: 1px solid var(--main-color);
-    border-radius: 5px;
+    border-radius: 8px; /* Cantos mais arredondados */
     background-color: #2a2a2a;
     color: #dedede;
     box-sizing: border-box;
-    /* Ajusta a altura para caber o emoji maior */
-    height: 45px;
     line-height: 1; /* Para centralizar verticalmente o emoji */
+    flex-shrink: 0; /* Impede que o input encolha */
+    display: flex; /* Permite centralizar o emoji vertical e horizontalmente */
+    align-items: center;
+    justify-content: center;
 }
+
+/* Remova o placeholder de background para que o emoji digitado apareça bem */
+.emoji-input::placeholder {
+    color: #888;
+}
+
 
 /* Container que vai receber os emojis animados */
 #emojiRainContainer {
@@ -550,7 +570,7 @@ body {
 
     /* Ajusta a altura máxima do date-input-container para desktop */
     .date-input-container {
-        max-height: 400px; /* Ajusta para comportar todos os inputs */
+        max-height: 500px; /* Ajusta para comportar todos os inputs */
         flex-direction: row; /* Volta a ser row em telas maiores */
         flex-wrap: wrap; /* Permite quebrar linha se necessário */
         justify-content: center;
@@ -577,7 +597,7 @@ body {
 
     /* Estilos para o emoji-input-container em telas maiores */
     .emoji-input-container {
-        flex-direction: row;
+        flex-direction: column; /* Manter em coluna, centralizando os inputs */
         justify-content: center;
         gap: 10px;
         flex-wrap: wrap;
@@ -586,10 +606,13 @@ body {
         flex-basis: 100%;
         text-align: center;
     }
+    .emoji-inputs-wrapper { /* Garante que o wrapper também centralize */
+        width: auto; /* Permite que o wrapper se ajuste ao conteúdo */
+    }
     .emoji-input {
-        width: 60px; /* Um pouco maior em desktop */
-        height: 50px;
-        font-size: 2.2em;
+        width: 70px; /* Um pouco maior em desktop */
+        height: 70px;
+        font-size: 2.5em;
     }
 
 
