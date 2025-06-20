@@ -28,24 +28,24 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('imagePreview3')
     ];
 
-    const personalMessageInput = document.getElementById('personalMessageInput'); // NOVO
-    const personalMessageDisplay = document.getElementById('personalMessageDisplay'); // NOVO
-    const messageSlot = document.getElementById('messageSlot'); // NOVO
-
+    const personalMessageInput = document.getElementById('personalMessageInput');
+    const personalMessageDisplay = document.getElementById('personalMessageDisplay');
+    const messageSlot = document.getElementById('messageSlot');
 
     let startDate = null;
     let currentThemeColor = '#ff007f';
     let countdownInterval;
+    let slideshowInterval;
+    let currentImageIndex = 0;
+    let loadedImages = [];
 
     // --- Funções de Aplicação de Tema e Visibilidade ---
     function applyThemeColor(color) {
         root.style.setProperty('--main-color', color);
         const hexToRgb = hex => hex.match(/\w\w/g).map(x => parseInt(x, 16));
-        const rgbToRgbA = (rgb, alpha) => `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
-
-        const rgb = hexToRgb(color);
+        const rgbToRgbA = (rgb, alpha) => `rgba(${rgb.join(',')}, ${alpha})`;
         const darkerRgb = rgb.map(c => Math.max(0, c - 30));
-        root.style.setProperty('--main-color-dark', `rgb(${darkerRgb[0]}, ${darkerRgb[1]}, ${darkerRgb[2]})`);
+        root.style.setProperty('--main-color-dark', `rgb(${darkerRgb.join(',')})`);
         root.style.setProperty('--main-color-shadow', rgbToRgbA(rgb, 0.4));
         root.style.setProperty('--main-color-border-dash', rgbToRgbA(rgb, 0.5));
         root.style.setProperty('--main-color-hover-bg', rgbToRgbA(rgb, 0.1));
@@ -63,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (generateLinkButton) generateLinkButton.classList.add('hidden');
 
-        // NOVO: Esconde o textarea e mostra o p de exibição
         personalMessageInput.classList.add('hidden');
         personalMessageDisplay.classList.add('show');
     }
@@ -80,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (generateLinkButton) generateLinkButton.classList.remove('hidden');
 
-        // NOVO: Mostra o textarea e esconde o p de exibição
         personalMessageInput.classList.remove('hidden');
         personalMessageDisplay.classList.remove('show');
     }
@@ -99,6 +97,26 @@ document.addEventListener('DOMContentLoaded', () => {
         dateInputContainer.querySelector('label').classList.remove('hidden');
     }
 
+    function startSlideshow() {
+        clearInterval(slideshowInterval); // Clear any existing interval
+        if (loadedImages.length > 0) {
+            slideshowInterval = setInterval(() => {
+                imagePreviews.forEach(img => {
+                    if (loadedImages.length > 0) {
+                        img.src = loadedImages[(currentImageIndex) % loadedImages.length];
+                    } else {
+                        img.src = 'https://via.placeholder.com/120x120?text=Foto'; // Fallback placeholder
+                    }
+                });
+                currentImageIndex++;
+            }, 3000); // Change image every 3 seconds (3000 milliseconds)
+        }
+    }
+
+    function updateLoadedImages() {
+        loadedImages = imagePreviews.map(img => img.src).filter(src => !src.includes('via.placeholder.com'));
+        startSlideshow(); // Start or restart the slideshow when images are updated
+    }
 
     // --- Lógica de Carregamento (Prioridade: URL Hash > localStorage) ---
     const hashParams = window.location.hash.substring(1);
@@ -122,10 +140,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.images && Array.isArray(data.images)) {
                 data.images.forEach((imgData, index) => {
-                    if (imagePreviews[index] && typeof imgData === 'string' && imgData.startsWith('data:image')) {
-                        imagePreviews[index].src = imgData;
+                    if (imagePreviews [index]) {
+                        imagePreviews [index].onload = updateLoadedImages; // Call update after each image loads
+                        imagePreviews [index].src = imgData || 'https://via.placeholder.com/120x120?text=Foto';
                     }
                 });
+                // If there are images in the link, and they are immediately available (cached),
+                // we might need to trigger the update if onload doesn't fire.
+                setTimeout(updateLoadedImages, 500);
+            } else {
+                updateLoadedImages(); // If no images in link, use placeholders
             }
 
             if (data.themeColor && typeof data.themeColor === 'string' && data.themeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -133,12 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyThemeColor(currentThemeColor);
             }
 
-            if (data.personalMessage && typeof data.personalMessage === 'string') { // NOVO
+            if (data.personalMessage && typeof data.personalMessage === 'string') {
                 personalMessageDisplay.textContent = data.personalMessage;
             } else {
-                personalMessageDisplay.textContent = ""; // Garante que esteja vazio se não houver mensagem
+                personalMessageDisplay.textContent = "";
             }
-
 
             if (isValidDate(startDate)) {
                 hideEditingElements();
@@ -175,9 +198,15 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePreviews.forEach((imgElement, index) => {
             const storedImage = localStorage.getItem(`uploadedImage${index + 1}`);
             if (storedImage) {
+                imgElement.onload = updateLoadedImages; // Call update after each image loads
                 imgElement.src = storedImage;
+            } else {
+                imgElement.src = 'https://via.placeholder.com/120x120?text=Foto ' + (index + 1);
             }
         });
+        // Trigger update after initial load from localStorage
+        setTimeout(updateLoadedImages, 500);
+
 
         const storedThemeColor = localStorage.getItem('themeColor');
         if (storedThemeColor && storedThemeColor.match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -186,18 +215,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         applyThemeColor(currentThemeColor);
 
-        const storedPersonalMessage = localStorage.getItem('personalMessage'); // NOVO
+        const storedPersonalMessage = localStorage.getItem('personalMessage');
         if (storedPersonalMessage) {
             personalMessageInput.value = storedPersonalMessage;
         }
 
-
-        showEditingElements(); // Garante que todos os elementos de edição estejam visíveis por padrão no modo edição
+        showEditingElements();
     }
 
 
     // --- Listeners de Eventos ---
-
     setStartDateButton.addEventListener('click', () => {
         const inputDateValue = startDatePicker.value;
         if (inputDateValue) {
@@ -224,21 +251,26 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('themeColor', currentThemeColor);
     });
 
-    personalMessageInput.addEventListener('input', (event) => { // NOVO
+    personalMessageInput.addEventListener('input', (event) => {
         localStorage.setItem('personalMessage', event.target.value);
     });
 
     imageUploads.forEach((inputElement, index) => {
         inputElement.addEventListener('change', (event) => {
-            const file = event.target.files[0];
+            const file = event.target.files [0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const imageDataUrl = e.target.result;
-                    imagePreviews[index].src = imageDataUrl;
+                    imagePreviews [index].onload = updateLoadedImages; // Call update after upload
+                    imagePreviews [index].src = imageDataUrl;
                     localStorage.setItem(`uploadedImage${index + 1}`, imageDataUrl);
                 };
                 reader.readAsDataURL(file);
+            } else {
+                imagePreviews [index].src = 'https://via.placeholder.com/120x120?text=Foto ' + (index + 1);
+                localStorage.removeItem(`uploadedImage${index + 1}`);
+                updateLoadedImages(); // Update if an image is removed
             }
         });
     });
@@ -252,18 +284,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const config = {
             startDate: startDate.toISOString(),
-            images: [],
+            images: imagePreviews.map(img => img.src.includes('via.placeholder.com') ? null : img.src),
             themeColor: currentThemeColor,
-            personalMessage: personalMessageInput.value // NOVO: Inclui a mensagem
+            personalMessage: personalMessageInput.value
         };
-
-        imagePreviews.forEach(imgElement => {
-            if (imgElement.src && !imgElement.src.includes('via.placeholder.com') && imgElement.src.startsWith('data:image')) {
-                config.images.push(imgElement.src);
-            } else {
-                config.images.push(null);
-            }
-        });
 
         const configString = JSON.stringify(config);
         const encodedConfig = encodeURIComponent(configString);
@@ -286,7 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Funções do Contador --- (inalteradas)
-
     function startCountdown() {
         if (countdownInterval) {
             clearInterval(countdownInterval);
