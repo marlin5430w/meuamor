@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // === Seletores de Elementos ===
-    const container = document.querySelector('.container'); // Seleciona o container principal
+    const appWrapper = document.querySelector('.app-wrapper'); // Novo wrapper
+    const container = document.querySelector('.container');
     const page1 = document.getElementById('page1');
     const page2 = document.getElementById('page2');
     const viewModeDisplay = document.getElementById('viewModeDisplay');
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let countdownInterval;
     let slideshowInterval;
     let currentSlide = 0;
-    let uploadedPhotoData = []; // Para armazenar base64 das imagens
+    let uploadedPhotoData = [];
     let musicId = '';
     let musicTitle = '';
     let selectedEmojis = ['', '', ''];
@@ -64,14 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Ajusta a altura do container para se adaptar à altura da página ativa
-        // Aumenta um pouco o setTimeout para garantir que o layout seja renderizado antes do cálculo
-        setTimeout(() => {
-            const activePageHeight = pageToShow.scrollHeight; // Inclui o padding da página
-            container.style.height = `${activePageHeight}px`;
-            // Para garantir que o container não exceda a altura da viewport, especialmente em mobile com teclado
-            container.style.maxHeight = `calc(100vh - 40px)`; // 40px para o padding do body
-        }, 150); // Atraso um pouco maior (150ms)
+        // Não precisamos mais ajustar a altura do container dinamicamente via JS
+        // pois o CSS `height: 100%` para .container e .page já devem lidar com isso,
+        // desde que o app-wrapper tenha altura 100vh.
+        // O `overflow-y: auto` nas páginas é que vai permitir a rolagem interna.
     }
 
     // === Funções de Utilitário ===
@@ -132,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let displayParts = [];
         if (years > 0) displayParts.push(`${years} ano${years !== 1 ? 's' : ''}`);
         if (remainingMonths > 0) displayParts.push(`${remainingMonths} mês${remainingMonths !== 1 ? 'es' : ''}`);
-        // Mostra dias se não houver meses/anos E se houver dias relevantes (não zero)
         if (displayParts.length < 2 && Math.floor(days % 30.44) > 0) displayParts.push(`${Math.floor(days % 30.44)} dia${Math.floor(days % 30.44) !== 1 ? 's' : ''}`);
 
         const displayString = displayParts.length > 0 ? displayParts.join(', ') : '0 dias';
@@ -150,12 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadYouTubePlayer(videoId) {
         if (videoId) {
-            player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&enablejsapi=1&iv_load_policy=3&loop=1&playlist=${videoId}`;
-            player.style.display = 'block'; // Garante que o player seja visível
+            player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&disablekb=1&enablejsapi=1&loop=1&playlist=${videoId}`;
+            player.style.display = 'block';
             player.style.opacity = '1';
-            player.style.position = 'relative'; // Volta ao fluxo normal do documento
+            player.style.position = 'relative';
             player.style.left = 'auto';
-            player.style.height = '100px'; // Altura visível
+            player.style.height = '100px';
         } else {
             player.src = '';
             player.style.display = 'none';
@@ -163,16 +159,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startSlideshow() {
-        stopSlideshow(); // Limpa qualquer slideshow anterior
+        stopSlideshow();
         const photos = photosContainer.querySelectorAll('img');
         if (photos.length === 0) {
-            photosContainer.style.display = 'none'; // Esconde se não houver fotos
+            photosContainer.style.display = 'none';
             return;
         }
-        photosContainer.style.display = 'flex'; // Garante que o container esteja visível
-        photosContainer.classList.add('slideshow-mode'); // Adiciona a classe para o CSS do slideshow
+        photosContainer.style.display = 'flex';
+        photosContainer.classList.add('slideshow-mode');
 
-        currentSlide = 0; // Reinicia o slide
+        currentSlide = 0;
         photos.forEach(img => img.classList.remove('active'));
         photos[currentSlide].classList.add('active');
 
@@ -180,22 +176,20 @@ document.addEventListener('DOMContentLoaded', () => {
             photos[currentSlide].classList.remove('active');
             currentSlide = (currentSlide + 1) % photos.length;
             photos[currentSlide].classList.add('active');
-        }, 5000); // Muda a cada 5 segundos
+        }, 5000);
     }
 
     function stopSlideshow() {
         clearInterval(slideshowInterval);
-        photosContainer.classList.remove('slideshow-mode'); // Remove a classe do slideshow
-        // Certifica-se de que todas as imagens estejam ocultas após parar o slideshow
+        photosContainer.classList.remove('slideshow-mode');
         photosContainer.querySelectorAll('img').forEach(img => img.classList.remove('active'));
     }
 
     function startEmojiRain() {
-        stopEmojiRain(); // Limpa qualquer chuva de emojis anterior
-        if (selectedEmojis.filter(e => e).length === 0) return; // Não inicia se não houver emojis
+        stopEmojiRain();
+        if (selectedEmojis.filter(e => e).length === 0) return;
         emojiRainContainer.style.display = 'block';
 
-        // Usa requestAnimationFrame para animação suave
         const createEmoji = () => {
             const emoji = selectedEmojis[Math.floor(Math.random() * selectedEmojis.length)];
             if (!emoji) return;
@@ -213,8 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
-        // Cria emojis em intervalos regulares
-        // Guarde o ID do setInterval para poder limpá-lo com stopEmojiRain
         emojiRainContainer.intervalId = setInterval(createEmoji, 300);
     }
 
@@ -223,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (emojiRainContainer.intervalId) {
             clearInterval(emojiRainContainer.intervalId);
         }
-        // Remove todos os emojis existentes
         emojiRainContainer.innerHTML = '';
     }
 
@@ -242,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
     themeColorPicker.addEventListener('input', (event) => {
         const newColor = event.target.value;
         document.documentElement.style.setProperty('--main-color', newColor);
-        // Verifica se tinycolor está carregado antes de usar
         if (typeof tinycolor !== 'undefined') {
             document.documentElement.style.setProperty('--main-color-dark', tinycolor(newColor).darken(10).toString());
             document.documentElement.style.setProperty('--main-color-shadow', tinycolor(newColor).setAlpha(0.4).toString());
@@ -263,23 +253,21 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('musicTitle', musicTitle);
         } else {
             musicLoadedMessage.textContent = 'Link inválido do YouTube.';
-            musicLoadedMessage.style.color = '#ff4444'; // Cor de erro
+            musicLoadedMessage.style.color = '#ff4444';
             musicLoadedMessage.style.display = 'block';
             localStorage.removeItem('musicId');
             localStorage.removeItem('musicTitle');
         }
         setTimeout(() => {
             musicLoadedMessage.style.display = 'none';
-            musicLoadedMessage.style.color = '#4CAF50'; // Volta para cor de sucesso
+            musicLoadedMessage.style.color = '#4CAF50';
         }, 3000);
     });
 
     emojiInputs.forEach((input, index) => {
         input.addEventListener('input', (event) => {
             let value = event.target.value;
-            // Remove caracteres que não são emojis
             value = value.replace(/[^\p{Emoji}\p{Emoji_Modifier}\p{Emoji_Component}\p{Emoji_Presentation}]/gu, '');
-            // Limita a 1 ou 2 caracteres para a maioria dos emojis
             if (value.length > 2) {
                 value = value.slice(0, 2);
             }
@@ -299,9 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     photoSlot.img.style.display = 'block';
                     photoSlot.img.style.opacity = '1';
                     photoSlot.button.classList.add('show-button');
-                    uploadedPhotoData[index] = e.target.result; // Armazena o Base64
+                    uploadedPhotoData[index] = e.target.result;
                     localStorage.setItem(`uploadedPhoto${index + 1}`, e.target.result);
-                    // Esconde o texto "Foto X"
                     photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'none';
                 };
                 reader.readAsDataURL(file);
@@ -309,14 +296,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         photoSlot.button.addEventListener('click', (event) => {
-            event.preventDefault(); // Impede o envio do formulário ou clique no label
+            event.preventDefault();
             photoSlot.img.src = '';
             photoSlot.img.style.display = 'none';
             photoSlot.img.style.opacity = '0';
             photoSlot.button.classList.remove('show-button');
-            uploadedPhotoData[index] = ''; // Limpa o Base64
+            uploadedPhotoData[index] = '';
             localStorage.removeItem(`uploadedPhoto${index + 1}`);
-            // Volta a exibir o texto "Foto X"
             photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'block';
         });
     });
@@ -336,14 +322,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     generateLinkButton.addEventListener('click', () => {
-        // Coleta todos os dados para o link
         const params = new URLSearchParams();
 
         if (startDate) {
             params.set('date', startDate.toISOString());
         }
         const themeColor = themeColorPicker.value;
-        params.set('color', themeColor.substring(1)); // Remove o #
+        params.set('color', themeColor.substring(1));
 
         if (musicId) {
             params.set('music', musicId);
@@ -360,18 +345,15 @@ document.addEventListener('DOMContentLoaded', () => {
             params.set('msg', encodeURIComponent(personalMessageInput.value));
         }
 
-        // Adiciona as fotos em Base64 como múltiplos parâmetros 'photo'
         uploadedPhotoData.forEach(data => {
             if (data) params.append('photo', encodeURIComponent(data));
         });
 
         const shareLink = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
 
-        // Altera para o modo de visualização diretamente
         renderViewMode(params);
         showPage(viewModeDisplay);
 
-        // Atualiza o histórico do navegador para refletir o novo URL
         window.history.pushState({}, '', shareLink);
     });
 
@@ -401,35 +383,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const urlParams = parseURLParams();
 
         if (urlParams.date || urlParams.music || urlParams.emoji1 || urlParams.photos.length > 0 || urlParams.msg) {
-            // Se houver parâmetros na URL, entra no modo de visualização
             renderViewMode(urlParams);
             showPage(viewModeDisplay);
         } else {
-            // Caso contrário, carrega do localStorage e fica no modo de edição (Página 1)
             loadFromLocalStorage();
-            showPage(page1); // Garante que a página 1 seja mostrada ao iniciar sem parâmetros
+            showPage(page1);
         }
 
-        // Garante que o player esteja invisível no início se não for modo de visualização com música
         if (!urlParams.music) {
             player.style.display = 'none';
         }
     }
 
     function loadFromLocalStorage() {
-        // Carregar data
         const storedStartDate = localStorage.getItem('startDate');
         if (storedStartDate) {
             startDate = new Date(storedStartDate);
-            // Ajusta o fuso horário para exibir corretamente no input datetime-local
             startDatePicker.value = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
-            updateCountdown(); // Atualiza o contador na tela de edição
+            updateCountdown();
         } else {
-            countdownMessage.textContent = "Selecione a data inicial."; // Mensagem padrão para a tela de edição
+            countdownMessage.textContent = "Selecione a data inicial.";
             exactTimeMessage.textContent = "";
         }
 
-        // Carregar cor
         const storedThemeColor = localStorage.getItem('themeColor');
         if (storedThemeColor) {
             themeColorPicker.value = storedThemeColor;
@@ -442,12 +418,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Carregar música
         musicId = localStorage.getItem('musicId') || '';
         musicTitle = localStorage.getItem('musicTitle') || '';
         if (musicId) {
-            // Note: O link do YouTube para display no input é diferente do embed
-            musicLinkInput.value = `https://www.youtube.com/watch?v=${musicId}`;
+            musicLinkInput.value = `https://www.youtube.com/watch?v=${musicId}`; // Link completo para o input
             musicNameInput.value = musicTitle;
             musicLoadedMessage.textContent = `Música: "${musicTitle}" carregada!`;
             musicLoadedMessage.style.display = 'block';
@@ -457,26 +431,22 @@ document.addEventListener('DOMContentLoaded', () => {
             musicNameInput.value = '';
         }
 
-
-        // Carregar emojis
         emojiInputs.forEach((input, index) => {
             const storedEmoji = localStorage.getItem(`emoji${index + 1}`);
             if (storedEmoji) {
                 input.value = storedEmoji;
                 selectedEmojis[index] = storedEmoji;
             } else {
-                input.value = ''; // Garante que o campo esteja vazio se não houver emoji armazenado
+                input.value = '';
                 selectedEmojis[index] = '';
             }
         });
 
-        // Carregar mensagem
         const storedMessage = localStorage.getItem('personalMessage');
         if (storedMessage) {
             personalMessageInput.value = storedMessage;
         }
 
-        // Carregar fotos
         uploadedPhotoData = [];
         photoUploads.forEach((photoSlot, index) => {
             const storedPhoto = localStorage.getItem(`uploadedPhoto${index + 1}`);
@@ -486,10 +456,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 photoSlot.img.style.opacity = '1';
                 photoSlot.button.classList.add('show-button');
                 uploadedPhotoData[index] = storedPhoto;
-                // Esconde o texto "Foto X"
                 photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'none';
             } else {
-                 // Garante que o texto "Foto X" esteja visível se não houver foto
                 photoSlot.input.parentElement.querySelector('.upload-text').style.display = 'block';
                 photoSlot.img.src = '';
                 photoSlot.img.style.display = 'none';
@@ -501,15 +469,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderViewMode(params) {
-        // Limpa intervalos antigos e elementos visuais de edição
         clearInterval(countdownInterval);
         stopSlideshow();
         stopEmojiRain();
-        player.src = ''; // Limpa o player de música
-        displayedMusicName.parentElement.style.display = 'none'; // Esconde o contêiner da música
-        photosContainer.innerHTML = ''; // Limpa fotos antigas do slideshow
+        player.src = '';
+        displayedMusicName.parentElement.style.display = 'none';
+        photosContainer.innerHTML = '';
 
-        // Aplicar cor do tema
         if (params.color) {
             const newColor = `#${params.color}`;
             document.documentElement.style.setProperty('--main-color', newColor);
@@ -521,29 +487,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Data Inicial
         if (params.date) {
             startDate = new Date(params.date);
-            countdownInterval = setInterval(updateCountdown, 1000); // Inicia o contador
-            updateCountdown(); // Atualiza imediatamente
+            countdownInterval = setInterval(updateCountdown, 1000);
+            updateCountdown();
         } else {
             countdownMessage.textContent = "Data inicial não definida.";
             exactTimeMessage.textContent = "";
         }
 
-        // Música
         musicId = params.music || '';
-        musicTitle = decodeURIComponent(params.musicName || '') || 'Música de Amor'; // Padrão se não houver nome
+        musicTitle = decodeURIComponent(params.musicName || '') || 'Música de Amor';
         if (musicId) {
             displayedMusicName.textContent = musicTitle;
             loadYouTubePlayer(musicId);
-            displayedMusicName.parentElement.style.display = 'block'; // Mostra o container da música
+            displayedMusicName.parentElement.style.display = 'block';
         } else {
-            displayedMusicName.parentElement.style.display = 'none'; // Esconde se não houver música
+            displayedMusicName.parentElement.style.display = 'none';
         }
 
-
-        // Mensagem Personalizada
         if (params.msg) {
             displayedPersonalMessage.textContent = decodeURIComponent(params.msg);
             displayedPersonalMessage.classList.remove('hidden');
@@ -553,58 +515,47 @@ document.addEventListener('DOMContentLoaded', () => {
             displayedPersonalMessage.classList.remove('show');
         }
 
-        // Emojis
         selectedEmojis = [
             decodeURIComponent(params.emoji1 || ''),
             decodeURIComponent(params.emoji2 || ''),
             decodeURIComponent(params.emoji3 || '')
-        ].filter(e => e); // Remove vazios
+        ].filter(e => e);
         if (selectedEmojis.length > 0) {
             startEmojiRain();
         }
 
-        // Fotos
         const photosInUrl = params.photos;
 
         if (photosInUrl && photosInUrl.length > 0) {
             photosInUrl.forEach((base64Data) => {
                 const imgElement = document.createElement('img');
                 imgElement.src = decodeURIComponent(base64Data);
-                // Adiciona a imagem a um uploader fictício para manter a estrutura do slideshow CSS
                 const uploaderDiv = document.createElement('div');
-                uploaderDiv.classList.add('photo-uploader'); // Mantém a classe para o estilo de foto no slideshow
+                uploaderDiv.classList.add('photo-uploader');
                 uploaderDiv.appendChild(imgElement);
                 photosContainer.appendChild(uploaderDiv);
             });
-            photosContainer.style.display = 'flex'; // Garante que o contêiner de fotos esteja visível
+            photosContainer.style.display = 'flex';
             startSlideshow();
         } else {
-            photosContainer.style.display = 'none'; // Esconde se não houver fotos
+            photosContainer.style.display = 'none';
         }
 
-        // Exibe o botão de copiar link
         copyShareLinkButton.style.display = 'block';
     }
 
 
     // --- Carregamento inicial ---
-    // Verifica se tinycolor.js está carregado, se não, carrega
     if (typeof tinycolor === 'undefined') {
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.6.0/tinycolor.min.js';
-        script.onload = initialize; // Inicializa depois que tinycolor for carregado
+        script.onload = initialize;
         document.head.appendChild(script);
     } else {
-        initialize(); // tinycolor já está carregado, inicializa diretamente
+        initialize();
     }
 
-    // Adiciona um listener para redimensionamento para ajustar a altura do container dinamicamente
-    // Isso é especialmente útil quando o teclado virtual do celular aparece/desaparece
-    window.addEventListener('resize', () => {
-        const activePage = document.querySelector('.page.active');
-        if (activePage) {
-            container.style.height = `${activePage.scrollHeight}px`;
-            container.style.maxHeight = `calc(100vh - 40px)`; // Reajusta max-height em redimensionamento
-        }
-    });
+    // Remover o event listener 'resize' aqui, pois a altura agora é mais controlada pelo CSS
+    // O ajuste dinâmico da altura do container não é mais necessário no JS
+    // se o CSS estiver corretamente configurado com height: 100% para .container e .page.
 });
