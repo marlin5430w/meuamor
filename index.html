@@ -19,6 +19,14 @@
             </div>
         </div>
 
+        <div class="music-input-container" id="musicInputContainer">
+            <label for="musicLinkInput">Link da Música (YouTube, SoundCloud, etc.):</label>
+            <input type="url" id="musicLinkInput" placeholder="Cole o link da música aqui">
+            <button id="loadMusicButton" class="action-button-small">Carregar Música</button>
+            <audio id="audioPlayer" controls loop style="width: 100%; margin-top: 10px; display: none;"></audio>
+            <iframe id="youtubePlayer" width="100%" height="auto" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="display: none; aspect-ratio: 16/9; margin-top: 10px;"></iframe>
+            <p id="musicStatus" class="copy-message" style="margin-top: 5px;"></p>
+        </div>
         <div class="photos-container">
             <div class="photo-uploader">
                 <input type="file" id="imageUpload1" accept="image/*" class="hidden-file-input">
