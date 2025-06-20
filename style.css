@@ -41,7 +41,8 @@ body {
     box-sizing: border-box;
     margin: auto; /* Centraliza o container verticalmente se houver espaço extra */
     position: relative; /* PARA O POSICIONAMENTO ABSOLUTO DAS PÁGINAS */
-    min-height: 400px; /* Altura mínima para que não encolha demais */
+    /* A altura será definida pelo JavaScript para se ajustar ao conteúdo da página ativa */
+    min-height: 400px; /* Altura mínima para que não encolha demais, bom para mobile */
     transition: height 0.5s ease-in-out; /* Suaviza a mudança de altura */
     overflow: hidden; /* IMPORTANTE: Oculta o conteúdo das páginas "hidden" fora dos limites do container */
 }
@@ -189,7 +190,7 @@ textarea::placeholder {
     justify-content: center;
     flex-wrap: wrap; /* Permite quebrar linha */
     width: 100%;
-    max-width: 200px; /* Força quebra de linha em mobile se 3 não couberem */
+    max-width: 200px; /* Força quebra de linha em mobile se 3 não couperem */
     margin: 0 auto;
 }
 
