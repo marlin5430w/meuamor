@@ -32,7 +32,23 @@ body {
     flex-direction: column; /* Em coluna para telas pequenas */
     align-items: center;
     gap: 10px; /* Espaço entre os elementos */
+    /* Adicionado transição para um efeito suave ao esconder/mostrar */
+    transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out;
+    overflow: hidden; /* Garante que o conteúdo não vaze durante a transição */
+    max-height: 200px; /* Altura máxima para a transição */
+    opacity: 1; /* Começa visível */
 }
+
+/* Nova classe para esconder o container de data */
+.date-input-container.hidden {
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    pointer-events: none; /* Desabilita interações com os elementos escondidos */
+}
+
 
 .date-input-container label {
     font-size: 0.9em;
