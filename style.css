@@ -244,8 +244,8 @@ body {
 /* --- NOVOS ESTILOS PARA EMOJIS --- */
 .emoji-input-container {
     display: flex;
-    flex-direction: column; /* Sempre em coluna */
-    align-items: center;
+    flex-direction: column; /* Sempre em coluna: label em cima, inputs embaixo */
+    align-items: center; /* Centraliza horizontalmente o conteúdo */
     gap: 10px;
     margin-top: 20px;
     width: 100%;
@@ -253,9 +253,8 @@ body {
     padding: 15px;
     border-radius: 8px;
     box-sizing: border-box;
-    /* Adicionado min-height para garantir espaço suficiente */
-    min-height: 150px; /* Ajuste este valor se ainda estiver cortando */
-    justify-content: center; /* Centraliza o conteúdo verticalmente */
+    min-height: 180px; /* Aumenta um pouco mais a altura mínima para garantir espaço */
+    justify-content: center; /* Centraliza o conteúdo verticalmente dentro do container */
 }
 
 .emoji-input-container label {
@@ -269,16 +268,19 @@ body {
 /* Container flexbox para os próprios inputs de emoji */
 .emoji-inputs-wrapper {
     display: flex;
-    gap: 10px;
-    justify-content: center; /* Centraliza os inputs */
-    flex-wrap: wrap; /* Permite quebrar linha se necessário */
-    width: 100%; /* Ocupa a largura total do container pai */
-    max-width: 250px; /* Limita a largura máxima do wrapper para manter os inputs próximos */
+    gap: 10px; /* Espaçamento entre os inputs */
+    justify-content: center; /* Centraliza os inputs horizontalmente */
+    flex-wrap: wrap; /* Permite quebrar linha se não couberem todos em uma linha */
+    width: 100%; /* Ocupa a largura total do container pai para flexibilidade */
+    max-width: 200px; /* REDUZIDO: Limita a largura do wrapper para que os 3 inputs quebrem a linha no mobile se necessário e fiquem centralizados */
+    margin: 0 auto; /* Centraliza o wrapper dentro do container principal */
 }
 
 .emoji-input {
-    width: 60px; /* Largura fixa para o input */
+    /* Usar flex-basis para controlar o tamanho preferencial */
+    flex-basis: 60px; /* Largura preferencial para cada input */
     height: 60px; /* Altura fixa para o input */
+    max-width: 60px; /* Garante que o input não fique maior que 60px */
     text-align: center;
     font-size: 2.2em; /* Tamanho do emoji dentro do input */
     padding: 5px;
@@ -579,7 +581,6 @@ body {
         flex-direction: column; /* Mantido em coluna, para o label ficar acima */
         justify-content: center;
         gap: 10px;
-        /* Remover flex-wrap aqui para evitar quebras indesejadas no desktop */
     }
     .emoji-input-container label {
         flex-basis: 100%;
@@ -587,14 +588,15 @@ body {
     }
     .emoji-inputs-wrapper {
         width: auto; /* Permite que o wrapper se ajuste ao conteúdo dos 3 inputs */
-        /* Remova o flex-wrap aqui se você não quer que os inputs quebrem linha no desktop */
+        max-width: none; /* Remove a limitação de largura no desktop para que fiquem lado a lado */
+        flex-wrap: nowrap; /* Não quebra linha no desktop */
     }
     .emoji-input {
-        width: 70px;
+        flex-basis: 70px; /* Um pouco maior em desktop */
         height: 70px;
+        max-width: 70px; /* Garante que não fique maior que 70px */
         font-size: 2.5em;
     }
-
 
     /* ESTILOS PARA AS FOTOS (REVISADO PARA MEDIA QUERY E DIMENSÃO) */
     .photos-container {
