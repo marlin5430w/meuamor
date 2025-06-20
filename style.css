@@ -62,12 +62,12 @@ body {
 
 /* Classes para esconder elementos no modo "somente leitura" */
 .action-button.hidden,
-.date-input-container label.hidden, /* Ainda útil se houver labels soltos */
+.date-input-container label.hidden,
 .date-picker.hidden,
 .color-picker-container.hidden,
 .message-slot textarea.hidden,
 .music-input-container.hidden,
-.emoji-input-container.hidden { /* Esconde o container de input de emoji também */
+.emoji-input-container.hidden {
     display: none !important; /* Força o ocultamento total */
 }
 
@@ -82,20 +82,20 @@ body {
 }
 
 .date-input-container label {
-    font-size: 1em; /* Um pouco maior para legibilidade em mobile */
+    font-size: 1em;
     margin-bottom: 5px;
     color: var(--main-color);
-    text-align: center; /* Centraliza o texto do label */
+    text-align: center;
 }
 
 .date-picker {
-    padding: 12px; /* Aumenta o padding para facilitar o toque */
+    padding: 12px;
     border: 1px solid var(--main-color);
     border-radius: 5px;
     background-color: #2a2a2a;
     color: #dedede;
-    font-size: 1.1em; /* Aumenta o tamanho da fonte */
-    width: calc(100% - 24px); /* Ocupa 100% da largura menos o padding */
+    font-size: 1.1em;
+    width: calc(100% - 24px);
     box-sizing: border-box;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -108,7 +108,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    margin-top: 15px; /* Mais espaço acima */
+    margin-top: 15px;
     width: 100%;
     transition: opacity 0.5s ease-in-out;
     opacity: 1;
@@ -118,7 +118,7 @@ body {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    width: 100px; /* Um pouco maior para mobile */
+    width: 100px;
     height: 35px;
     border: 1px solid var(--main-color);
     background-color: #2a2a2a;
@@ -144,20 +144,19 @@ body {
     border-radius: 4px;
 }
 
-
 /* Estilo para os botões gerais */
 .action-button {
     background-color: var(--main-color);
     color: white;
     border: none;
-    padding: 12px 20px; /* Aumenta o padding para facilitar o toque */
+    padding: 12px 20px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1.1em; /* Aumenta o tamanho da fonte */
+    font-size: 1.1em;
     transition: background-color 0.3s ease;
-    margin-top: 25px; /* Mais espaço acima do botão */
-    width: calc(100% - 2px); /* Ocupa a largura total menos a borda */
-    max-width: 300px; /* Limita a largura para botões grandes em telas maiores */
+    margin-top: 25px;
+    width: calc(100% - 2px);
+    max-width: 300px;
     box-sizing: border-box;
 }
 
@@ -166,11 +165,10 @@ body {
 }
 
 #setStartDateButton {
-    margin-top: 15px; /* Espaço entre o picker de cor e o botão de data */
-    width: calc(100% - 24px); /* Ajusta a largura para o input date */
-    max-width: 220px; /* Mantém a largura do input date */
+    margin-top: 15px;
+    width: calc(100% - 24px);
+    max-width: 220px;
 }
-
 
 /* --- ESTILOS PARA A MÚSICA --- */
 .music-input-container {
@@ -180,7 +178,7 @@ body {
     gap: 10px;
     margin-top: 20px;
     width: 100%;
-    border: 1px dashed var(--main-color-border-dash); /* Borda tracejada */
+    border: 1px dashed var(--main-color-border-dash);
     padding: 15px;
     border-radius: 8px;
     box-sizing: border-box;
@@ -189,11 +187,11 @@ body {
 .music-input-container label {
     font-size: 1em;
     color: var(--main-color);
-    margin-bottom: 0; /* Ajuste para espaçamento consistente */
+    margin-bottom: 0;
 }
 
 .music-input-container input[type="text"] {
-    width: calc(100% - 24px); /* Ocupa 100% da largura menos o padding */
+    width: calc(100% - 24px);
     padding: 10px;
     border: 1px solid var(--main-color);
     border-radius: 5px;
@@ -204,13 +202,13 @@ body {
 }
 
 #loadMusicButton {
-    margin-top: 10px; /* Espaço entre o último input e o botão */
-    width: auto; /* Deixa o botão se ajustar ao conteúdo */
+    margin-top: 10px;
+    width: auto;
     max-width: 200px;
 }
 
 .music-player-display {
-    display: none; /* Inicia oculto, será exibido via JS no modo de visualização */
+    display: none;
     margin-top: 20px;
     text-align: center;
     width: 100%;
@@ -221,25 +219,24 @@ body {
     font-size: 1.1em;
     color: var(--main-color);
     margin-bottom: 10px;
-    word-wrap: break-word; /* Garante quebra de texto para nomes longos */
+    word-wrap: break-word;
 }
 
 #player {
     width: 100%;
-    max-width: 400px; /* Limita a largura do player no centro */
-    height: 100px; /* Altura menor para o player oculto */
-    margin: 0 auto; /* Centraliza o player */
-    /* Garante que o player fique invisível, mas carregado */
+    max-width: 400px;
+    height: 100px;
+    margin: 0 auto;
     opacity: 0;
-    pointer-events: none; /* Desabilita interações com o player no modo oculto */
+    pointer-events: none;
     overflow: hidden;
-    position: absolute; /* Para que ele não afete o layout */
-    left: -9999px; /* Mover para fora da tela */
+    position: absolute;
+    left: -9999px;
 }
 
 /* Mensagem de música carregada */
 #musicLoadedMessage {
-    color: #4CAF50; /* Verde de sucesso */
+    color: #4CAF50;
     font-size: 0.9em;
     margin-top: 5px;
 }
@@ -247,80 +244,82 @@ body {
 /* --- NOVOS ESTILOS PARA EMOJIS --- */
 .emoji-input-container {
     display: flex;
-    flex-direction: column; /* Padrão: empilha em mobile */
+    flex-direction: column; /* Sempre em coluna */
     align-items: center;
     gap: 10px;
     margin-top: 20px;
     width: 100%;
-    border: 1px dashed var(--main-color-border-dash); /* Borda tracejada */
+    border: 1px dashed var(--main-color-border-dash);
     padding: 15px;
     border-radius: 8px;
     box-sizing: border-box;
+    /* Adicionado min-height para garantir espaço suficiente */
+    min-height: 150px; /* Ajuste este valor se ainda estiver cortando */
+    justify-content: center; /* Centraliza o conteúdo verticalmente */
 }
 
 .emoji-input-container label {
     font-size: 1em;
     color: var(--main-color);
     margin-bottom: 5px;
-    text-align: center; /* Centraliza o label em mobile */
-    width: 100%; /* Garante que o label ocupe a largura para centralizar */
+    text-align: center;
+    width: 100%;
 }
 
 /* Container flexbox para os próprios inputs de emoji */
 .emoji-inputs-wrapper {
     display: flex;
-    gap: 10px; /* Espaçamento entre os inputs */
+    gap: 10px;
     justify-content: center; /* Centraliza os inputs */
-    flex-wrap: wrap; /* Permite quebrar linha se não couberem todos (improvável aqui, mas boa prática) */
+    flex-wrap: wrap; /* Permite quebrar linha se necessário */
     width: 100%; /* Ocupa a largura total do container pai */
+    max-width: 250px; /* Limita a largura máxima do wrapper para manter os inputs próximos */
 }
 
 .emoji-input {
-    width: 60px; /* Largura fixa maior para o input */
-    height: 60px; /* Altura igual à largura para um quadrado */
+    width: 60px; /* Largura fixa para o input */
+    height: 60px; /* Altura fixa para o input */
     text-align: center;
-    font-size: 2.2em; /* Emojis maiores */
+    font-size: 2.2em; /* Tamanho do emoji dentro do input */
     padding: 5px;
     border: 1px solid var(--main-color);
-    border-radius: 8px; /* Cantos mais arredondados */
+    border-radius: 8px;
     background-color: #2a2a2a;
     color: #dedede;
     box-sizing: border-box;
     line-height: 1; /* Para centralizar verticalmente o emoji */
     flex-shrink: 0; /* Impede que o input encolha */
-    display: flex; /* Permite centralizar o emoji vertical e horizontalmente */
+    display: flex; /* Torna o input um contêiner flex para centralizar o texto/emoji */
     align-items: center;
     justify-content: center;
 }
 
-/* Remova o placeholder de background para que o emoji digitado apareça bem */
 .emoji-input::placeholder {
     color: #888;
 }
 
-
 /* Container que vai receber os emojis animados */
 #emojiRainContainer {
-    position: fixed; /* Fixado para cobrir toda a viewport */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* Não interfere com cliques em outros elementos */
-    overflow: hidden; /* Corta emojis que saiam da tela */
-    z-index: 999; /* Garante que esteja acima de todo o conteúdo */
-    display: none; /* Inicia oculto, será ativado via JS */
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 999;
+    display: none;
 }
 
 /* Estilo para cada emoji individual */
 .falling-emoji {
     position: absolute;
-    font-size: 2em; /* Tamanho dos emojis caindo */
-    opacity: 0; /* Começa invisível e fade-in */
-    transform: translateY(-50px); /* Começa acima da tela */
-    animation: fall linear infinite; /* Animação de queda */
-    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); /* Sombra suave para destaque */
-    will-change: transform, opacity; /* Otimização de performance */
+    font-size: 2em;
+    opacity: 0;
+    transform: translateY(-50px);
+    animation: fall linear infinite;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+    will-change: transform, opacity;
 }
 
 /* Definição da animação de queda */
@@ -330,75 +329,64 @@ body {
         opacity: 0;
     }
     10% {
-        opacity: 1; /* Aparece rapidamente */
+        opacity: 1;
     }
     90% {
         opacity: 1;
     }
     100% {
-        transform: translateY(calc(100vh + 50px)); /* Cai para fora da tela */
-        opacity: 0; /* Desaparece suavemente */
+        transform: translateY(calc(100vh + 50px));
+        opacity: 0;
     }
 }
 
-
-/* --- ESTILOS PARA AS FOTOS (AJUSTADOS PARA DIMENSÃO 120x180) --- */
+/* --- ESTILOS PARA AS FOTOS --- */
 .photos-container {
     display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center; /* Centraliza verticalmente */
+    justify-content: center;
+    align-items: center;
     width: 100%;
-    position: relative; /* Contexto de posicionamento para as fotos no slideshow */
-    overflow: hidden; /* Garante que fotos fora dos limites sejam cortadas */
+    position: relative;
+    overflow: hidden;
     margin-bottom: 30px;
-
-    /* Propriedades para o modo de EDIÇÃO (desktop e mobile) */
-    flex-wrap: wrap; /* Permite que os itens quebrem linha */
-    gap: 20px; /* Espaçamento entre os uploaders */
-    height: auto; /* Altura se adapta ao conteúdo no modo de edição */
+    flex-wrap: wrap;
+    gap: 20px;
+    height: auto;
 }
 
-/* Esconde os photo-uploaders no modo de visualização */
 .photos-container.slideshow-mode .photo-uploader {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0; /* Controlado pelo JS para o slideshow */
+    opacity: 0;
     transition: opacity 0.5s ease-in-out;
-    border: 2px dashed var(--main-color-border-dash); /* Mantém a borda no slideshow */
-    width: 120px; /* Largura ajustada para o formato retrato */
-    height: 180px; /* Altura ajustada para o formato retrato */
-    z-index: 1; /* Padrão para itens sobrepostos */
+    border: 2px dashed var(--main-color-border-dash);
+    width: 120px;
+    height: 180px;
+    z-index: 1;
 }
 
-/* Garante que o container de fotos tenha altura definida no modo slideshow */
 .photos-container.slideshow-mode {
-    height: 200px; /* Aumenta a altura fixa para o contêiner no modo slideshow (pouco mais que a foto) */
-    /* Remove o gap no modo slideshow para que os elementos possam sobrepor */
+    height: 200px;
     gap: 0;
 }
 
-
 .photo-uploader {
-    width: 120px; /* Largura ajustada para o formato retrato */
-    height: 180px; /* Altura ajustada para o formato retrato */
+    width: 120px;
+    height: 180px;
     background-color: #2a2a2a;
     border-radius: 8px;
     box-shadow: 0 0 10px var(--main-color-shadow);
-    overflow: hidden; /* Garante que a imagem não saia do limite */
-    flex-shrink: 0; /* Impede que encolham no flexbox */
-
-    /* Garante que o uploader seja visível no modo de edição */
+    overflow: hidden;
+    flex-shrink: 0;
     opacity: 1;
-    position: relative; /* Modo de edição: posição relativa no fluxo flex */
-    transform: none; /* Modo de edição: remove transform do slideshow */
-    z-index: auto; /* Modo de edição: z-index automático */
-    border: 2px dashed var(--main-color-border-dash); /* Borda visível para o uploader */
+    position: relative;
+    transform: none;
+    z-index: auto;
+    border: 2px dashed var(--main-color-border-dash);
 }
 
-
-/* Estilo para o label que age como botão/área de upload */
 .custom-file-upload {
     display: flex;
     justify-content: center;
@@ -407,9 +395,9 @@ body {
     height: 100%;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    border: none; /* A borda já está no .photo-uploader */
+    border: none;
     border-radius: 8px;
-    position: relative; /* Para posicionar o botão de remover dentro dele */
+    position: relative;
 }
 
 .custom-file-upload:hover {
@@ -422,44 +410,40 @@ body {
     object-fit: cover;
     display: block;
     border-radius: 8px;
-    /* Transição de opacidade para a imagem, gerenciada pelo JS */
     transition: opacity 0.5s ease-in-out;
-    opacity: 0; /* Inicia escondida, o JS vai gerenciar */
-    position: absolute; /* Para empilhar as imagens internas no slideshow */
+    opacity: 0;
+    position: absolute;
     top: 0;
     left: 0;
-    z-index: 1; /* Padrão, o JS vai ajustar */
+    z-index: 1;
 }
 
-/* Imagem ativa no slideshow */
 .photos-container.slideshow-mode .photo-uploader img.active {
     opacity: 1;
-    z-index: 2; /* Garante que a imagem ativa esteja acima */
+    z-index: 2;
 }
 
-/* Esconde o input de arquivo padrão */
 .hidden-file-input {
     display: none;
 }
 
-/* Estilo para o botão de remover foto */
 .remove-photo-button {
     position: absolute;
     top: 5px;
     right: 5px;
-    background-color: rgba(255, 0, 127, 0.8); /* Cor principal com transparência */
+    background-color: rgba(255, 0, 127, 0.8);
     color: white;
     border: none;
-    border-radius: 50%; /* Faz um círculo */
+    border-radius: 50%;
     width: 25px;
     height: 25px;
     font-size: 0.9em;
     font-weight: bold;
     cursor: pointer;
-    display: none; /* Inicia escondido, só aparece no modo edição com foto */
+    display: none;
     align-items: center;
     justify-content: center;
-    z-index: 10; /* Garante que esteja acima da imagem */
+    z-index: 10;
     transition: background-color 0.2s ease;
 }
 
@@ -467,33 +451,30 @@ body {
     background-color: rgba(255, 0, 127, 1);
 }
 
-/* Mostra o botão de remover APENAS se não for o placeholder e estiver no modo edição */
-/* O JS controlará se a imagem é um placeholder ou não */
 .photo-uploader .remove-photo-button.show-button {
-    display: flex; /* Para centralizar o "X" */
+    display: flex;
 }
 
-
-/* NOVO: Estilos para o slot de mensagem */
+/* Estilos para o slot de mensagem */
 .message-slot {
     width: 100%;
-    margin-bottom: 25px; /* Espaço abaixo das fotos e acima do título */
+    margin-bottom: 25px;
     text-align: center;
 }
 
 .message-slot textarea {
-    width: calc(100% - 24px); /* Ajusta para padding */
-    max-width: 450px; /* Limita a largura em telas maiores */
-    height: 80px; /* Altura inicial */
+    width: calc(100% - 24px);
+    max-width: 450px;
+    height: 80px;
     padding: 10px;
     border: 1px solid var(--main-color);
     border-radius: 5px;
     background-color: #2a2a2a;
     color: #dedede;
     font-size: 1em;
-    resize: vertical; /* Permite redimensionar verticalmente */
+    resize: vertical;
     box-sizing: border-box;
-    line-height: 1.4; /* Espaçamento entre linhas */
+    line-height: 1.4;
 }
 
 .message-slot textarea::placeholder {
@@ -507,21 +488,19 @@ body {
     background-color: #2a2a2a;
     padding: 15px;
     border-radius: 8px;
-    min-height: 80px; /* Garante altura mínima consistente com o textarea */
-    display: flex; /* Para centralizar o texto verticalmente */
-    align-items: center; /* Centraliza verticalmente */
-    justify-content: center; /* Centraliza horizontalmente */
-    white-space: pre-wrap; /* Preserva quebras de linha e espaços do texto */
-    word-wrap: break-word; /* Quebra palavras longas */
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: pre-wrap;
+    word-wrap: break-word;
     border: 1px solid var(--main-color);
     box-sizing: border-box;
 }
 
-/* Esconde o parágrafo por padrão e só mostra com a classe 'show' */
 .message-slot p.hidden {
     display: none;
 }
-
 
 .text-content {
     margin-top: 20px;
@@ -570,47 +549,48 @@ body {
 
     /* Ajusta a altura máxima do date-input-container para desktop */
     .date-input-container {
-        max-height: 500px; /* Ajusta para comportar todos os inputs */
-        flex-direction: row; /* Volta a ser row em telas maiores */
-        flex-wrap: wrap; /* Permite quebrar linha se necessário */
+        max-height: 500px;
+        flex-direction: row;
+        flex-wrap: wrap;
         justify-content: center;
         gap: 20px;
     }
 
     /* Ajusta o layout do music-input-container em telas maiores */
     .music-input-container {
-        flex-direction: row; /* Coloca os inputs lado a lado */
+        flex-direction: row;
         justify-content: center;
         gap: 15px;
-        flex-wrap: wrap; /* Permite quebrar linha */
+        flex-wrap: wrap;
     }
 
     .music-input-container label {
-        flex-basis: 100%; /* Ocupa a largura total para o label */
+        flex-basis: 100%;
         text-align: center;
     }
 
     .music-input-container input[type="text"] {
-        width: 45%; /* Divide a largura entre os dois inputs */
+        width: 45%;
         max-width: 250px;
     }
 
     /* Estilos para o emoji-input-container em telas maiores */
     .emoji-input-container {
-        flex-direction: column; /* Manter em coluna, centralizando os inputs */
+        flex-direction: column; /* Mantido em coluna, para o label ficar acima */
         justify-content: center;
         gap: 10px;
-        flex-wrap: wrap;
+        /* Remover flex-wrap aqui para evitar quebras indesejadas no desktop */
     }
     .emoji-input-container label {
         flex-basis: 100%;
         text-align: center;
     }
-    .emoji-inputs-wrapper { /* Garante que o wrapper também centralize */
-        width: auto; /* Permite que o wrapper se ajuste ao conteúdo */
+    .emoji-inputs-wrapper {
+        width: auto; /* Permite que o wrapper se ajuste ao conteúdo dos 3 inputs */
+        /* Remova o flex-wrap aqui se você não quer que os inputs quebrem linha no desktop */
     }
     .emoji-input {
-        width: 70px; /* Um pouco maior em desktop */
+        width: 70px;
         height: 70px;
         font-size: 2.5em;
     }
@@ -618,17 +598,16 @@ body {
 
     /* ESTILOS PARA AS FOTOS (REVISADO PARA MEDIA QUERY E DIMENSÃO) */
     .photos-container {
-        flex-direction: row; /* Volta a ser row em telas maiores para a edição */
-        flex-wrap: nowrap; /* Não quebra linha em telas maiores, mantém 3 lado a lado */
-        gap: 20px; /* Mantém o espaçamento na edição */
-        height: auto; /* Altura se adapta no modo edição */
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 20px;
+        height: auto;
     }
 
-    /* Esconde os photo-uploaders no modo de visualização */
     .photos-container.slideshow-mode .photo-uploader {
-        width: 150px; /* Largura ajustada para o formato retrato */
-        height: 225px; /* Altura ajustada para o formato retrato (1.5x a largura) */
-        position: absolute; /* Para sobreposição no slideshow */
+        width: 150px;
+        height: 225px;
+        position: absolute;
         transform: translate(-50%, -50%);
         opacity: 0;
         transition: opacity 0.5s ease-in-out;
@@ -636,24 +615,22 @@ body {
     }
 
     .photos-container.slideshow-mode {
-        height: 250px; /* Aumenta a altura fixa para o slideshow, para acomodar a nova dimensão */
-        gap: 0; /* Sem gap no slideshow */
+        height: 250px;
+        gap: 0;
     }
 
     .photo-uploader {
-        width: 150px; /* Largura ajustada para o formato retrato */
-        height: 225px; /* Altura ajustada para o formato retrato (1.5x a largura) */
-        /* Garante que esteja no fluxo normal de layout na edição */
+        width: 150px;
+        height: 225px;
         position: relative;
         transform: none;
         opacity: 1;
         z-index: auto;
     }
 
-    /* Imagem interna visível no modo de edição */
     .photo-uploader img {
-        position: relative; /* Imagem interna é relativa ao uploader no modo de edição */
-        opacity: 1; /* Visível no modo de edição */
+        position: relative;
+        opacity: 1;
     }
 
     .date-input-container label {
@@ -695,7 +672,7 @@ body {
         max-width: 600px;
     }
     .music-input-container input[type="text"] {
-        width: auto; /* Deixa o input se ajustar ao conteúdo */
-        flex-grow: 1; /* Permite que cresça para preencher espaço */
+        width: auto;
+        flex-grow: 1;
     }
 }
