@@ -45,7 +45,7 @@ body {
     gap: 10px;
     transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out;
     overflow: hidden;
-    max-height: 400px; /* Aumenta a altura máxima para acomodar os campos de música */
+    max-height: 550px; /* Aumenta a altura máxima para acomodar os campos de música e emoji */
     opacity: 1;
     width: 100%; /* Ocupa toda a largura do container */
 }
@@ -62,11 +62,12 @@ body {
 
 /* Classes para esconder elementos no modo "somente leitura" */
 .action-button.hidden,
-.date-input-container label.hidden,
+.date-input-container label.hidden, /* Ainda útil se houver labels soltos */
 .date-picker.hidden,
 .color-picker-container.hidden,
 .message-slot textarea.hidden,
-.music-input-container.hidden { /* Esconde o container de input de música */
+.music-input-container.hidden,
+.emoji-input-container.hidden { /* Esconde o container de input de emoji também */
     display: none !important; /* Força o ocultamento total */
 }
 
@@ -171,7 +172,7 @@ body {
 }
 
 
-/* --- NOVOS ESTILOS PARA A MÚSICA --- */
+/* --- ESTILOS PARA A MÚSICA --- */
 .music-input-container {
     display: flex;
     flex-direction: column;
@@ -241,6 +242,83 @@ body {
     color: #4CAF50; /* Verde de sucesso */
     font-size: 0.9em;
     margin-top: 5px;
+}
+
+/* --- NOVOS ESTILOS PARA EMOJIS --- */
+.emoji-input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+    border: 1px dashed var(--main-color-border-dash); /* Borda tracejada */
+    padding: 15px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.emoji-input-container label {
+    font-size: 1em;
+    color: var(--main-color);
+    margin-bottom: 5px;
+}
+
+.emoji-input {
+    width: 50px; /* Largura pequena para um emoji */
+    text-align: center;
+    font-size: 1.8em; /* Emojis maiores */
+    padding: 5px;
+    border: 1px solid var(--main-color);
+    border-radius: 5px;
+    background-color: #2a2a2a;
+    color: #dedede;
+    box-sizing: border-box;
+    /* Ajusta a altura para caber o emoji maior */
+    height: 45px;
+    line-height: 1; /* Para centralizar verticalmente o emoji */
+}
+
+/* Container que vai receber os emojis animados */
+#emojiRainContainer {
+    position: fixed; /* Fixado para cobrir toda a viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Não interfere com cliques em outros elementos */
+    overflow: hidden; /* Corta emojis que saiam da tela */
+    z-index: 999; /* Garante que esteja acima de todo o conteúdo */
+    display: none; /* Inicia oculto, será ativado via JS */
+}
+
+/* Estilo para cada emoji individual */
+.falling-emoji {
+    position: absolute;
+    font-size: 2em; /* Tamanho dos emojis caindo */
+    opacity: 0; /* Começa invisível e fade-in */
+    transform: translateY(-50px); /* Começa acima da tela */
+    animation: fall linear infinite; /* Animação de queda */
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); /* Sombra suave para destaque */
+    will-change: transform, opacity; /* Otimização de performance */
+}
+
+/* Definição da animação de queda */
+@keyframes fall {
+    0% {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1; /* Aparece rapidamente */
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(calc(100vh + 50px)); /* Cai para fora da tela */
+        opacity: 0; /* Desaparece suavemente */
+    }
 }
 
 
@@ -472,7 +550,7 @@ body {
 
     /* Ajusta a altura máxima do date-input-container para desktop */
     .date-input-container {
-        max-height: 250px;
+        max-height: 400px; /* Ajusta para comportar todos os inputs */
         flex-direction: row; /* Volta a ser row em telas maiores */
         flex-wrap: wrap; /* Permite quebrar linha se necessário */
         justify-content: center;
@@ -495,6 +573,23 @@ body {
     .music-input-container input[type="text"] {
         width: 45%; /* Divide a largura entre os dois inputs */
         max-width: 250px;
+    }
+
+    /* Estilos para o emoji-input-container em telas maiores */
+    .emoji-input-container {
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .emoji-input-container label {
+        flex-basis: 100%;
+        text-align: center;
+    }
+    .emoji-input {
+        width: 60px; /* Um pouco maior em desktop */
+        height: 50px;
+        font-size: 2.2em;
     }
 
 
