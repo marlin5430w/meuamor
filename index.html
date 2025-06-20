@@ -1,38 +1,40 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nosso Tempo Juntos</title>
     <link rel="stylesheet" href="style.css">
-    <meta name="theme-color" content="#ff007f">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="app-wrapper"> <div class="container">
+    <div class="app-wrapper">
+        <div class="container">
             <div id="page1" class="page active">
                 <h1 class="title">Nosso Tempo Juntos</h1>
 
                 <div class="date-input-container">
-                    <label for="startDatePicker">Selecione a Data Inicial:</label>
-                    <input type="datetime-local" id="startDatePicker">
-                    <button id="setStartDateButton" class="action-button">Definir Data</button>
+                    <label for="startDate">Selecione a Data Inicial:</label>
+                    <input type="datetime-local" id="startDate">
+                    <button class="action-button" id="setStartDateButton">Definir Data</button>
                 </div>
 
                 <div class="color-picker-container">
-                    <label for="themeColorPicker">Escolha a Cor do Tema:</label>
-                    <input type="color" id="themeColorPicker" value="#ff007f" class="color-picker">
+                    <label for="themeColor">Escolha a Cor do Tema:</label>
+                    <input type="color" id="themeColor" value="#FF007F" class="color-picker">
                 </div>
 
                 <div class="music-input-container">
-                    <label for="musicLinkInput">Link da Música (YouTube):</label>
-                    <input type="text" id="musicLinkInput" placeholder="Ex: https://www.youtube.cc/watch?v=VIDEOID">
-                    <label for="musicNameInput">Nome da Música (opcional):</label>
-                    <input type="text" id="musicNameInput" placeholder="Nome da sua música">
-                    <button id="loadMusicButton" class="action-button">Carregar Música</button>
-                    <span id="musicLoadedMessage" style="display: none; color: #4CAF50; font-size: 0.9em; margin-top: 5px;"></span>
+                    <label for="musicLink">Link da Música (YouTube):</label>
+                    <input type="text" id="musicLink" placeholder="Ex: https://www.youtube.cc">
+                    <label for="musicName">Nome da Música (opcional):</label>
+                    <input type="text" id="musicName" placeholder="Nome da sua música">
+                    <button class="action-button" id="loadMusicButton">Carregar Música</button>
                 </div>
 
-                <button id="goToEmojiPageButton" class="action-button">Próximo: Emojis e Fotos</button>
+                <button class="action-button" id="nextPage1Button">Próximo: Emojis e Fotos</button>
             </div>
 
             <div id="page2" class="page hidden">
@@ -41,75 +43,74 @@
                 <div class="emoji-input-container">
                     <label>Escolha 3 Emojis (coloque 1 por campo):</label>
                     <div class="emoji-inputs-wrapper">
-                        <input type="text" id="emojiInput1" class="emoji-input" maxlength="2" placeholder="❤️">
-                        <input type="text" id="emojiInput2" class="emoji-input" maxlength="2" placeholder="✨">
-                        <input type="text" id="emojiInput3" class="emoji-input" maxlength="2" placeholder="😊">
+                        <input type="text" class="emoji-input" maxlength="2" placeholder="❤️">
+                        <input type="text" class="emoji-input" maxlength="2" placeholder="✨">
+                        <input type="text" class="emoji-input" maxlength="2" placeholder="😊">
                     </div>
                 </div>
 
-                <div class="photos-container">
-                    <label>Carregue 3 Fotos (opcional):</label>
-                    <div class="photo-uploader">
-                        <label for="photoUpload1" class="custom-file-upload">
-                            <input type="file" id="photoUpload1" accept="image/*" class="hidden-file-input">
-                            <img id="uploadedPhoto1" src="" alt="Foto 1">
+                <div class="photos-container" id="photosContainer">
+                    <label style="color: var(--main-color);">Carregue 3 Fotos (opcional):</label>
+                    <div class="photo-uploader" id="photoUploader1">
+                        <input type="file" class="hidden-file-input" data-index="0" accept="image/*">
+                        <label class="custom-file-upload" for="hiddenFileInput1">
+                            <img id="photoPreview1" src="" alt="Foto 1" style="opacity: 0;">
                             <span class="upload-text">Foto 1</span>
                         </label>
-                        <button class="remove-photo-button" data-photo-id="1">X</button>
+                        <button class="remove-photo-button" data-index="0">X</button>
                     </div>
-                    <div class="photo-uploader">
-                        <label for="photoUpload2" class="custom-file-upload">
-                            <input type="file" id="photoUpload2" accept="image/*" class="hidden-file-input">
-                            <img id="uploadedPhoto2" src="" alt="Foto 2">
+                    <div class="photo-uploader" id="photoUploader2">
+                        <input type="file" class="hidden-file-input" data-index="1" accept="image/*">
+                        <label class="custom-file-upload" for="hiddenFileInput2">
+                            <img id="photoPreview2" src="" alt="Foto 2" style="opacity: 0;">
                             <span class="upload-text">Foto 2</span>
                         </label>
-                        <button class="remove-photo-button" data-photo-id="2">X</button>
+                        <button class="remove-photo-button" data-index="1">X</button>
                     </div>
-                    <div class="photo-uploader">
-                        <label for="photoUpload3" class="custom-file-upload">
-                            <input type="file" id="photoUpload3" accept="image/*" class="hidden-file-input">
-                            <img id="uploadedPhoto3" src="" alt="Foto 3">
+                    <div class="photo-uploader" id="photoUploader3">
+                        <input type="file" class="hidden-file-input" data-index="2" accept="image/*">
+                        <label class="custom-file-upload" for="hiddenFileInput3">
+                            <img id="photoPreview3" src="" alt="Foto 3" style="opacity: 0;">
                             <span class="upload-text">Foto 3</span>
                         </label>
-                        <button class="remove-photo-button" data-photo-id="3">X</button>
+                        <button class="remove-photo-button" data-index="2">X</button>
                     </div>
                 </div>
 
+
                 <div class="message-slot">
-                    <label for="personalMessageInput">Escreva sua mensagem personalizada aqui...</label>
-                    <textarea id="personalMessageInput" placeholder="Sua mensagem de amor..."></textarea>
+                    <label for="customMessage">Escreva sua mensagem personalizada aqui...</label>
+                    <textarea id="customMessage" placeholder="Amo vc"></textarea>
                 </div>
 
-                <button id="generateLinkButton" class="action-button">Gerar Link Compartilhável</button>
-                <button id="backToConfigButton" class="action-button back-button">Voltar</button>
+                <button class="action-button" id="generateLinkButton">Gerar Link Compartilhável</button>
+                <p id="copyMessage" class="copy-message">Link copiado!</p>
+                <button class="action-button back-button" id="backToPage1Button">Voltar</button>
             </div>
 
-            <div id="viewModeDisplay" class="page hidden">
-                <h1 class="title">Nosso Tempo Juntos</h1>
+            <div id="page3" class="page hidden">
+                <h1 class="title" id="viewModeTitle">Nosso Tempo Juntos</h1>
+
+                <div class="photos-container slideshow-mode" id="slideshowContainer">
+                    </div>
 
                 <div class="text-content">
-                    <p id="countdownMessage" class="counter-line">Carregando...</p>
-                    <pre id="exactTimeMessage" class="counter-line"></pre>
+                    <p class="counter-line" id="counterDisplay"></p>
+                    <p class="message-slot"><p id="viewModeMessage" class="hidden"></p></p>
                 </div>
 
                 <div class="music-player-display">
-                    <p id="displayedMusicName"></p>
-                    <iframe id="player" width="100%" height="100px" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    <p id="musicInfoDisplay" class="hidden"></p>
+                    <div id="player"></div>
                 </div>
 
-                <div class="message-slot">
-                    <p id="displayedPersonalMessage" class="hidden"></p>
-                </div>
-
-                <div class="photos-container slideshow-mode">
-                    </div>
-
-                <button id="copyShareLinkButton" class="action-button">Copiar Link Compartilhável</button>
-                <span id="copyMessage" class="copy-message"></span>
+                <button class="action-button back-button" id="backToPage2Button">Voltar para Edição</button>
             </div>
         </div>
-    </div> <div id="emojiRainContainer"></div>
+    </div>
+    <div id="emojiRainContainer"></div>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="script.js"></script>
 </body>
 </html>
