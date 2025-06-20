@@ -35,13 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const personalMessageDisplay = document.getElementById('personalMessageDisplay');
     const messageSlot = document.getElementById('messageSlot');
 
-    // NOVO: Elementos da música
     const musicInputContainer = document.getElementById('musicInputContainer');
     const musicLinkInput = document.getElementById('musicLinkInput');
     const loadMusicButton = document.getElementById('loadMusicButton');
     const audioPlayer = document.getElementById('audioPlayer');
     const youtubePlayer = document.getElementById('youtubePlayer');
     const musicStatus = document.getElementById('musicStatus');
+    // NOVO: Botão para trocar a música
+    const changeMusicButton = document.getElementById('changeMusicButton');
 
     let startDate = null;
     let currentThemeColor = '#ff007f';
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let slideshowInterval;
     let currentImageIndex = 0;
     let activeImages = [];
-    let currentMusicLink = ''; // Armazena o link da música
+    let currentMusicLink = '';
 
     // --- Funções de Aplicação de Tema e Visibilidade ---
     function applyThemeColor(color) {
@@ -65,11 +66,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hideEditingElements() {
         dateInputContainer.classList.add('hidden');
-        musicInputContainer.classList.add('hidden'); // NOVO: Esconde o container de música
+        musicInputContainer.classList.add('hidden');
         photosContainer.classList.add('slideshow-mode');
 
         photoUploaders.forEach(uploader => {});
         if (generateLinkButton) generateLinkButton.classList.add('hidden');
+        // NOVO: Mostra o botão "Trocar Música" no modo de visualização, se houver música
+        if (currentMusicLink) {
+            changeMusicButton.classList.remove('hidden');
+        } else {
+            changeMusicButton.classList.add('hidden');
+        }
+
 
         personalMessageInput.classList.add('hidden');
         personalMessageDisplay.classList.add('show');
@@ -78,12 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateActiveImages();
         startSlideshow();
-        playLoadedMusic(); // NOVO: Tenta tocar a música se já estiver carregada
+        playLoadedMusic();
     }
 
     function showEditingElements() {
+        // Esconde o botão "Trocar Música" no modo de edição
+        changeMusicButton.classList.add('hidden');
+
         dateInputContainer.classList.remove('hidden');
-        musicInputContainer.classList.remove('hidden'); // NOVO: Mostra o container de música
+        musicInputContainer.classList.remove('hidden');
         photosContainer.classList.remove('slideshow-mode');
 
         photoUploaders.forEach(uploader => {});
@@ -105,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        stopMusic(); // NOVO: Para a música no modo de edição (se estava tocando)
+        stopMusic();
     }
 
     // --- Lógica do Slideshow (mantida da versão anterior) ---
@@ -186,9 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- NOVO: Lógica da Música ---
+    // --- Lógica da Música ---
     function isYouTubeLink(url) {
-        return url.includes('youtube.com/watch?v=') || url.includes('youtu.be/');
+        return url.includes('youtube.com') || url.includes('youtu.be');
     }
 
     function getYouTubeVideoId(url) {
@@ -198,23 +209,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadMusic(link) {
-        stopMusic(); // Para qualquer música tocando
+        stopMusic();
 
         if (!link) {
             musicStatus.textContent = "Nenhuma música carregada.";
             musicStatus.classList.add('show');
+            currentMusicLink = ''; // Limpa o link da música se for vazio
+            localStorage.removeItem('musicLink'); // Remove do LocalStorage
             return;
         }
 
-        currentMusicLink = link; // Salva o link validado
-        localStorage.setItem('musicLink', link); // Salva no LocalStorage
+        currentMusicLink = link;
+        localStorage.setItem('musicLink', link);
 
-        // Tenta carregar como YouTube
         const youtubeId = getYouTubeVideoId(link);
         if (youtubeId) {
             audioPlayer.style.display = 'none';
             youtubePlayer.style.display = 'block';
-            // Adiciona autoplay e loop ao link do YouTube. Muted é importante para autoplay em alguns navegadores.
             youtubePlayer.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&loop=1&playlist=${youtubeId}&mute=0`;
             musicStatus.textContent = "Música do YouTube carregada!";
             musicStatus.classList.add('show');
@@ -222,12 +233,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Tenta carregar como áudio genérico
         try {
             audioPlayer.src = link;
             audioPlayer.style.display = 'block';
             youtubePlayer.style.display = 'none';
-            audioPlayer.load(); // Carrega a música
+            audioPlayer.load();
             audioPlayer.play().then(() => {
                 musicStatus.textContent = "Música carregada e tocando!";
                 musicStatus.classList.add('show');
@@ -248,31 +258,30 @@ document.addEventListener('DOMContentLoaded', () => {
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
         audioPlayer.style.display = 'none';
-        youtubePlayer.src = ''; // Limpa o src do iframe para parar o vídeo
+        youtubePlayer.src = '';
         youtubePlayer.style.display = 'none';
     }
 
     function playLoadedMusic() {
         if (!currentMusicLink) {
-            return; // Não faz nada se não houver link
+            stopMusic(); // Garante que nenhum player esteja visível se não houver link
+            return;
         }
 
         const youtubeId = getYouTubeVideoId(currentMusicLink);
         if (youtubeId) {
-            // Se for YouTube, garanta que o iframe está visível e reproduzindo
             youtubePlayer.style.display = 'block';
-            // Se já estiver tocando, pode não precisar mudar o src.
-            // Para garantir autoplay no modo de visualização, sempre tentamos carregar com autoplay.
-            youtubePlayer.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&loop=1&playlist=${youtubeId}&mute=0`; // autoplay e loop
-        } else if (audioPlayer.src) {
-            // Se for áudio genérico, tente tocar
+            youtubePlayer.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&loop=1&playlist=${youtubeId}&mute=0`;
+        } else if (audioPlayer.src === currentMusicLink) { // Verifica se o SRC já está configurado
             audioPlayer.style.display = 'block';
             audioPlayer.play().catch(error => {
                 console.warn("Autoplay de áudio bloqueado:", error);
-                // Pode adicionar um botão de "Play" para o usuário clicar
             });
+        } else { // Se o SRC do audioPlayer não corresponde ao currentMusicLink (pode ter sido limpo)
+            loadMusic(currentMusicLink); // Recarrega a música para garantir
         }
     }
+
 
     // --- Lógica de Carregamento (Prioridade: URL Hash > localStorage) ---
     const hashParams = window.location.hash.substring(1);
@@ -337,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 personalMessageDisplay.textContent = "";
             }
 
-            if (data.musicLink && typeof data.musicLink === 'string') { // NOVO: Carrega link da música
+            if (data.musicLink && typeof data.musicLink === 'string') {
                 currentMusicLink = data.musicLink;
             } else {
                 currentMusicLink = '';
@@ -348,8 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error("Erro ao decodificar ou analisar o link:", e);
             alert("O link de personalização está inválido. Por favor, crie um novo.");
-            updateDisplayForNoDate();
-            showEditingElements(); // Se o link for inválido, volta para o modo edição
+            // Não chama showEditingElements aqui, pois o usuário tentou acessar um link quebrado.
+            // A página ficará com os placeholders e sem contagem.
+            // Para permitir que edite, o usuário precisaria apagar o hash da URL ou recarregar a página sem o hash.
+            window.location.hash = ''; // Limpa o hash para voltar ao modo edição limpo
+            location.reload(); // Recarrega a página no modo edição
         }
     } else {
         // Modo de edição (sem hash na URL)
@@ -389,15 +401,14 @@ document.addEventListener('DOMContentLoaded', () => {
             personalMessageInput.value = storedPersonalMessage;
         }
 
-        const storedMusicLink = localStorage.getItem('musicLink'); // NOVO: Carrega música do LocalStorage
+        const storedMusicLink = localStorage.getItem('musicLink');
         if (storedMusicLink) {
             musicLinkInput.value = storedMusicLink;
-            currentMusicLink = storedMusicLink; // Preenche a variável também
-            loadMusic(storedMusicLink); // Carrega a música no player no modo de edição
-            // Se o link for do YouTube, o player pode aparecer, mas não tocará automaticamente na edição
+            currentMusicLink = storedMusicLink;
+            loadMusic(storedMusicLink);
         }
 
-        showEditingElements(); // Sempre mostra os elementos de edição quando não há hash
+        showEditingElements();
     }
 
 
@@ -459,7 +470,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // NOVO: Listener para o botão de carregar música
     loadMusicButton.addEventListener('click', () => {
         const link = musicLinkInput.value.trim();
         if (link) {
@@ -467,9 +477,19 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             musicStatus.textContent = "Por favor, insira um link de música.";
             musicStatus.classList.add('show');
-            stopMusic(); // Para qualquer música se o link for limpo
+            stopMusic();
         }
     });
+
+    // NOVO: Listener para o botão "Trocar Música"
+    changeMusicButton.addEventListener('click', () => {
+        // Para a música e retorna para o modo de edição
+        stopMusic();
+        showEditingElements();
+        // Limpa o hash da URL para que a página possa ser editada novamente
+        window.location.hash = '';
+    });
+
 
     // --- Gerar Link (Inclui a música) ---
     generateLinkButton.addEventListener('click', async () => {
@@ -483,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
             images: imagePreviews.map(img => img.src.includes('via.placeholder.com') ? null : img.src),
             themeColor: currentThemeColor,
             personalMessage: personalMessageInput.value,
-            musicLink: currentMusicLink // NOVO: Adiciona o link da música à configuração
+            musicLink: currentMusicLink
         };
 
         const configString = JSON.stringify(config);
