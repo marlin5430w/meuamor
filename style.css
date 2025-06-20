@@ -6,14 +6,21 @@
     --main-color-hover-bg: rgba(255, 0, 127, 0.1); /* Fundo hover translúcido */
 }
 
-/* ** CRÍTICO: Garante que o HTML e o BODY ocupem 100% da viewport e não rolem ** */
+/* ** CRÍTICO: Garante que o HTML e o BODY ocupem 100% da viewport e não rolem DE JEITO NENHUM ** */
 html, body {
-    height: 100%;
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden; /* Esconde barras de rolagem globais */
     -webkit-overflow-scrolling: touch; /* Melhora rolagem em iOS */
     box-sizing: border-box; /* Garante que padding e borda não adicionem tamanho */
+    /* ** NOVO: Força o posicionamento e o tamanho para preencher a tela inteira, impedindo a rolagem do documento ** */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 body {
@@ -23,17 +30,16 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Remover min-height aqui, pois o app-wrapper vai controlar a altura */
 }
 
-/* ** NOVO: Wrapper para controlar o layout principal e garantir que o container fique visível ** */
+/* ** REVISADO: Wrapper para controlar o layout principal. Agora sem padding para simplificar o cálculo do container ** */
 .app-wrapper {
     width: 100vw; /* Ocupa 100% da largura da viewport */
     height: 100vh; /* Ocupa 100% da altura da viewport */
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px; /* Padding ao redor do container rosa */
+    /* REMOVIDO: padding aqui. O padding será no container para não interferir no 100vh */
     box-sizing: border-box;
     overflow: hidden; /* Essencial: Garante que se algo sair do app-wrapper, ele seja cortado */
 }
@@ -48,38 +54,41 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
+    width: 100%; /* Ocupa 100% da largura disponível no app-wrapper */
     max-width: 500px;
     box-sizing: border-box;
     position: relative; /* PARA O POSICIONAMENTO ABSOLUTO DAS PÁGINAS */
-    /* ** CRÍTICO: A altura será sempre a altura restante do app-wrapper menos o padding ** */
-    height: 100%; /* Ocupa 100% da altura disponível no app-wrapper */
-    /* Removido max-height calc aqui, pois o app-wrapper já controla a altura total */
+    /* ** REVISADO: A altura agora é calculada para caber no 100vh do app-wrapper, descontando um padding ** */
+    height: calc(100vh - 40px); /* 100% da altura da viewport menos 20px de padding em cima e 20px embaixo */
+    padding: 20px; /* Adicionado padding diretamente ao container */
     transition: height 0.5s ease-in-out; /* Suaviza a mudança de altura */
     overflow: hidden; /* Oculta o conteúdo das páginas "hidden" fora dos limites do container */
-    flex-shrink: 0;
+    flex-shrink: 0; /* Impede que o container encolha além do necessário */
 }
 
 /* Estilos para as páginas (abas) */
 .page {
     width: 100%;
-    height: 100%; /* ** CRÍTICO: Cada página tenta ocupar 100% da altura do seu pai (.container) ** */
+    /* ** CRÍTICO: A altura de cada página deve ser a altura total do CONTAINER menos o padding interno da página ** */
+    /* Agora a altura é 100% do pai (.container) menos o padding interno de 30px superior e 30px inferior */
+    height: calc(100% - 60px); /* 100% do .container - (30px top + 30px bottom) */
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
     transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
     position: absolute; /* Essencial para sobrepor as páginas e permitir transições */
-    top: 0;
-    left: 0;
-    padding: 30px;
+    top: 30px; /* Posiciona abaixo do padding top do .container */
+    left: 20px; /* Posiciona abaixo do padding left do .container */
+    padding: 0; /* Removido padding direto da página, ele está no container */
     box-sizing: border-box;
-    background-color: #0d0d0d;
-    border-radius: 10px;
-    /* ** CRÍTICO: Permite rolagem VERTICAL dentro da página se o conteúdo EXCEDER a altura de 100% ** */
+    background-color: #0d0d0d; /* Para garantir que o fundo cubra a área da página */
+    border-radius: 10px; /* Se desejar borda arredondada */
+    /* ** CRÍTICO: Permite rolagem VERTICAL dentro da página se o conteúdo EXCEDER a altura visível ** */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch; /* Melhora rolagem em iOS */
     touch-action: pan-y; /* Ajuda a garantir que apenas a rolagem vertical seja manipulada pelo elemento */
+    overscroll-behavior-y: contain; /* Impede que a rolagem "vaze" para o body em iOS quando o final é alcançado */
 }
 
 .page.hidden {
@@ -118,7 +127,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    margin-bottom: 0;
+    margin-bottom: 0; /* Remover margin-bottom para evitar que o conteúdo exceda */
 }
 
 .date-input-container label,
@@ -487,16 +496,17 @@ textarea::placeholder {
 
 /* Media query para telas maiores (desktops e tablets) */
 @media (min-width: 600px) {
-    .app-wrapper {
-        padding: 40px; /* Mais padding em telas maiores */
-    }
+    /* REMOVIDO: Padding do app-wrapper, agora está no container */
     .container {
-        /* No desktop, a altura pode ser um pouco mais flexível se o app-wrapper já tiver padding */
-        height: auto; /* Deixa o container ajustar-se ao conteúdo se o app-wrapper já tiver altura fixa */
-        max-height: calc(100vh - 80px); /* Ajusta para o padding do app-wrapper */
+        height: calc(100vh - 80px); /* Ajusta a altura do container para 80px de margem total */
+        max-width: 500px; /* Mantém a largura máxima */
+        padding: 40px; /* Mais padding no container em telas maiores */
     }
     .page {
-        padding: 40px;
+        /* Ajusta o top/left baseado no novo padding do container */
+        top: 40px;
+        left: 40px;
+        height: calc(100% - 80px); /* 100% do .container - (40px top + 40px bottom) */
     }
 
     .title {
