@@ -15,7 +15,9 @@ body {
     align-items: center;
     min-height: 100vh; /* Ocupa a altura total da viewport */
     margin: 0;
-    overflow: hidden; /* Evita barras de rolagem desnecessárias */
+    padding: 20px; /* Adicionado padding para garantir espaço nas bordas em mobile */
+    box-sizing: border-box; /* Garante que padding não adicione largura extra */
+    overflow-y: auto; /* Permite rolagem vertical se o conteúdo for maior que a tela */
 }
 
 .container {
@@ -28,25 +30,27 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 90%;
-    max-width: 500px;
+    width: 100%; /* Agora ocupa 100% da largura disponível */
+    max-width: 500px; /* Largura máxima um pouco maior para as fotos */
     box-sizing: border-box;
+    margin: auto; /* Centraliza o container verticalmente se houver espaço extra */
 }
 
 /* Estilos para o input de data e cor */
 .date-input-container {
     margin-bottom: 25px;
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Sempre em coluna para melhor empilhamento */
     align-items: center;
     gap: 10px;
     transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out;
     overflow: hidden;
     max-height: 200px;
     opacity: 1;
+    width: 100%; /* Ocupa toda a largura do container */
 }
 
-/* Nova classe para esconder o container de data e cor */
+/* Classe para esconder o container de data e cor */
 .date-input-container.hidden {
     opacity: 0;
     max-height: 0;
@@ -56,30 +60,36 @@ body {
     pointer-events: none;
 }
 
-/* Nova classe para esconder os uploaders de foto e o botão de link */
+/* Classes para esconder elementos no modo "somente leitura" */
 .photo-uploader.hidden,
 .action-button.hidden,
-.date-input-container label.hidden, /* Esconder label também */
+.date-input-container label.hidden,
 .date-picker.hidden,
-.color-picker-container.hidden { /* Esconder o contêiner do color picker */
+.color-picker-container.hidden {
     display: none !important; /* Força o ocultamento total */
 }
 
+
 .date-input-container label {
-    font-size: 0.9em;
+    font-size: 1em; /* Um pouco maior para legibilidade em mobile */
     margin-bottom: 5px;
-    color: var(--main-color); /* Usando a variável */
+    color: var(--main-color);
+    text-align: center; /* Centraliza o texto do label */
 }
 
 .date-picker {
-    padding: 10px;
-    border: 1px solid var(--main-color); /* Usando a variável */
+    padding: 12px; /* Aumenta o padding para facilitar o toque */
+    border: 1px solid var(--main-color);
     border-radius: 5px;
     background-color: #2a2a2a;
     color: #dedede;
-    font-size: 1em;
-    width: 220px;
+    font-size: 1.1em; /* Aumenta o tamanho da fonte */
+    width: calc(100% - 24px); /* Ocupa 100% da largura menos o padding */
     box-sizing: border-box;
+    /* Ajustes específicos para browsers mobile */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 /* Estilo para o seletor de cores */
@@ -88,27 +98,26 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    margin-top: 10px; /* Espaçamento acima */
-    /* Adicionado para ocultar */
+    margin-top: 15px; /* Mais espaço acima */
+    width: 100%;
     transition: opacity 0.5s ease-in-out;
     opacity: 1;
 }
 
 .color-picker {
-    -webkit-appearance: none; /* Remove o estilo padrão do navegador para WebKit */
-    -moz-appearance: none; /* Remove o estilo padrão do navegador para Mozilla */
-    appearance: none; /* Remove o estilo padrão do navegador */
-    width: 80px; /* Largura menor para o seletor */
-    height: 30px; /* Altura */
-    border: 1px solid var(--main-color); /* Borda com a cor do tema */
-    background-color: #2a2a2a; /* Fundo do input */
-    padding: 0; /* Remove padding padrão */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 100px; /* Um pouco maior para mobile */
+    height: 35px;
+    border: 1px solid var(--main-color);
+    background-color: #2a2a2a;
+    padding: 0;
     cursor: pointer;
-    border-radius: 5px; /* Cantos arredondados */
-    overflow: hidden; /* Garante que a cor preencha o box */
+    border-radius: 5px;
+    overflow: hidden;
 }
 
-/* Estiliza a cor dentro do seletor (compatibilidade de navegador varia) */
 .color-picker::-webkit-color-swatch-wrapper {
     padding: 0;
 }
@@ -128,44 +137,50 @@ body {
 
 /* Estilo para os botões gerais */
 .action-button {
-    background-color: var(--main-color); /* Usando a variável */
+    background-color: var(--main-color);
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 12px 20px; /* Aumenta o padding para facilitar o toque */
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1em;
+    font-size: 1.1em; /* Aumenta o tamanho da fonte */
     transition: background-color 0.3s ease;
-    margin-top: 20px;
+    margin-top: 25px; /* Mais espaço acima do botão */
+    width: calc(100% - 2px); /* Ocupa a largura total menos a borda */
+    max-width: 300px; /* Limita a largura para botões grandes em telas maiores */
+    box-sizing: border-box;
 }
 
 .action-button:hover {
-    background-color: var(--main-color-dark); /* Usando a variável */
+    background-color: var(--main-color-dark);
 }
 
 #setStartDateButton {
-    margin-top: 0;
+    margin-top: 15px; /* Espaço entre o picker de cor e o botão de data */
+    width: calc(100% - 24px); /* Ajusta a largura para o input date */
+    max-width: 220px; /* Mantém a largura do input date */
 }
 
 
 /* Estilos para as fotos e upload */
 .photos-container {
     display: flex;
-    justify-content: space-around;
+    flex-direction: column; /* Empilha as fotos em mobile por padrão */
+    justify-content: center; /* Centraliza as fotos na coluna */
     align-items: center;
     flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 25px;
+    gap: 20px; /* Mais espaço entre as fotos empilhadas */
+    margin-bottom: 30px; /* Mais margem inferior */
     width: 100%;
 }
 
 .photo-uploader {
-    width: 120px;
-    height: 120px;
+    width: 150px; /* Fotos um pouco maiores em mobile */
+    height: 150px;
     background-color: #2a2a2a;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 0 10px var(--main-color-shadow); /* Usando a variável */
+    box-shadow: 0 0 10px var(--main-color-shadow);
     position: relative;
     transition: opacity 0.5s ease-in-out;
     opacity: 1;
@@ -185,12 +200,12 @@ body {
     height: 100%;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    border: 2px dashed var(--main-color-border-dash); /* Usando a variável */
+    border: 2px dashed var(--main-color-border-dash);
     border-radius: 8px;
 }
 
 .custom-file-upload:hover {
-    background-color: var(--main-color-hover-bg); /* Usando a variável */
+    background-color: var(--main-color-hover-bg);
 }
 
 .photo-uploader img {
@@ -203,61 +218,96 @@ body {
 
 .text-content {
     margin-top: 20px;
+    margin-bottom: 20px; /* Adicionado margem inferior para separar do botão */
 }
 
 .title {
-    font-size: 1.8em;
+    font-size: 2em; /* Título um pouco maior para destaque */
     font-weight: bold;
     margin-bottom: 15px;
-    color: var(--main-color); /* Usando a variável */
+    color: var(--main-color);
 }
 
 .counter-line {
-    font-size: 1.2em;
+    font-size: 1.3em; /* Contador um pouco maior */
     margin: 8px 0;
     line-height: 1.4;
 }
 
 .copy-message {
     color: #4CAF50;
-    font-size: 0.9em;
-    margin-top: 10px;
+    font-size: 1em; /* Mensagem um pouco maior */
+    margin-top: 15px; /* Mais espaço */
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
+    min-height: 20px; /* Garante que ocupa espaço mesmo vazio */
 }
 
 .copy-message.show {
     opacity: 1;
 }
 
-/* Responsividade básica */
-@media (max-width: 500px) {
+/* Media query para telas maiores (desktops e tablets) */
+@media (min-width: 600px) {
     .container {
-        padding: 20px;
-        width: 95%;
+        padding: 40px; /* Mais padding em telas maiores */
     }
 
     .title {
-        font-size: 1.5em;
+        font-size: 2.5em; /* Título maior */
     }
 
     .counter-line {
-        font-size: 1em;
+        font-size: 1.5em; /* Contador maior */
     }
 
     .photos-container {
-        flex-direction: column;
+        flex-direction: row; /* Fotos lado a lado em telas maiores */
+        flex-wrap: nowrap; /* Não quebra a linha se tiver espaço */
     }
 
     .photo-uploader {
-        width: 150px;
-        height: 150px;
+        width: 120px; /* Volta ao tamanho menor para 3 fotos lado a lado */
+        height: 120px;
     }
 
     .date-input-container {
-        width: 100%;
+        flex-direction: row; /* Volta a alinhar input e botão de data lado a lado */
+        justify-content: center;
+        gap: 20px; /* Mais espaço entre eles */
+        flex-wrap: wrap; /* Permite quebrar se não houver espaço suficiente */
     }
+
+    .date-input-container label {
+        margin-bottom: 0; /* Remove margem inferior quando lado a lado */
+        text-align: right; /* Alinha o label à direita do input */
+    }
+
     .date-picker {
-        width: calc(100% - 20px);
+        width: 220px; /* Largura padrão em desktop */
+    }
+
+    #setStartDateButton {
+        margin-top: 0;
+        width: auto; /* Volta ao tamanho automático */
+        max-width: none;
+    }
+
+    .color-picker-container {
+        flex-direction: row; /* Label e input de cor lado a lado */
+        gap: 10px;
+        margin-top: 0; /* Remove margem superior se estiver na mesma linha */
+    }
+
+    .color-picker {
+        width: 80px;
+        height: 30px;
+    }
+}
+
+/* Media query para tablets em modo paisagem e alguns desktops */
+@media (min-width: 768px) {
+    .container {
+        max-width: 600px; /* Pode ser um pouco maior */
     }
 }
