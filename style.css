@@ -173,7 +173,6 @@ body {
     align-items: center;
     width: 100%;
     /* Altura fixa para o contêiner das fotos no modo slideshow */
-    /* Isso garante que o layout não salte durante a transição */
     height: 180px;
     margin-bottom: 30px;
     position: relative; /* Contexto de posicionamento para as fotos no slideshow */
@@ -206,7 +205,6 @@ body {
     position: relative; /* Volta para o fluxo normal de layout */
     transform: none; /* Remove a centralização absoluta */
     opacity: 1; /* Garante que seja visível */
-    /* Não precisa de margin-right aqui, o gap do container já cuida */
     flex-shrink: 0; /* Impede que encolham em flexbox */
 }
 
@@ -222,6 +220,7 @@ body {
     transition: background-color 0.3s ease;
     border: none; /* A borda já está no .photo-uploader */
     border-radius: 8px;
+    position: relative; /* Para posicionar o botão de remover dentro dele */
 }
 
 .custom-file-upload:hover {
@@ -252,6 +251,38 @@ body {
 /* Esconde o input de arquivo padrão */
 .hidden-file-input {
     display: none;
+}
+
+/* NOVO: Estilo para o botão de remover foto */
+.remove-photo-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 127, 0.8); /* Cor principal com transparência */
+    color: white;
+    border: none;
+    border-radius: 50%; /* Faz um círculo */
+    width: 25px;
+    height: 25px;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    display: none; /* Inicia escondido, só aparece no modo edição com foto */
+    align-items: center;
+    justify-content: center;
+    z-index: 10; /* Garante que esteja acima da imagem */
+    transition: background-color 0.2s ease;
+}
+
+.remove-photo-button:hover {
+    background-color: rgba(255, 0, 127, 1);
+}
+
+/* NOVO: Mostra o botão de remover APENAS se não for o placeholder e estiver no modo edição */
+.photo-uploader:not(.hidden) .remove-photo-button {
+    /* O JS controlará se a imagem é um placeholder ou não */
+    /* Por padrão, escondido e o JS vai exibir quando houver imagem */
+    display: flex; /* Para centralizar o "X" */
 }
 
 
@@ -353,7 +384,6 @@ body {
         /* No modo edição, alinham lado a lado */
         flex-direction: row;
         flex-wrap: wrap; /* Permite quebrar linha se não couberem */
-        /* A altura fixa é para o slideshow, no modo edição pode variar */
         height: auto; /* Deixa a altura se ajustar ao conteúdo no modo de edição */
     }
 
@@ -364,7 +394,6 @@ body {
         position: relative;
         transform: none;
         opacity: 1; /* Garante visibilidade no modo edição */
-        /* Garante que a borda do uploader apareça durante a edição */
         border: 2px dashed var(--main-color-border-dash);
         margin: 0; /* O gap do container cuidará do espaçamento */
     }
@@ -380,13 +409,17 @@ body {
     .photo-uploader.hidden {
         position: absolute !important;
         transform: translate(-50%, -50%) !important;
-        /* A opacidade será controlada pelo JS para o slideshow */
         opacity: 0 !important;
     }
     .photo-uploader.hidden img {
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
+    }
+
+    /* Mostra o botão de remover APENAS se não for o placeholder e estiver no modo edição */
+    .photo-uploader:not(.hidden) .remove-photo-button {
+        display: flex; /* Para centralizar o "X" */
     }
 
 
