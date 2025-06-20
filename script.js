@@ -13,8 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const customMessageInput = document.getElementById('customMessage');
     const copyMessage = document.getElementById('copyMessage');
     const photoUploaders = document.querySelectorAll('.photo-uploader');
-    const removePhotoButtons = document.querySelectorAll('.remove-photo-button');
+    const removePhotoButtons = document.querySelectorAll('.remove-photo-button'); // Esta linha é redundante se você acessa via photoUploaders
     const emojiInputs = document.querySelectorAll('.emoji-input');
+    const shareLinkDisplay = document.getElementById('shareLinkDisplay'); // Novo elemento para exibir o link
+    const copyLinkButton = document.getElementById('copyLinkButton'); // Novo botão para copiar o link
 
     // Páginas
     const page1 = document.getElementById('page1');
@@ -30,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPhotoIndex = 0;
     let photoSlideshowInterval;
     let player; // Variável global para o player do YouTube
+    let generatedShareLink = ''; // Para armazenar o link gerado
 
     // --- Funções Auxiliares ---
 
@@ -84,10 +87,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (photo) {
                 photos[index] = photo;
                 const imgPreview = document.getElementById(`photoPreview${index + 1}`);
+                const uploadText = document.getElementById(`uploadText${index + 1}`); // Pega o texto "Foto X"
                 if (imgPreview) {
                     imgPreview.src = photo;
                     imgPreview.style.opacity = '1';
-                    imgPreview.nextElementSibling.style.display = 'none'; // Esconde o texto "Foto X"
+                    if (uploadText) {
+                         uploadText.style.display = 'none'; // Esconde o texto "Foto X"
+                    }
                     const removeBtn = photoUploaders[index].querySelector('.remove-photo-button');
                     if (removeBtn) removeBtn.classList.add('show-button');
                 }
@@ -292,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
     photoUploaders.forEach((uploader, index) => {
         const fileInput = uploader.querySelector('.hidden-file-input');
         const imgPreview = uploader.querySelector('img');
-        const uploadText = uploader.querySelector('.upload-text');
+        const uploadText = uploader.querySelector('.upload-text'); // Garante que você está pegando o elemento de texto
         const removeBtn = uploader.querySelector('.remove-photo-button');
 
         // Adiciona listener para o input de arquivo (o que realmente recebe o arquivo)
@@ -305,8 +311,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     photos[index] = e.target.result; // Salva o Base64 para exibição e link
                     imgPreview.src = e.target.result;
                     imgPreview.style.opacity = '1';
-                    uploadText.style.display = 'none'; // Esconde o texto
-                    removeBtn.classList.add('show-button');
+                    if (uploadText) {
+                        uploadText.style.display = 'none'; // Esconde o texto
+                    }
+                    if (removeBtn) {
+                        removeBtn.classList.add('show-button');
+                    }
                     saveAllData();
                 };
                 reader.readAsDataURL(file);
@@ -314,16 +324,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Adiciona listener para o botão de remover foto
-        removeBtn.addEventListener('click', (event) => {
-            event.stopPropagation(); // Impede que o clique no botão de remover acione o uploader de arquivo
-            photos[index] = '';
-            photoFiles[index] = null; // Limpa o objeto File
-            imgPreview.src = '';
-            imgPreview.style.opacity = '0';
-            uploadText.style.display = 'block'; // Mostra o texto novamente
-            removeBtn.classList.remove('show-button');
-            saveAllData();
-        });
+        if (removeBtn) {
+            removeBtn.addEventListener('click', (event) => {
+                event.stopPropagation(); // Impede que o clique no botão de remover acione o uploader de arquivo
+                photos[index] = '';
+                photoFiles[index] = null; // Limpa o objeto File
+                imgPreview.src = '';
+                imgPreview.style.opacity = '0';
+                if (uploadText) {
+                    uploadText.style.display = 'block'; // Mostra o texto novamente
+                }
+                removeBtn.classList.remove('show-button');
+                saveAllData();
+            });
+        }
 
         // Adiciona listener para o custom-file-upload (o label)
         const customUploadLabel = uploader.querySelector('.custom-file-upload');
@@ -363,6 +377,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('emojiRainContainer').style.display = 'none'; // Esconde a chuva de emojis
         document.getElementById('slideshowContainer').innerHTML = ''; // Limpa o slideshow
         document.getElementById('musicInfoDisplay').classList.add('hidden'); // Esconde info da musica
+        
+        // Esconde o display do link e o botão de copiar ao voltar para edição
+        if (shareLinkDisplay) {
+            shareLinkDisplay.textContent = '';
+            shareLinkDisplay.classList.add('hidden');
+        }
+        if (copyLinkButton) {
+            copyLinkButton.classList.add('hidden');
+        }
     });
 
     // --- Botão Gerar Link Compartilhável (CRÍTICO) ---
@@ -370,6 +393,28 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Clicou em Gerar Link Compartilhável'); // Log de depuração
         await generateShareLink();
     });
+
+    // Botão Copiar Link
+    if (copyLinkButton) {
+        copyLinkButton.addEventListener('click', async () => {
+            if (generatedShareLink) {
+                try {
+                    await navigator.clipboard.writeText(generatedShareLink);
+                    copyMessage.textContent = 'Link copiado!'; // Altera a mensagem para algo mais claro
+                    copyMessage.classList.add('show');
+                    setTimeout(() => {
+                        copyMessage.classList.remove('show');
+                        copyMessage.textContent = 'Copiado!'; // Volta a mensagem original se preferir
+                    }, 3000);
+                } catch (err) {
+                    console.error('Falha ao copiar o link: ', err);
+                    alert('Não foi possível copiar o link automaticamente. Por favor, copie e cole manualmente:\n\n' + generatedShareLink);
+                }
+            } else {
+                alert('Nenhum link para copiar. Gere o link primeiro.');
+            }
+        });
+    }
 
     // Função para gerar o link compartilhável
     async function generateShareLink() {
@@ -407,23 +452,20 @@ document.addEventListener('DOMContentLoaded', () => {
             params.append('photos', JSON.stringify(photosBase64));
         }
 
-        const shareLink = `${baseUrl}?${params.toString()}`;
+        generatedShareLink = `${baseUrl}?${params.toString()}`; // Armazena o link gerado
 
-        try {
-            await navigator.clipboard.writeText(shareLink);
-            copyMessage.classList.add('show');
-            setTimeout(() => {
-                copyMessage.classList.remove('show');
-            }, 3000); // Esconde a mensagem após 3 segundos
-
-            // Após gerar e copiar o link, muda para a página de visualização
-            showPage(page3);
-            updateViewModeContent(); // Atualiza o conteúdo da página 3
-        } catch (err) {
-            console.error('Falha ao copiar o link: ', err);
-            // Mensagem de alerta mais amigável para o usuário
-            alert('Não foi possível copiar o link automaticamente. Por favor, copie e cole manualmente:\n\n' + shareLink);
+        // Exibe o link na interface e o botão de copiar
+        if (shareLinkDisplay) {
+            shareLinkDisplay.textContent = generatedShareLink;
+            shareLinkDisplay.classList.remove('hidden');
         }
+        if (copyLinkButton) {
+            copyLinkButton.classList.remove('hidden');
+        }
+        
+        // Após gerar o link, muda para a página de visualização
+        showPage(page3);
+        updateViewModeContent(); // Atualiza o conteúdo da página 3
     }
 
     // --- Funções para a Página de Visualização (Page 3) ---
@@ -496,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Carrega o script da API do YouTube se ainda não foi carregado
             if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
                 const tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
+                tag.src = "https://www.youtube.com/iframe_api"; // URL CORRETA DA API DO YOUTUBE
                 const firstScriptTag = document.getElementsByTagName('script')[0];
                 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
                 // A função onYouTubeIframeAPIReady será chamada automaticamente
@@ -579,6 +621,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     return `rgba(${this._r}, ${this._g}, ${this._b}, ${this._a})`;
                 },
                 toString: function() {
+                    // Para garantir que o toString retorne o hex para o input color se necessário
+                    if (this._a === 1 && this._r !== undefined) {
+                        const toHex = (c) => `0${c.toString(16)}`.slice(-2);
+                        return `#${toHex(this._r)}${toHex(this._g)}${toHex(this._b)}`;
+                    }
                     return this.toRgbString();
                 }
             };
@@ -598,16 +645,5 @@ document.addEventListener('DOMContentLoaded', () => {
         showPage(page1); // Caso contrário, mostra a página de configuração inicial
     }
 
-    // Adiciona o script da API do YouTube dinamicamente (se não for carregado via HTML)
-    // Movido para dentro do DOMContentLoaded para garantir que o script seja inserido após o carregamento do DOM.
-    // O script do YouTube é carregado se for necessário para a página 3 ou se a página 3 for acessada.
-    // A linha <script src="https://www.youtube.com/iframe_api"></script> no HTML é incorreta.
-    // A URL correta é https://www.youtube.com/iframe_api
-    // Remova a linha incorreta do HTML e deixe o JS carregar se for preciso.
+    // A função onYouTubeIframeAPIReady é definida globalmente acima para ser chamada pela API do YouTube
 });
-
-// Fora do DOMContentLoaded, a função onYouTubeIframeAPIReady precisa ser global.
-// Se você está incluindo <script src="https://www.youtube.com/iframe_api"></script> no seu HTML,
-// então esta função global será chamada automaticamente quando a API estiver pronta.
-// Se você não está incluindo, ela será definida e aguardará o carregamento dinâmico.
-// Se já definida acima, não precisa repetir.
