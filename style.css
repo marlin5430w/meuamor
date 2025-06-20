@@ -1,117 +1,129 @@
 :root {
-    --main-color: #ff007f; /* Variável CSS para a cor principal */
-    --main-color-dark: #e6006e; /* Cor mais escura para hover */
-    --main-color-shadow: rgba(255, 0, 127, 0.4); /* Sombra */
-    --main-color-border-dash: rgba(255, 0, 127, 0.5); /* Borda tracejada */
-    --main-color-hover-bg: rgba(255, 0, 127, 0.1); /* Fundo hover translúcido */
+    --main-color: #ff007f;
+    --main-color-dark: #e6006e;
+    --main-color-shadow: rgba(255, 0, 127, 0.4);
+    --main-color-border-dash: rgba(255, 0, 127, 0.5);
+    --main-color-hover-bg: rgba(255, 0, 127, 0.1);
 }
 
 body {
-    background-color: #1a1a1a; /* Fundo escuro */
-    color: #dedede; /* Texto branco/claro */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte limpa */
+    background-color: #1a1a1a;
+    color: #dedede;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh; /* Ocupa a altura total da viewport */
+    min-height: 100vh;
     margin: 0;
-    padding: 20px; /* Adicionado padding para garantir espaço nas bordas em mobile */
-    box-sizing: border-box; /* Garante que padding não adicione largura extra */
-    overflow-y: auto; /* Permite rolagem vertical se o conteúdo for maior que a tela */
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
 }
 
 .container {
-    background-color: #0d0d0d; /* Fundo ainda mais escuro para o container */
-    border: 2px solid var(--main-color); /* Usando a variável */
+    background-color: #0d0d0d;
+    border: 2px solid var(--main-color);
     border-radius: 10px;
     padding: 30px;
     text-align: center;
-    box-shadow: 0 0 20px var(--main-color-shadow); /* Usando a variável */
+    box-shadow: 0 0 20px var(--main-color-shadow);
+    display: flex; /* Mantido flex para o container principal */
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    box-sizing: border-box;
+    margin: auto;
+    position: relative; /* Para posicionar as páginas */
+}
+
+/* Estilos para as páginas */
+.page {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%; /* Agora ocupa 100% da largura disponível */
-    max-width: 500px; /* Largura máxima */
+    gap: 20px; /* Espaçamento entre os blocos dentro da página */
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    position: absolute; /* Para que uma não afete o layout da outra */
+    top: 0;
+    left: 0;
+    padding: 30px; /* Padding interno para a página */
     box-sizing: border-box;
-    margin: auto; /* Centraliza o container verticalmente se houver espaço extra */
+    background-color: #0d0d0d; /* Mesma cor do container */
+    border-radius: 10px;
 }
 
-/* Estilos para o input de data e cor */
-.date-input-container {
-    margin-bottom: 25px;
+.page.hidden {
+    opacity: 0;
+    pointer-events: none; /* Desabilita cliques em elementos ocultos */
+    transform: translateX(100%); /* Move para fora da tela à direita */
+    z-index: 1; /* Garante que a página oculta esteja abaixo */
+}
+
+.page.active {
+    opacity: 1;
+    pointer-events: auto; /* Habilita cliques */
+    transform: translateX(0); /* Posição normal */
+    z-index: 2; /* Garante que a página ativa esteja acima */
+}
+
+/* Redefine o padding do container para 0 quando as páginas estiverem controlando o padding */
+.container.page-active {
+    padding: 0;
+}
+
+
+/* Estilos comuns para campos e botões */
+.date-input-container,
+.color-picker-container,
+.music-input-container,
+.emoji-input-container,
+.message-slot {
+    width: 100%;
+    border: 1px dashed var(--main-color-border-dash);
+    padding: 15px;
+    border-radius: 8px;
+    box-sizing: border-box;
     display: flex;
-    flex-direction: column; /* Sempre em coluna para melhor empilhamento */
+    flex-direction: column;
     align-items: center;
     gap: 10px;
-    transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out, padding 0.5s ease-in-out;
-    overflow: hidden;
-    max-height: 650px; /* Aumenta a altura máxima para acomodar os campos de música e emoji */
-    opacity: 1;
-    width: 100%; /* Ocupa toda a largura do container */
 }
 
-/* Classe para esconder o container de data e cor */
-.date-input-container.hidden {
-    opacity: 0;
-    max-height: 0;
-    margin-bottom: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    pointer-events: none;
-}
-
-/* Classes para esconder elementos no modo "somente leitura" */
-.action-button.hidden,
-.date-input-container label.hidden,
-.date-picker.hidden,
-.color-picker-container.hidden,
-.message-slot textarea.hidden,
-.music-input-container.hidden,
-.emoji-input-container.hidden {
-    display: none !important; /* Força o ocultamento total */
-}
-
-/* Exibe o parágrafo de mensagem no modo somente leitura */
-.message-slot p.show {
-    display: block !important;
-}
-
-/* Exibe o player de música no modo somente leitura */
-.music-player-display.show {
-    display: block !important;
-}
-
-.date-input-container label {
+.date-input-container label,
+.color-picker-container label,
+.music-input-container label,
+.emoji-input-container label,
+.message-slot label {
     font-size: 1em;
-    margin-bottom: 5px;
     color: var(--main-color);
     text-align: center;
+    margin-bottom: 5px;
+    width: 100%;
 }
 
-.date-picker {
-    padding: 12px;
+input[type="datetime-local"],
+input[type="text"],
+textarea {
+    width: calc(100% - 24px); /* Ajusta para padding */
+    padding: 10px;
     border: 1px solid var(--main-color);
     border-radius: 5px;
     background-color: #2a2a2a;
     color: #dedede;
-    font-size: 1.1em;
-    width: calc(100% - 24px);
+    font-size: 1em;
     box-sizing: border-box;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
 }
 
-/* Estilo para o seletor de cores */
-.color-picker-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    margin-top: 15px;
-    width: 100%;
-    transition: opacity 0.5s ease-in-out;
-    opacity: 1;
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #888;
 }
 
 .color-picker {
@@ -128,23 +140,11 @@ body {
     overflow: hidden;
 }
 
-.color-picker::-webkit-color-swatch-wrapper {
-    padding: 0;
-}
-.color-picker::-webkit-color-swatch {
-    border: none;
-    border-radius: 4px;
-}
-.color-picker::-moz-color-swatch-wrapper {
-    border: none;
-    padding: 0;
-}
-.color-picker::-moz-color-swatch {
-    border: none;
-    border-radius: 4px;
-}
+.color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+.color-picker::-webkit-color-swatch { border: none; border-radius: 4px; }
+.color-picker::-moz-color-swatch-wrapper { border: none; padding: 0; }
+.color-picker::-moz-color-swatch { border: none; border-radius: 4px; }
 
-/* Estilo para os botões gerais */
 .action-button {
     background-color: var(--main-color);
     color: white;
@@ -154,7 +154,6 @@ body {
     cursor: pointer;
     font-size: 1.1em;
     transition: background-color 0.3s ease;
-    margin-top: 25px;
     width: calc(100% - 2px);
     max-width: 300px;
     box-sizing: border-box;
@@ -164,185 +163,50 @@ body {
     background-color: var(--main-color-dark);
 }
 
-#setStartDateButton {
-    margin-top: 15px;
-    width: calc(100% - 24px);
-    max-width: 220px;
-}
-
-/* --- ESTILOS PARA A MÚSICA --- */
-.music-input-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    margin-top: 20px;
-    width: 100%;
-    border: 1px dashed var(--main-color-border-dash);
-    padding: 15px;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-.music-input-container label {
-    font-size: 1em;
-    color: var(--main-color);
-    margin-bottom: 0;
-}
-
-.music-input-container input[type="text"] {
-    width: calc(100% - 24px);
-    padding: 10px;
-    border: 1px solid var(--main-color);
-    border-radius: 5px;
-    background-color: #2a2a2a;
-    color: #dedede;
-    font-size: 1em;
-    box-sizing: border-box;
-}
-
-#loadMusicButton {
+.back-button {
+    background-color: #555;
     margin-top: 10px;
-    width: auto;
-    max-width: 200px;
+}
+.back-button:hover {
+    background-color: #777;
 }
 
-.music-player-display {
-    display: none;
-    margin-top: 20px;
-    text-align: center;
-    width: 100%;
-    max-width: 450px;
-}
-
-.music-player-display p {
-    font-size: 1.1em;
-    color: var(--main-color);
-    margin-bottom: 10px;
-    word-wrap: break-word;
-}
-
-#player {
-    width: 100%;
-    max-width: 400px;
-    height: 100px;
-    margin: 0 auto;
-    opacity: 0;
-    pointer-events: none;
-    overflow: hidden;
-    position: absolute;
-    left: -9999px;
-}
-
-/* Mensagem de música carregada */
-#musicLoadedMessage {
-    color: #4CAF50;
-    font-size: 0.9em;
-    margin-top: 5px;
-}
-
-/* --- NOVOS ESTILOS PARA EMOJIS --- */
+/* Emojis */
 .emoji-input-container {
-    display: flex;
-    flex-direction: column; /* Sempre em coluna: label em cima, inputs embaixo */
-    align-items: center; /* Centraliza horizontalmente o conteúdo */
-    gap: 10px;
-    margin-top: 20px;
-    width: 100%;
-    border: 1px dashed var(--main-color-border-dash);
-    padding: 15px;
-    border-radius: 8px;
-    box-sizing: border-box;
-    min-height: 180px; /* Aumenta um pouco mais a altura mínima para garantir espaço */
-    justify-content: center; /* Centraliza o conteúdo verticalmente dentro do container */
+    min-height: 180px; /* Altura mínima para garantir espaço */
+    justify-content: center;
 }
 
-.emoji-input-container label {
-    font-size: 1em;
-    color: var(--main-color);
-    margin-bottom: 5px;
-    text-align: center;
-    width: 100%;
-}
-
-/* Container flexbox para os próprios inputs de emoji */
 .emoji-inputs-wrapper {
     display: flex;
-    gap: 10px; /* Espaçamento entre os inputs */
-    justify-content: center; /* Centraliza os inputs horizontalmente */
-    flex-wrap: wrap; /* Permite quebrar linha se não couberem todos em uma linha */
-    width: 100%; /* Ocupa a largura total do container pai para flexibilidade */
-    max-width: 200px; /* REDUZIDO: Limita a largura do wrapper para que os 3 inputs quebrem a linha no mobile se necessário e fiquem centralizados */
-    margin: 0 auto; /* Centraliza o wrapper dentro do container principal */
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap; /* Permite quebrar linha */
+    width: 100%;
+    max-width: 200px; /* Força quebra de linha em mobile se 3 não couberem */
+    margin: 0 auto;
 }
 
 .emoji-input {
-    /* Usar flex-basis para controlar o tamanho preferencial */
-    flex-basis: 60px; /* Largura preferencial para cada input */
-    height: 60px; /* Altura fixa para o input */
-    max-width: 60px; /* Garante que o input não fique maior que 60px */
+    flex-basis: 60px; /* Largura preferencial */
+    height: 60px;
+    max-width: 60px; /* Garante que não ultrapasse */
     text-align: center;
-    font-size: 2.2em; /* Tamanho do emoji dentro do input */
+    font-size: 2.2em;
     padding: 5px;
     border: 1px solid var(--main-color);
     border-radius: 8px;
     background-color: #2a2a2a;
     color: #dedede;
     box-sizing: border-box;
-    line-height: 1; /* Para centralizar verticalmente o emoji */
-    flex-shrink: 0; /* Impede que o input encolha */
-    display: flex; /* Torna o input um contêiner flex para centralizar o texto/emoji */
+    line-height: 1;
+    flex-shrink: 0;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.emoji-input::placeholder {
-    color: #888;
-}
-
-/* Container que vai receber os emojis animados */
-#emojiRainContainer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 999;
-    display: none;
-}
-
-/* Estilo para cada emoji individual */
-.falling-emoji {
-    position: absolute;
-    font-size: 2em;
-    opacity: 0;
-    transform: translateY(-50px);
-    animation: fall linear infinite;
-    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
-    will-change: transform, opacity;
-}
-
-/* Definição da animação de queda */
-@keyframes fall {
-    0% {
-        transform: translateY(-50px);
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(calc(100vh + 50px));
-        opacity: 0;
-    }
-}
-
-/* --- ESTILOS PARA AS FOTOS --- */
+/* Fotos */
 .photos-container {
     display: flex;
     justify-content: center;
@@ -350,28 +214,13 @@ body {
     width: 100%;
     position: relative;
     overflow: hidden;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* No modo de edição, permite quebrar linha */
     gap: 20px;
-    height: auto;
-}
-
-.photos-container.slideshow-mode .photo-uploader {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    border: 2px dashed var(--main-color-border-dash);
-    width: 120px;
-    height: 180px;
-    z-index: 1;
-}
-
-.photos-container.slideshow-mode {
-    height: 200px;
-    gap: 0;
+    height: auto; /* Altura se adapta no modo edição */
+    padding: 15px; /* Adiciona padding para as fotos ficarem dentro da borda tracejada */
+    border: 1px dashed var(--main-color-border-dash);
+    border-radius: 8px;
+    box-sizing: border-box;
 }
 
 .photo-uploader {
@@ -386,11 +235,12 @@ body {
     position: relative;
     transform: none;
     z-index: auto;
-    border: 2px dashed var(--main-color-border-dash);
+    border: 2px dashed var(--main-color-border-dash); /* Borda visível para o uploader */
 }
 
 .custom-file-upload {
     display: flex;
+    flex-direction: column; /* Para empilhar o texto "Foto X" e o ícone, se houver */
     justify-content: center;
     align-items: center;
     width: 100%;
@@ -400,8 +250,9 @@ body {
     border: none;
     border-radius: 8px;
     position: relative;
+    color: #dedede; /* Cor do texto "Foto X" */
+    font-size: 0.9em;
 }
-
 .custom-file-upload:hover {
     background-color: var(--main-color-hover-bg);
 }
@@ -419,15 +270,21 @@ body {
     left: 0;
     z-index: 1;
 }
-
+/* Imagem ativa no slideshow */
 .photos-container.slideshow-mode .photo-uploader img.active {
     opacity: 1;
     z-index: 2;
 }
-
-.hidden-file-input {
-    display: none;
+/* Esconde o input de arquivo padrão */
+.hidden-file-input { display: none; }
+/* Mostra o texto "Foto X" apenas quando a imagem não está visível */
+.photo-uploader .upload-text {
+    display: block;
 }
+.photo-uploader img[style*="opacity: 1"] + .upload-text {
+    display: none; /* Esconde o texto se a imagem estiver visível */
+}
+
 
 .remove-photo-button {
     position: absolute;
@@ -442,45 +299,56 @@ body {
     font-size: 0.9em;
     font-weight: bold;
     cursor: pointer;
-    display: none;
+    display: none; /* Inicia escondido, só aparece no modo edição com foto */
     align-items: center;
     justify-content: center;
     z-index: 10;
     transition: background-color 0.2s ease;
 }
+.remove-photo-button:hover { background-color: rgba(255, 0, 127, 1); }
+.photo-uploader .remove-photo-button.show-button { display: flex; }
 
-.remove-photo-button:hover {
-    background-color: rgba(255, 0, 127, 1);
+
+/* Visualização Final */
+#viewModeDisplay {
+    padding: 0; /* No modo de visualização, o padding do container já é suficiente */
+    gap: 15px; /* Espaçamento mais compacto para visualização */
 }
 
-.photo-uploader .remove-photo-button.show-button {
-    display: flex;
-}
+#viewModeDisplay .title { margin-bottom: 5px; }
 
-/* Estilos para o slot de mensagem */
-.message-slot {
-    width: 100%;
-    margin-bottom: 25px;
+.music-player-display {
+    display: none; /* Inicia oculto, será exibido via JS no modo de visualização */
+    margin-top: 20px;
     text-align: center;
-}
-
-.message-slot textarea {
-    width: calc(100% - 24px);
+    width: 100%;
     max-width: 450px;
-    height: 80px;
-    padding: 10px;
-    border: 1px solid var(--main-color);
-    border-radius: 5px;
-    background-color: #2a2a2a;
-    color: #dedede;
-    font-size: 1em;
-    resize: vertical;
-    box-sizing: border-box;
-    line-height: 1.4;
+}
+.music-player-display p {
+    font-size: 1.1em;
+    color: var(--main-color);
+    margin-bottom: 10px;
+    word-wrap: break-word;
+}
+#player {
+    width: 100%;
+    max-width: 400px;
+    height: 100px; /* Altura padrão para o player visível */
+    margin: 0 auto;
+    opacity: 1; /* Visível quando em #viewModeDisplay */
+    pointer-events: auto; /* Interativo quando visível */
+    position: relative; /* Volta ao fluxo normal */
+    left: auto;
 }
 
-.message-slot textarea::placeholder {
-    color: #888;
+.text-content {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.counter-line {
+    font-size: 1.3em;
+    margin: 5px 0;
+    line-height: 1.4;
 }
 
 .message-slot p {
@@ -499,27 +367,47 @@ body {
     border: 1px solid var(--main-color);
     box-sizing: border-box;
 }
+.message-slot p.hidden { display: none; }
 
-.message-slot p.hidden {
-    display: none;
+
+.photos-container.slideshow-mode {
+    height: 250px; /* Altura fixa para o slideshow */
+    gap: 0; /* Sem gap entre as fotos no slideshow */
+    padding: 0; /* Remove padding extra no modo slideshow */
+    border: none; /* Remove a borda tracejada no modo slideshow */
+    position: relative; /* Essencial para o posicionamento das imagens */
+    overflow: hidden; /* Garante que fotos fora dos limites sejam cortadas */
+    margin-bottom: 20px; /* Espaço abaixo do slideshow */
 }
 
-.text-content {
-    margin-top: 20px;
-    margin-bottom: 20px;
+.photos-container.slideshow-mode .photo-uploader {
+    position: absolute; /* Para sobrepor as imagens no slideshow */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0; /* Controlado pelo JS */
+    transition: opacity 0.5s ease-in-out;
+    border: none; /* Remove a borda tracejada no slideshow */
+    box-shadow: 0 0 15px var(--main-color-shadow); /* Sombra mais destacada */
 }
 
-.title {
-    font-size: 2em;
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: var(--main-color);
+.photos-container.slideshow-mode .photo-uploader img {
+    opacity: 0; /* Controlado pelo JS */
+    transition: opacity 0.5s ease-in-out;
+    position: absolute; /* Para empilhar imagens internas */
+    top: 0;
+    left: 0;
+    z-index: 1; /* Padrão, o JS vai ajustar */
 }
 
-.counter-line {
-    font-size: 1.3em;
-    margin: 8px 0;
-    line-height: 1.4;
+.photos-container.slideshow-mode .photo-uploader img.active {
+    opacity: 1;
+    z-index: 2; /* Garante que a imagem ativa esteja acima */
+}
+/* Esconde o texto "Foto X" e o botão remover no modo slideshow */
+.photos-container.slideshow-mode .upload-text,
+.photos-container.slideshow-mode .remove-photo-button {
+    display: none !important;
 }
 
 .copy-message {
@@ -530,141 +418,87 @@ body {
     transition: opacity 0.3s ease-in-out;
     min-height: 20px;
 }
-
-.copy-message.show {
-    opacity: 1;
-}
+.copy-message.show { opacity: 1; }
 
 /* Media query para telas maiores (desktops e tablets) */
 @media (min-width: 600px) {
     .container {
         padding: 40px;
     }
+    .page {
+        padding: 40px; /* Padding maior para as páginas em desktop */
+    }
 
     .title {
         font-size: 2.5em;
     }
-
     .counter-line {
         font-size: 1.5em;
     }
 
-    /* Ajusta a altura máxima do date-input-container para desktop */
+    /* Em telas maiores, os inputs de data e cor podem ficar lado a lado */
     .date-input-container {
-        max-height: 500px;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
         gap: 20px;
     }
-
-    /* Ajusta o layout do music-input-container em telas maiores */
-    .music-input-container {
-        flex-direction: row;
-        justify-content: center;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-
-    .music-input-container label {
-        flex-basis: 100%;
-        text-align: center;
-    }
-
-    .music-input-container input[type="text"] {
-        width: 45%;
-        max-width: 250px;
-    }
-
-    /* Estilos para o emoji-input-container em telas maiores */
-    .emoji-input-container {
-        flex-direction: column; /* Mantido em coluna, para o label ficar acima */
-        justify-content: center;
-        gap: 10px;
-    }
-    .emoji-input-container label {
-        flex-basis: 100%;
-        text-align: center;
-    }
-    .emoji-inputs-wrapper {
-        width: auto; /* Permite que o wrapper se ajuste ao conteúdo dos 3 inputs */
-        max-width: none; /* Remove a limitação de largura no desktop para que fiquem lado a lado */
-        flex-wrap: nowrap; /* Não quebra linha no desktop */
-    }
-    .emoji-input {
-        flex-basis: 70px; /* Um pouco maior em desktop */
-        height: 70px;
-        max-width: 70px; /* Garante que não fique maior que 70px */
-        font-size: 2.5em;
-    }
-
-    /* ESTILOS PARA AS FOTOS (REVISADO PARA MEDIA QUERY E DIMENSÃO) */
-    .photos-container {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 20px;
-        height: auto;
-    }
-
-    .photos-container.slideshow-mode .photo-uploader {
-        width: 150px;
-        height: 225px;
-        position: absolute;
-        transform: translate(-50%, -50%);
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-        z-index: 1;
-    }
-
-    .photos-container.slideshow-mode {
-        height: 250px;
-        gap: 0;
-    }
-
-    .photo-uploader {
-        width: 150px;
-        height: 225px;
-        position: relative;
-        transform: none;
-        opacity: 1;
-        z-index: auto;
-    }
-
-    .photo-uploader img {
-        position: relative;
-        opacity: 1;
-    }
-
-    .date-input-container label {
-        margin-bottom: 0;
-        text-align: right;
-    }
-
-    .date-picker {
-        width: 220px;
-    }
-
+    .date-input-container label { text-align: right; }
+    input[type="datetime-local"] { width: 220px; }
     #setStartDateButton {
         margin-top: 0;
         width: auto;
         max-width: none;
     }
-
     .color-picker-container {
         flex-direction: row;
         gap: 10px;
         margin-top: 0;
     }
 
-    .color-picker {
-        width: 80px;
-        height: 30px;
+    /* Música em desktop */
+    .music-input-container {
+        flex-direction: row;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .music-input-container label {
+        flex-basis: 100%;
+        text-align: center;
+    }
+    .music-input-container input[type="text"] {
+        width: 45%;
+        max-width: 250px;
     }
 
-    .message-slot textarea,
-    .message-slot p {
-        width: 100%;
-        max-width: 450px;
+    /* Emojis em desktop */
+    .emoji-inputs-wrapper {
+        max-width: none; /* Remove limitação de largura para desktop */
+        flex-wrap: nowrap; /* Não quebra linha no desktop */
+    }
+    .emoji-input {
+        flex-basis: 70px;
+        height: 70px;
+        max-width: 70px;
+        font-size: 2.5em;
+    }
+
+    /* Fotos em desktop */
+    .photos-container {
+        flex-wrap: nowrap; /* Não quebra linha em desktop */
+        gap: 20px;
+    }
+    .photo-uploader {
+        width: 150px;
+        height: 225px;
+    }
+    .photos-container.slideshow-mode {
+        height: 280px; /* Altura maior para fotos maiores no slideshow desktop */
+    }
+    .photos-container.slideshow-mode .photo-uploader {
+        width: 150px; /* Tamanho maior para fotos no slideshow */
+        height: 225px;
     }
 }
 
