@@ -226,7 +226,6 @@ textarea::placeholder {
 }
 
 .emoji-input {
-    /* Novos estilos para slots de emoji menores */
     width: 50px; /* Largura pequena */
     height: 50px; /* Altura pequena, igual à largura para quadrado */
     padding: 0; /* Remove padding */
@@ -250,17 +249,17 @@ textarea::placeholder {
 }
 
 .photo-upload-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    justify-content: center;
+    display: flex; /* Mudar para flexbox */
+    flex-direction: column; /* Coloca os itens em coluna (um abaixo do outro) */
+    align-items: center; /* Centraliza os itens horizontalmente */
+    gap: 15px; /* Espaçamento entre os slots de foto */
     width: 100%; /* Garante que a grid ocupe a largura total */
 }
 
 .photo-uploader {
     position: relative;
-    width: 100%;
-    padding-top: 100%; /* Proporção 1:1 */
+    width: 200px; /* Largura fixa para o slot de foto */
+    height: 200px; /* Altura fixa para o slot de foto (proporção 1:1) */
     background-color: var(--input-bg-color);
     border: 2px dashed var(--main-color-border-dash);
     border-radius: 8px;
@@ -559,14 +558,10 @@ textarea::placeholder {
         line-height: 45px;
     }
 
-    .photo-upload-grid {
-        grid-template-columns: 1fr; /* Uma coluna em telas pequenas */
-    }
-
+    /* Ajustes específicos para telas menores nas fotos */
     .photo-uploader {
-        width: 80%; /* Ajuste a largura para ser mais centralizada */
-        margin: 0 auto; /* Centraliza a foto quando é uma coluna */
-        padding-top: 80%; /* Ajuste a proporção se necessário */
+        width: 180px; /* Ajuste para ser um pouco menor em telas menores */
+        height: 180px;
     }
 
     .slideshow-container {
@@ -604,6 +599,12 @@ textarea::placeholder {
         height: 40px;
         font-size: 1.8em;
         line-height: 40px;
+    }
+
+    /* Ajustes para telas muito pequenas nas fotos */
+    .photo-uploader {
+        width: 150px; /* Ainda menor em telas muito pequenas */
+        height: 150px;
     }
 
     .slideshow-container {
