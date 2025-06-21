@@ -218,19 +218,35 @@ textarea::placeholder {
 /* Estilos Específicos da Página 2 (Emojis e Fotos) */
 .emoji-inputs {
     display: flex;
-    justify-content: space-around;
-    gap: 10px;
+    justify-content: center; /* Centraliza os emojis */
+    gap: 10px; /* Espaço entre os inputs */
     margin-bottom: 20px;
     width: 100%; /* Garante que ocupe a largura total */
+    flex-wrap: wrap; /* Permite que os emojis quebrem linha se a tela for muito pequena */
 }
 
 .emoji-input {
-    width: 60px; /* Ajuste para caber 3 emojis */
+    /* Novos estilos para slots de emoji menores */
+    width: 50px; /* Largura pequena */
+    height: 50px; /* Altura pequena, igual à largura para quadrado */
+    padding: 0; /* Remove padding */
     text-align: center;
-    font-size: 2em;
-    padding: 5px;
-    height: 60px; /* Altura para emojis */
+    font-size: 2.2em; /* Tamanho do emoji maior para centralizar */
+    line-height: 50px; /* Centraliza verticalmente o texto no input */
     flex-shrink: 0; /* Não permite que diminua se não houver espaço */
+    border: 1px solid var(--input-border-color);
+    border-radius: 8px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    box-sizing: border-box; /* Inclui borda na largura/altura */
+    margin: 0; /* Remove margem padrão, o gap controla o espaçamento */
+    outline: none; /* Remove a borda de foco padrão */
+}
+
+/* Estilo para placeholder para que ele também se ajuste */
+.emoji-input::placeholder {
+    font-size: 0.8em; /* Menor que o emoji real, se necessário */
+    color: var(--placeholder-color);
 }
 
 .photo-upload-grid {
@@ -535,10 +551,12 @@ textarea::placeholder {
         font-size: 1em;
     }
 
+    /* Ajustes específicos para telas menores nos emojis */
     .emoji-input {
-        width: 50px;
-        height: 50px;
-        font-size: 1.8em;
+        width: 45px; /* Ligeiramente menor em telas menores */
+        height: 45px;
+        font-size: 2em; /* Mantém o emoji visível */
+        line-height: 45px;
     }
 
     .photo-upload-grid {
@@ -580,10 +598,12 @@ textarea::placeholder {
         font-size: 1.2em;
     }
 
+    /* Ajustes para telas muito pequenas nos emojis */
     .emoji-input {
-        width: 45px;
-        height: 45px;
-        font-size: 1.6em;
+        width: 40px; /* Ainda menor em telas muito pequenas */
+        height: 40px;
+        font-size: 1.8em;
+        line-height: 40px;
     }
 
     .slideshow-container {
