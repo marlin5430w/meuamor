@@ -14,7 +14,7 @@ const uploadedPhotoUrls = []; // Array para armazenar as URLs das imagens base64
 
 // Referências aos elementos
 const initialDateInput = document.getElementById('initialDate');
-const defineDateButton = document.getElementById('defineDateButton');
+const defineDateButton = document.getElementById('defineDateButton'); // Este botão define a data
 const themeColorInput = document.getElementById('themeColor');
 const musicLinkInput = document.getElementById('musicLink');
 const musicNameInput = document.getElementById('musicName');
@@ -25,8 +25,10 @@ const shareLinkTextarea = document.getElementById('shareLinkTextarea');
 const copyLinkButton = document.getElementById('copyLinkButton');
 const copyMessage = document.getElementById('copyMessage');
 
+// Corrigindo a referência: este é o botão "PRÓXIMO" da PÁGINA 1
+const nextButtonPage1 = document.getElementById('nextButtonPage2'); // Este ID parece estar no HTML para o botão da PÁGINA 1
+
 const prevButtonPage2 = document.getElementById('prevButtonPage2');
-const nextButtonPage2 = document.getElementById('nextButtonPage2');
 const prevButtonPage3 = document.getElementById('prevButtonPage3');
 
 const emojiInputs = [ // Seleciona todos os inputs de emoji
@@ -82,29 +84,21 @@ function showPage(pageIndex) {
     }
 }
 
-// Funções de Navegação
-function goToNextPage() {
-    if (currentPage < pages.length - 1) {
-        showPage(currentPage + 1);
-    }
-}
-
-function goToPrevPage() {
-    if (currentPage > 0) {
-        showPage(currentPage - 1);
-    }
-}
+// Funções de Navegação (mantidas como estão, pois os botões são independentes agora)
+// No entanto, o `nextButtonPage2` do JS deve ser o botão da Página 1
+// Não há um goToNextPage/goToPrevPage genérico mais, pois cada botão tem seu evento específico.
 
 // --- Funções da Página 1 (Configuração) ---
 defineDateButton.addEventListener('click', () => {
     const dateValue = initialDateInput.value;
     if (dateValue) {
         initialDate = new Date(dateValue);
-        alert('Data inicial definida!');
-        // Habilitar a próxima página se todas as informações essenciais estiverem preenchidas
+        // Não alerta mais aqui, apenas atualiza o estado
+        console.log('Data inicial definida:', initialDate);
         checkPage1Readiness();
     } else {
-        alert('Por favor, selecione uma data inicial.');
+        // Preferimos desabilitar o botão do que alertar aqui
+        // alert('Por favor, selecione uma data inicial.');
     }
 });
 
@@ -123,10 +117,12 @@ loadMusicButton.addEventListener('click', () => {
     if (link) {
         musicLink = link;
         musicName = musicNameInput.value || 'Música Carregada';
-        alert('Música carregada! Ela tocará na visualização final.');
+        // Não alerta mais aqui, apenas atualiza o estado
+        console.log('Música carregada:', musicName, musicLink);
         checkPage1Readiness();
     } else {
-        alert('Por favor, insira o link da música do YouTube.');
+        // Preferimos desabilitar o botão do que alertar aqui
+        // alert('Por favor, insira o link da música do YouTube.');
     }
 });
 
@@ -137,34 +133,37 @@ messageInput.addEventListener('input', (event) => {
 
 // Habilitar/desabilitar botão "Próximo" da Página 1
 function checkPage1Readiness() {
-    // Basicamente, garantir que data e link da música (se preenchido) estão ok
-    const isDateSet = initialDate instanceof Date && !isNaN(initialDate);
-    const isMusicLinkValid = musicLinkInput.value === '' || isValidYouTubeUrl(musicLinkInput.value); // Permite vazio ou link válido
+    // Garante que a data está definida e é uma data válida
+    const isDateSet = initialDate instanceof Date && !isNaN(initialDate.getTime());
+    // A mensagem não pode estar vazia
     const isMessageSet = messageInput.value.trim() !== '';
+    // O link da música é opcional, mas se preenchido, deve ser válido
+    const isMusicLinkValid = musicLinkInput.value.trim() === '' || isValidYouTubeUrl(musicLinkInput.value);
 
-    // O botão "Próximo: Emojis e Fotos" só será habilitado se a data e a mensagem estiverem preenchidas.
-    // O link da música é opcional, mas se preenchido, deve ser válido.
-    if (isDateSet && isMusicLinkValid && isMessageSet) {
-        nextButtonPage2.disabled = false;
-        nextButtonPage2.classList.remove('secondary-button');
-        nextButtonPage2.classList.add('main-button');
+    // O botão "Próximo: Emojis e Fotos" (nextButtonPage1) só será habilitado se a data e a mensagem estiverem preenchidas,
+    // e o link da música (se existir) for válido.
+    if (isDateSet && isMessageSet && isMusicLinkValid) {
+        nextButtonPage1.disabled = false;
+        nextButtonPage1.classList.remove('secondary-button');
+        nextButtonPage1.classList.add('main-button');
     } else {
-        nextButtonPage2.disabled = true;
-        nextButtonPage2.classList.add('secondary-button');
-        nextButtonPage2.classList.remove('main-button');
+        nextButtonPage1.disabled = true;
+        nextButtonPage1.classList.add('secondary-button');
+        nextButtonPage1.classList.remove('main-button');
     }
 }
 
 // Chamar a checagem ao carregar a página e em cada input relevante
 document.addEventListener('DOMContentLoaded', checkPage1Readiness);
-initialDateInput.addEventListener('change', checkPage1Read readiness); // 'change' para o datetime-local
+initialDateInput.addEventListener('change', checkPage1Readiness); // 'change' para o datetime-local
 musicLinkInput.addEventListener('input', checkPage1Readiness);
+musicNameInput.addEventListener('input', checkPage1Readiness); // Adicionado para caso o nome da música seja obrigatório em alguma lógica futura
 messageInput.addEventListener('input', checkPage1Readiness);
 
 // Função para validar URL do YouTube
 function isValidYouTubeUrl(url) {
-    // Regex mais robusta para links do YouTube, incluindo youtu.be e youtube.com/watch?v=
     const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})(\S+)?$/;
+    // Também pode adicionar validação para links de compartilhamento como youtu.be
     return youtubeRegex.test(url);
 }
 
@@ -246,20 +245,31 @@ document.addEventListener('DOMContentLoaded', checkPage2Readiness);
 
 generateLinkButton.addEventListener('click', () => {
     // Assegura que todos os dados foram coletados antes de gerar o link
-    if (!initialDate || !message.trim()) {
-        alert('Por favor, preencha a data inicial e a mensagem especial na primeira página.');
+    // Revalida a página 1 (Página de Configuração)
+    const isDateSet = initialDate instanceof Date && !isNaN(initialDate.getTime());
+    const isMessageSet = message.trim() !== '';
+    const isMusicLinkValid = musicLinkInput.value.trim() === '' || isValidYouTubeUrl(musicLinkInput.value);
+
+    if (!isDateSet || !isMessageSet || !isMusicLinkValid) {
+        alert('Por favor, preencha corretamente a data inicial, a mensagem especial e, se houver, o link da música na primeira página.');
+        showPage(0); // Volta para a página 1 para o usuário corrigir
         return;
     }
-    if (!emojis.some(emoji => emoji.trim() !== '')) {
+
+    // Revalida a página 2 (Emojis e Fotos)
+    const hasEmojis = emojis.some(emoji => emoji.trim() !== '');
+    const hasPhotos = uploadedPhotoUrls.some(url => url !== null);
+
+    if (!hasEmojis) {
         alert('Por favor, escolha pelo menos um emoji.');
         return;
     }
-    if (!uploadedPhotoUrls.some(url => url !== null)) {
+    if (!hasPhotos) {
         alert('Por favor, carregue pelo menos uma foto.');
         return;
     }
 
-    // Codifica os dados para a URL
+    // Se tudo estiver ok, prossegue com a geração do link
     const encodedDate = initialDate.toISOString();
     const encodedColor = themeColor.replace('#', '');
     const encodedMusicLink = musicLink ? encodeURIComponent(musicLink) : '';
@@ -318,27 +328,29 @@ function updateViewMode() {
     const photosParam = urlParams.get('photos');
 
     // Data
-    let displayDate = initialDate;
-    if (dateParam) {
+    let displayDate = initialDate; // Usa o valor do formulário como padrão
+    if (dateParam) { // Se houver na URL, sobrescreve
         displayDate = new Date(dateParam);
     }
-    if (displayDate instanceof Date && !isNaN(displayDate)) {
+    if (displayDate instanceof Date && !isNaN(displayDate.getTime())) { // Usar getTime() para NaN check
         updateCounter(displayDate);
-        setInterval(() => updateCounter(displayDate), 1000); // Atualiza a cada segundo
+        // Limpa o intervalo anterior antes de criar um novo
+        if (window._counterInterval) clearInterval(window._counterInterval);
+        window._counterInterval = setInterval(() => updateCounter(displayDate), 1000); // Atualiza a cada segundo
     } else {
         counterDisplay.textContent = 'Data não definida.';
     }
 
     // Cor do Tema
     if (colorParam) {
-        themeColor = '#' + colorParam;
+        themeColor = '#' + colorParam; // Assume que a cor na URL não tem #
         document.documentElement.style.setProperty('--main-color', themeColor);
         document.documentElement.style.setProperty('--main-color-dark', darkenColor(themeColor, -10));
         document.documentElement.style.setProperty('--main-color-shadow', themeColor + '66');
         document.documentElement.style.setProperty('--main-color-border-dash', themeColor + '80');
         document.documentElement.style.setProperty('--main-color-hover-bg', themeColor + '1A');
     } else {
-        // Usa a cor padrão ou a definida pelo usuário se não houver na URL
+        // Se não houver na URL, usa a cor definida pelo usuário no formulário
         document.documentElement.style.setProperty('--main-color', themeColor);
         document.documentElement.style.setProperty('--main-color-dark', darkenColor(themeColor, -10));
         document.documentElement.style.setProperty('--main-color-shadow', themeColor + '66');
@@ -354,28 +366,35 @@ function updateViewMode() {
     const displayEmojis = emojisParam ? decodeURIComponent(emojisParam).split('') : emojis.filter(e => e.trim() !== '');
     if (displayEmojis.length > 0) {
         startEmojiRain(displayEmojis);
+    } else {
+        stopEmojiRain(); // Garante que a chuva pare se não houver emojis
     }
 
     // Fotos para slideshow
-    let displayPhotos = uploadedPhotoUrls.filter(url => url !== null);
+    let displayPhotos = uploadedPhotoUrls.filter(url => url !== null); // Usa fotos do formulário como padrão
     if (photosParam) {
         // Prioriza as fotos da URL se existirem
         displayPhotos = decodeURIComponent(photosParam).split('|').filter(url => url !== '');
     }
 
-    slideshowPhotos.forEach((img, index) => {
-        if (displayPhotos[index]) {
-            img.src = displayPhotos[index];
-            img.alt = `Foto ${index + 1}`;
-            // Mantém a primeira foto visível no início do slideshow
-            if (index === 0) {
-                img.classList.add('active');
-            }
-        } else {
-            img.src = ''; // Limpa a imagem se não houver URL
-            img.classList.remove('active');
-        }
+    // Limpa todas as fotos antes de carregar novas
+    slideshowPhotos.forEach(img => {
+        img.src = '';
+        img.classList.remove('active');
     });
+
+    if (displayPhotos.length > 0) {
+        slideshowPhotos.forEach((img, index) => {
+            if (displayPhotos[index]) {
+                img.src = displayPhotos[index];
+                img.alt = `Foto ${index + 1}`;
+            }
+        });
+        startSlideshow(); // Inicia o slideshow apenas se houver fotos
+    } else {
+        stopSlideshow();
+    }
+
 
     // Música
     const displayMusicLink = musicParam ? decodeURIComponent(musicParam) : musicLink;
@@ -405,21 +424,25 @@ function updateCounter(date) {
     const months = Math.floor(days / 30.44); // Média de dias no mês
     const years = Math.floor(days / 365.25); // Média de dias no ano (considerando bissextos)
 
-    let remainingDays = days;
-    let remainingHours = hours % 24;
-    let remainingMinutes = minutes % 60;
-    let remainingSeconds = seconds % 60;
-
     let counterText = '';
-    if (years > 0) {
-        counterText += `${years} ano${years > 1 ? 's' : ''}, `;
-        remainingDays = days % 365.25; // Remove os dias dos anos completos
+    // Lógica para construir a string de tempo
+    const parts = [];
+    if (years > 0) parts.push(`${years} ano${years > 1 ? 's' : ''}`);
+    if (months % 12 > 0) parts.push(`${months % 12} mês${months % 12 > 1 ? 'es' : ''}`); // Meses restantes após anos
+    if (days % 30 > 0 || (years === 0 && months === 0)) parts.push(`${days % 30} dia${(days % 30) !== 1 ? 's' : ''}`);
+    parts.push(`${hours % 24} hora${(hours % 24) !== 1 ? 's' : ''}`);
+    parts.push(`${minutes % 60} minuto${(minutes % 60) !== 1 ? 's' : ''}`);
+    parts.push(`${seconds % 60} segundo${(seconds % 60) !== 1 ? 's' : ''}`);
+
+    // Formatação para "e" no final
+    if (parts.length > 1) {
+        const lastPart = parts.pop();
+        counterText = `${parts.join(', ')} e ${lastPart}`;
+    } else if (parts.length === 1) {
+        counterText = parts[0];
+    } else {
+        counterText = 'Calculando...'; // Caso não haja tempo passado ainda
     }
-    if (months > 0) {
-        counterText += `${Math.floor(remainingDays / 30.44)} mês${Math.floor(remainingDays / 30.44) > 1 ? 'es' : ''}, `;
-    }
-    // Sempre mostrar dias, horas, minutos e segundos, mesmo que sejam 0
-    counterText += `${days % 30} dia${(days % 30) !== 1 ? 's' : ''}, ${remainingHours} hora${remainingHours !== 1 ? 's' : ''}, ${remainingMinutes} minuto${remainingMinutes !== 1 ? 's' : ''} e ${remainingSeconds} segundo${remainingSeconds !== 1 ? 's' : ''}`;
 
     counterDisplay.textContent = `Estamos juntos há:\n${counterText}`;
 }
@@ -468,7 +491,7 @@ function loadYouTubePlayer(videoUrl) {
             createPlayer(videoId);
         };
         const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
+        tag.src = "http://www.youtube.com/iframe_api"; // URL correta para a API
         const firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     } else {
@@ -512,7 +535,7 @@ function onPlayerStateChange(event) {
 
 function getYouTubeVideoId(url) {
     let videoId = '';
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i;
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube.com\/embed\/)([^"&?\/ ]{11})/i;
     const match = url.match(regex);
     if (match && match[1]) {
         videoId = match[1];
@@ -602,8 +625,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     showPage(0); // Garante que a primeira página seja exibida corretamente
-    checkPage1Readiness(); // Verifica o estado inicial do botão "Próximo"
-    checkPage2Readiness(); // Verifica o estado inicial do botão "Gerar Link"
+    checkPage1Readiness(); // Verifica o estado inicial do botão "Próximo" da Pág 1
+    checkPage2Readiness(); // Verifica o estado inicial do botão "Gerar Link" da Pág 2
 
     // Processa a URL se for um link de visualização
     const urlParams = new URLSearchParams(window.location.search);
@@ -612,7 +635,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Event Listeners para botões de navegação
-document.getElementById('nextButtonPage2').addEventListener('click', () => showPage(1)); // Botão "Próximo" da Página 1
-prevButtonPage2.addEventListener('click', () => showPage(0)); // Botão "Voltar" da Página 2
-prevButtonPage3.addEventListener('click', () => showPage(1)); // Botão "Voltar" da Página 3
+// EVENT LISTENERS CORRIGIDOS PARA A NAVEGAÇÃO ENTRE AS PÁGINAS
+
+// Botão "Próximo: Emojis e Fotos" (na PÁGINA 1, ID nextButtonPage2 no HTML)
+// Este botão AVANÇA PARA A PÁGINA 2
+if (nextButtonPage1) { // Verifica se o elemento existe para evitar erros
+    nextButtonPage1.addEventListener('click', () => showPage(1));
+}
+
+
+// Botão "Voltar para Configurações" (na PÁGINA 2, ID prevButtonPage2 no HTML)
+// Este botão VOLTA PARA A PÁGINA 1
+if (prevButtonPage2) {
+    prevButtonPage2.addEventListener('click', () => showPage(0));
+}
+
+// Botão "Voltar para Emojis e Fotos" (na PÁGINA 3, ID prevButtonPage3 no HTML)
+// Este botão VOLTA PARA A PÁGINA 2
+if (prevButtonPage3) {
+    prevButtonPage3.addEventListener('click', () => showPage(1));
+}
