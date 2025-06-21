@@ -19,9 +19,9 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 100%; /* Garante que ocupa a altura total */
+    height: 100%; /* Garante que ocupa a altura total da viewport */
     overflow-x: hidden; /* Evita rolagem horizontal */
-    box-sizing: border-box;
+    box-sizing: border-box; /* Inclui padding e borda na largura/altura */
 }
 
 body {
@@ -29,10 +29,10 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Alinhar ao topo para permitir rolagem vertical */
-    min-height: 100vh; /* Garante que o corpo ocupa a altura total da viewport */
-    padding: 20px 0; /* Padding vertical apenas, largura controlada pelo container */
+    justify-content: center; /* Centraliza o container horizontalmente */
+    align-items: flex-start; /* Alinha o container ao topo para permitir rolagem vertical */
+    min-height: 100vh; /* Garante que o corpo tenha pelo menos a altura da viewport */
+    padding: 20px 0; /* Padding vertical, largura controlada pelo container */
     box-sizing: border-box;
 }
 
@@ -45,9 +45,14 @@ body {
     max-width: 600px; /* Mantém uma largura máxima razoável para desktop */
     box-shadow: 0 0 20px var(--main-color-shadow);
     text-align: center;
-    overflow: hidden; /* Para gerenciar as páginas com overflow */
-    position: relative;
+    position: relative; /* Essencial para o posicionamento absoluto das páginas */
     box-sizing: border-box;
+    /* Adicionado para garantir que o container não seja esmagado */
+    min-height: calc(100vh - 40px); /* Pelo menos a altura da viewport menos o padding do body */
+    display: flex; /* Transforma o container em um flex container */
+    flex-direction: column; /* Organiza os itens verticalmente */
+    justify-content: flex-start; /* Alinha os itens ao topo */
+    align-items: center; /* Centraliza itens flex horizontalmente */
 }
 
 h1 {
@@ -55,6 +60,7 @@ h1 {
     margin-bottom: 25px;
     font-size: 2.2em;
     text-shadow: 0 0 10px var(--main-color-shadow);
+    width: 100%; /* Garante que o H1 ocupe a largura total */
 }
 
 h2 {
@@ -62,6 +68,7 @@ h2 {
     margin-bottom: 20px;
     font-size: 1.6em;
     text-shadow: 0 0 5px var(--main-color-shadow);
+    width: 100%; /* Garante que o H2 ocupe a largura total */
 }
 
 .card {
@@ -71,6 +78,8 @@ h2 {
     margin-bottom: 25px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     text-align: left; /* Alinha o conteúdo dos cards à esquerda */
+    width: 100%; /* Faz o card preencher a largura do container */
+    box-sizing: border-box;
 }
 
 .input-group {
@@ -87,7 +96,7 @@ h2 {
 input[type="datetime-local"],
 input[type="text"],
 textarea {
-    width: calc(100% - 20px); /* Ajusta para padding */
+    width: 100%; /* Removido o calc para simplificar e garantir 100% */
     padding: 12px;
     margin-bottom: 10px;
     border: 1px solid var(--input-border-color);
@@ -112,7 +121,7 @@ input[type="color"] {
 }
 
 .full-width-input {
-    width: calc(100% - 20px); /* Para inputs que devem ocupar 100% da largura do pai */
+    width: 100%; /* Para inputs que devem ocupar 100% da largura do pai */
 }
 
 textarea {
@@ -170,14 +179,19 @@ textarea::placeholder {
     box-shadow: none;
 }
 
+.navigation-buttons {
+    width: 100%; /* Garante que os botões de navegação ocupem a largura total */
+    box-sizing: border-box;
+}
+
 /* Navegação de Páginas */
 .page {
     transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-    position: absolute; /* Permite sobrepor as páginas */
+    position: absolute; /* Permite sobrepor as páginas dentro do container */
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%; /* Garante que a página preencha o container */
+    height: 100%; /* Garante que a página preencha a altura do container */
     padding: 30px; /* Mesmo padding do container */
     box-sizing: border-box;
     overflow-y: auto; /* Permite rolagem dentro de cada página, se o conteúdo for grande */
@@ -185,6 +199,10 @@ textarea::placeholder {
     transform: translateX(100%);
     z-index: 1; /* Garante que a página ativa esteja acima */
     background-color: #000000; /* Cor de fundo para evitar transparência durante a transição */
+    display: flex; /* Torna a página um flex container */
+    flex-direction: column; /* Organiza o conteúdo verticalmente */
+    align-items: center; /* Centraliza horizontalmente */
+    justify-content: flex-start; /* Alinha o conteúdo ao topo */
 }
 
 .page.active {
@@ -194,7 +212,7 @@ textarea::placeholder {
 }
 
 .page.hidden {
-    display: none; /* Usamos 'display: none' em vez de apenas 'hidden' */
+    display: none; /* Usamos 'display: none' quando não é a página ativa */
 }
 
 /* Estilos Específicos da Página 2 (Emojis e Fotos) */
@@ -203,6 +221,7 @@ textarea::placeholder {
     justify-content: space-around;
     gap: 10px;
     margin-bottom: 20px;
+    width: 100%; /* Garante que ocupe a largura total */
 }
 
 .emoji-input {
@@ -211,6 +230,7 @@ textarea::placeholder {
     font-size: 2em;
     padding: 5px;
     height: 60px; /* Altura para emojis */
+    flex-shrink: 0; /* Não permite que diminua se não houver espaço */
 }
 
 .photo-upload-grid {
@@ -218,6 +238,7 @@ textarea::placeholder {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 15px;
     justify-content: center;
+    width: 100%; /* Garante que a grid ocupe a largura total */
 }
 
 .photo-uploader {
@@ -308,6 +329,8 @@ textarea::placeholder {
     margin-bottom: 25px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     text-align: center;
+    width: 100%; /* Garante que ocupe a largura total */
+    box-sizing: border-box;
 }
 
 .share-link-section p {
@@ -317,7 +340,7 @@ textarea::placeholder {
 }
 
 .share-link-section textarea {
-    width: calc(100% - 20px);
+    width: 100%; /* Simplificado para 100% */
     height: 80px;
     margin-bottom: 15px;
     resize: none;
@@ -346,7 +369,7 @@ textarea::placeholder {
     text-align: center;
     display: flex; /* Usa flexbox para centralizar conteúdo */
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Ajustado para start, para permitir rolagem */
     align-items: center;
     min-height: 100%; /* Garante que ocupe a altura total da página */
     position: absolute; /* Para sobrepor as outras páginas */
@@ -356,6 +379,7 @@ textarea::placeholder {
     height: 100%;
     background-color: var(--background-color); /* Fundo da página de visualização */
     z-index: 10; /* Garante que fique acima de tudo quando ativo */
+    overflow-y: auto; /* Permite rolagem vertical para o conteúdo */
 }
 
 /* Esconde o botão de voltar na visualização quando o link é acessado diretamente */
@@ -403,6 +427,7 @@ textarea::placeholder {
     justify-content: center;
     align-items: center;
     background-color: #000; /* Fundo preto para o slideshow */
+    flex-shrink: 0; /* Não deixa diminuir se a página for flex */
 }
 
 .slideshow-photo {
@@ -432,6 +457,7 @@ textarea::placeholder {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0; /* Não deixa diminuir se a página for flex */
 }
 
 .music-info-display {
@@ -493,6 +519,7 @@ textarea::placeholder {
     .container {
         padding: 20px;
         width: 95%; /* Ocupa ainda mais da largura em telas menores */
+        min-height: calc(100vh - 20px); /* Ajusta min-height com novo padding */
     }
 
     h1 {
@@ -542,6 +569,7 @@ textarea::placeholder {
     .container {
         padding: 15px;
         width: 98%; /* Quase total em telas muito pequenas */
+        min-height: calc(100vh - 30px); /* Ajusta min-height com novo padding */
     }
 
     h1 {
