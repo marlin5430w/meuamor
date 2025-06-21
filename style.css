@@ -253,13 +253,14 @@ textarea::placeholder {
     flex-direction: column; /* Coloca os itens em coluna (um abaixo do outro) */
     align-items: center; /* Centraliza os itens horizontalmente */
     gap: 15px; /* Espaçamento entre os slots de foto */
+    margin-bottom: 20px; /* Adiciona um espaço abaixo da grade de fotos */
     width: 100%; /* Garante que a grid ocupe a largura total */
 }
 
 .photo-uploader {
     position: relative;
-    width: 750px; /* LARGURA FIXA */
-    height: 1334px; /* ALTURA FIXA */
+    width: 120px; /* Nova largura para formato retangular vertical */
+    height: 160px; /* Nova altura para proporção 3:4 */
     background-color: var(--input-bg-color);
     border: 2px dashed var(--main-color-border-dash);
     border-radius: 8px;
@@ -277,7 +278,7 @@ textarea::placeholder {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* **IMPORTANTE**: Garante que a imagem preencha o espaço sem distorcer, cortando se necessário */
+    object-fit: cover; /* Garante que a imagem preencha o espaço sem distorcer */
     border-radius: 6px;
     opacity: 0; /* Começa invisível */
     transition: opacity 0.3s ease;
@@ -428,12 +429,9 @@ textarea::placeholder {
     word-wrap: break-word; /* Quebra palavras longas */
 }
 
-/* Ajuste o slideshow para a nova proporção */
 .slideshow-container {
-    width: 750px; /* LARGURA FIXA */
-    height: 1334px; /* ALTURA FIXA */
-    max-width: 90%; /* Limita a largura em telas menores para não vazar muito */
-    max-height: 90vh; /* Limita a altura em telas menores */
+    width: 240px; /* Largura para acomodar a proporção 3:4 das fotos internas */
+    height: 320px; /* Altura para acomodar a proporção 3:4 das fotos internas (2x a largura) */
     position: relative;
     margin: 20px auto 30px auto;
     border: 3px solid var(--main-color);
@@ -450,7 +448,7 @@ textarea::placeholder {
 .slideshow-photo {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* **IMPORTANTE**: Ajusta a imagem inteira dentro do container, adicionando barras se a proporção for diferente */
+    object-fit: contain; /* Ajusta a imagem inteira dentro do container */
     position: absolute;
     top: 0;
     left: 0;
@@ -562,18 +560,13 @@ textarea::placeholder {
 
     /* Ajustes específicos para telas menores nas fotos */
     .photo-uploader {
-        width: 90vw; /* Usa 90% da largura da viewport para o slot de upload */
-        height: calc(90vw * (1334 / 750)); /* Calcula a altura para manter a proporção 750x1334 */
-        max-width: 750px; /* Garante que não exceda o tamanho fixo em telas grandes */
-        max-height: 1334px; /* Garante que não exceda o tamanho fixo */
-        min-height: 300px; /* Garante um tamanho mínimo visível */
+        width: 100px; /* Ligeiramente menor em telas menores */
+        height: 133px; /* Proporção 3:4 (100 * 4/3) */
     }
-    /* Ajuste para o slideshow em telas menores para manter a proporção */
+
     .slideshow-container {
-        width: 90vw; /* Usa 90% da largura da viewport para o slideshow */
-        height: calc(90vw * (1334 / 750)); /* Calcula a altura para manter a proporção */
-        max-width: 750px;
-        max-height: 1334px;
+        width: 200px; /* Ajusta largura para telas menores (mantendo proporção 3:4) */
+        height: 266px; /* Ajusta altura para telas menores (mantendo proporção 3:4) */
     }
 
     .counter-display {
@@ -610,17 +603,12 @@ textarea::placeholder {
 
     /* Ajustes para telas muito pequenas nas fotos */
     .photo-uploader {
-        width: 95vw; /* Ocupa 95% da largura da viewport em telas muito pequenas */
-        height: calc(95vw * (1334 / 750)); /* Calcula a altura para manter a proporção */
-        max-width: 750px;
-        max-height: 1334px;
-        min-height: 250px; /* Garante um tamanho mínimo */
+        width: 90px; /* Ainda menor em telas muito pequenas */
+        height: 120px; /* Proporção 3:4 (90 * 4/3) */
     }
-    /* Ajuste para o slideshow em telas muito pequenas */
+
     .slideshow-container {
-        width: 95vw; /* Ocupa 95% da largura da viewport */
-        height: calc(95vw * (1334 / 750)); /* Calcula a altura para manter a proporção */
-        max-width: 750px;
-        max-height: 1334px;
+        width: 180px; /* Ajusta largura para telas muito pequenas (mantendo proporção 3:4) */
+        height: 240px; /* Ajusta altura para telas muito pequenas (mantendo proporção 3:4) */
     }
 }
