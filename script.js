@@ -2,7 +2,7 @@
 const pages = document.querySelectorAll('.page');
 let currentPage = 0;
 
-let initialDate = null; // Inicie como null para indicar que a data ainda não foi definida
+let initialDate = null; // Inicie como null
 let themeColor = '#FF00FF';
 let musicLink = '';
 let musicName = '';
@@ -11,7 +11,7 @@ let emojis = ['', '', ''];
 const photoFiles = [];
 const uploadedPhotoUrls = [];
 
-// Referências aos elementos HTML (verifique esses IDs no seu index.html!)
+// Referências aos elementos HTML
 const initialDateInput = document.getElementById('initialDate');
 const defineDateButton = document.getElementById('defineDateButton'); // Botão "Definir Data"
 const themeColorInput = document.getElementById('themeColor');
@@ -91,50 +91,50 @@ function showPage(pageIndex) {
 
 // --- Funções da Página 1 (Configuração) ---
 
-// Event Listener para o input de data
-if (initialDateInput) {
-    initialDateInput.addEventListener('change', () => {
-        console.log("[initialDateInput] Valor alterado:", initialDateInput.value);
-        if (initialDateInput.value) {
-            // Tenta criar um objeto Date
-            const tempDate = new Date(initialDateInput.value);
-            // Verifica se a data é válida (não é 'Invalid Date')
-            if (!isNaN(tempDate.getTime())) {
-                initialDate = tempDate;
-                console.log("[initialDateInput] Data inicial definida:", initialDate);
-            } else {
-                initialDate = null; // Define como nulo se for inválida
-                console.log("[initialDateInput] Data inválida detectada.");
-            }
-        } else {
-            initialDate = null; // Se o campo for limpo
-            console.log("[initialDateInput] Campo de data vazio, initialDate = null.");
-        }
-        checkPage1Readiness(); // Sempre verifica a prontidão ao mudar o input
-    });
-} else {
-    console.error("ERRO: Elemento 'initialDateInput' não encontrado.");
-}
-
-// Event Listener para o botão "Definir Data"
+// NOVO: Event Listener mais simples para o botão "Definir Data"
+// Ele irá processar o valor do input de data no momento do clique.
 if (defineDateButton) {
     defineDateButton.addEventListener('click', () => {
-        console.log("[defineDateButton] Botão clicado.");
-        // A lógica de definir a data já acontece no 'change' do input.
-        // Este botão serve mais como uma confirmação visual ou um trigger manual.
-        // Podemos adicionar um alerta aqui se a data ainda não estiver válida.
-        if (initialDate instanceof Date && !isNaN(initialDate.getTime())) {
-            alert('Data definida com sucesso!');
+        console.log("[defineDateButton] Botão 'Definir Data' clicado.");
+        const dateValue = initialDateInput ? initialDateInput.value : ''; // Pega o valor do input, verificando se ele existe
+
+        if (dateValue) {
+            const tempDate = new Date(dateValue);
+            if (!isNaN(tempDate.getTime())) { // Verifica se a data é um objeto Date válido
+                initialDate = tempDate;
+                console.log('Data inicial definida E VÁLIDA:', initialDate);
+                alert('Data definida com sucesso!'); // Feedback visual
+            } else {
+                initialDate = null; // Reinicia a data se for inválida
+                console.log('Data inserida é INVÁLIDA. initialDate = null.');
+                alert('Formato de data inválido. Por favor, insira uma data e hora válidas.');
+            }
         } else {
-            alert('Por favor, selecione uma data inicial válida no campo acima.');
+            initialDate = null; // Reinicia a data se o campo estiver vazio
+            console.log('Campo de data vazio. initialDate = null.');
+            alert('Por favor, selecione uma data inicial.');
         }
-        checkPage1Readiness(); // Revalida o botão "Próximo"
+        checkPage1Readiness(); // Sempre chama para atualizar o estado do botão "Próximo"
     });
 } else {
-    console.error("ERRO: Elemento 'defineDateButton' não encontrado.");
+    console.error("ERRO GRAVE: Elemento 'defineDateButton' NÃO ENCONTRADO no DOM. Verifique seu HTML!");
 }
 
-// Event Listener para o input de cor do tema
+// O event listener para o 'change' do input de data é mantido
+// para que o `checkPage1Readiness` seja acionado quando o usuário
+// seleciona uma data no calendário, antes mesmo de clicar no botão.
+if (initialDateInput) {
+    initialDateInput.addEventListener('change', () => {
+        console.log("[initialDateInput] Valor alterado (sem clique no botão 'Definir Data'):", initialDateInput.value);
+        // Não define `initialDate` aqui para que o botão "Definir Data" seja o ponto de "confirmação".
+        // A validação de `initialDate` será feita no `checkPage1Readiness` e no clique do botão.
+        checkPage1Readiness();
+    });
+} else {
+    console.error("ERRO GRAVE: Elemento 'initialDateInput' NÃO ENCONTRADO no DOM. Verifique seu HTML!");
+}
+
+// Outros event listeners (mantidos do código anterior)
 if (themeColorInput) {
     themeColorInput.addEventListener('input', (event) => {
         themeColor = event.target.value;
@@ -149,7 +149,6 @@ if (themeColorInput) {
     console.error("ERRO: Elemento 'themeColorInput' não encontrado.");
 }
 
-// Event Listener para o botão "Carregar Música"
 if (loadMusicButton) {
     loadMusicButton.addEventListener('click', () => {
         console.log("[loadMusicButton] Botão clicado.");
@@ -176,7 +175,6 @@ if (loadMusicButton) {
     console.error("ERRO: Elemento 'loadMusicButton' não encontrado.");
 }
 
-// Event Listeners para inputs de música (também disparam checkPage1Readiness)
 if (musicLinkInput) {
     musicLinkInput.addEventListener('input', checkPage1Readiness);
 } else {
@@ -188,7 +186,6 @@ if (musicNameInput) {
     console.error("ERRO: Elemento 'musicNameInput' não encontrado.");
 }
 
-// Event Listener para o input de mensagem
 if (messageInput) {
     messageInput.addEventListener('input', (event) => {
         message = event.target.value.trim();
@@ -201,14 +198,16 @@ if (messageInput) {
 // Função para Habilitar/Desabilitar o botão "Próximo" da Página 1
 function checkPage1Readiness() {
     console.log("--- Executando checkPage1Readiness ---");
-    const isDateSetAndValid = initialDate instanceof Date && !isNaN(initialDate.getTime());
-    const isMessageFilled = messageInput.value.trim().length > 0; // Verifica se tem algum texto
-    const isMusicLinkValidOptionally = musicLinkInput.value.trim() === '' || isValidYouTubeUrl(musicLinkInput.value);
+    // Agora, a validação de `isDateSetAndValid` usa o valor de `initialDateInput` diretamente
+    // para refletir o que o usuário *selecionou*, independentemente de ter clicado em "Definir Data" ainda.
+    const isDateSetAndValid = initialDateInput && initialDateInput.value.trim() !== '' && !isNaN(new Date(initialDateInput.value).getTime());
+    const isMessageFilled = messageInput && messageInput.value.trim().length > 0;
+    const isMusicLinkValidOptionally = musicLinkInput && (musicLinkInput.value.trim() === '' || isValidYouTubeUrl(musicLinkInput.value));
 
     console.log(`Condições para 'Próximo':
-    - Data Válida: ${isDateSetAndValid} (initialDate: ${initialDate})
-    - Mensagem Preenchida: ${isMessageFilled} (messageInput.value: '${messageInput.value.trim()}')
-    - Link Música (Opcional, se preenchido, válido): ${isMusicLinkValidOptionally} (musicLinkInput.value: '${musicLinkInput.value.trim()}')`);
+    - Data Válida no Input: ${isDateSetAndValid} (initialDateInput.value: '${initialDateInput ? initialDateInput.value : 'N/A'}')
+    - Mensagem Preenchida: ${isMessageFilled} (messageInput.value: '${messageInput ? messageInput.value.trim() : 'N/A'}')
+    - Link Música (Opcional, se preenchido, válido): ${isMusicLinkValidOptionally} (musicLinkInput.value: '${musicLinkInput ? musicLinkInput.value.trim() : 'N/A'}')`);
 
     if (nextButtonPage1) {
         if (isDateSetAndValid && isMessageFilled && isMusicLinkValidOptionally) {
@@ -292,15 +291,14 @@ photoUploaders.forEach((uploader, index) => {
     }
 });
 
-// Função para verificar se a Página 2 está pronta para gerar o link
 function checkPage2Readiness() {
     console.log("--- Executando checkPage2Readiness ---");
     const hasEmojis = emojis.some(emoji => emoji.trim() !== '');
     const hasPhotos = uploadedPhotoUrls.some(url => url !== null && url !== '');
 
     console.log(`Condições para 'Gerar Link':
-    - Tem Emojis: ${hasEmojis} (emojis: ${emojis})
-    - Tem Fotos: ${hasPhotos} (uploadedPhotoUrls: ${uploadedPhotoUrls.filter(url => url !== null && url !== '').length > 0 ? 'sim' : 'não'} fotos)`);
+    - Tem Emojis: ${hasEmojis}
+    - Tem Fotos: ${hasPhotos}`);
 
     if (generateLinkButton) {
         if (hasEmojis && hasPhotos) {
@@ -319,12 +317,10 @@ function checkPage2Readiness() {
     }
 }
 
-// Event Listener para o botão "Gerar Link Compartilhável"
 if (generateLinkButton) {
     generateLinkButton.addEventListener('click', () => {
         console.log("[generateLinkButton] Botão clicado.");
 
-        // Validações finais antes de gerar o link
         const isDateValid = initialDate instanceof Date && !isNaN(initialDate.getTime());
         const isMessageFilled = message.trim() !== '';
         const isMusicLinkValidOptionally = musicLinkInput.value.trim() === '' || isValidYouTubeUrl(musicLinkInput.value);
@@ -345,11 +341,11 @@ if (generateLinkButton) {
         }
         if (!hasEmojis) {
             alert('Por favor, escolha pelo menos um emoji na página de Emojis e Fotos.');
-            showPage(1); return; // Volta para a página de emojis
+            showPage(1); return;
         }
         if (!hasPhotos) {
             alert('Por favor, carregue pelo menos uma foto na página de Emojis e Fotos.');
-            showPage(1); return; // Volta para a página de fotos
+            showPage(1); return;
         }
 
         const encodedDate = initialDate.toISOString();
@@ -376,8 +372,6 @@ if (generateLinkButton) {
 
         showPage(2);
     });
-} else {
-    console.error("ERRO: Elemento 'generateLinkButton' não encontrado.");
 }
 
 if (copyLinkButton) {
@@ -470,82 +464,22 @@ function updateCounter(date) {
     counterDisplay.textContent = `Estamos juntos há:\n${counterText}`;
 }
 
-function startSlideshow() {
-    stopSlideshow();
-    const activePhotos = slideshowPhotos.filter(img => img.src !== '');
-    if (activePhotos.length > 0) {
-        currentSlideIndex = 0;
-        activePhotos[currentSlideIndex].classList.add('active');
-        if (activePhotos.length > 1) {
-            slideshowInterval = setInterval(() => {
-                activePhotos[currentSlideIndex].classList.remove('active');
-                currentSlideIndex = (currentSlideIndex + 1) % activePhotos.length;
-                activePhotos[currentSlideIndex].classList.add('active');
-            }, 5000);
-        }
-    }
-}
-function stopSlideshow() {
-    if (slideshowInterval) { clearInterval(slideshowInterval); slideshowInterval = null; }
-    slideshowPhotos.forEach(img => img.classList.remove('active'));
-}
-
-// YouTube Player API
-function loadYouTubePlayer(videoUrl) {
-    if (player) player.destroy();
-    const videoId = getYouTubeVideoId(videoUrl);
-    if (!videoId) { console.error("URL do YouTube inválida:", videoUrl); return; }
-    if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
-        window.onYouTubeIframeAPIReady = () => { createPlayer(videoId); };
-        const tag = document.createElement('script');
-        tag.src = "http://www.youtube.com/iframe_api"; // URL oficial da API do YouTube
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    } else { createPlayer(videoId); }
-}
-
-function createPlayer(videoId) {
-    player = new YT.Player('player', {
-        height: '100', width: '100%', videoId: videoId,
-        playerVars: { 'playsinline': 1, 'autoplay': 1, 'loop': 1, 'controls': 1, 'disablekb': 1, 'modestbranding': 1, 'rel': 0, 'playlist': videoId },
-        events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
-    });
-}
-function onPlayerReady(event) { event.target.playVideo(); event.target.setVolume(50); }
-function onPlayerStateChange(event) { if (event.data === YT.PlayerState.ENDED) player.playVideo(); }
+function startSlideshow() { /* ... */ }
+function stopSlideshow() { /* ... */ }
+function loadYouTubePlayer(videoUrl) { /* ... */ }
+function createPlayer(videoId) { /* ... */ }
+function onPlayerReady(event) { /* ... */ }
+function onPlayerStateChange(event) { /* ... */ }
 function getYouTubeVideoId(url) {
     let videoId = '';
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube-nocookie\.com\/embed\/)([^"&?\/ ]{11})/i;
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube-nocookie\.com\/embed\/)([a-zA-Z0-9_-]{11})(\S+)?$/;
     const match = url.match(regex);
     if (match && match[1]) videoId = match[1];
     return videoId;
 }
 
-// Chuva de Emojis
-const emojiRainContainer = document.getElementById('emojiRainContainer');
-function startEmojiRain(emojisToUse = defaultEmojis) {
-    stopEmojiRain();
-    if (!emojiRainContainer) { console.warn("Elemento 'emojiRainContainer' não encontrado."); return; }
-    emojiRainContainer.style.display = 'block';
-    emojiRainInterval = setInterval(() => {
-        const emoji = document.createElement('span');
-        emoji.classList.add('falling-emoji');
-        emoji.textContent = emojisToUse[Math.floor(Math.random() * emojisToUse.length)];
-        const startX = Math.random() * window.innerWidth;
-        emoji.style.left = `${startX}px`;
-        const duration = Math.random() * 5 + 5;
-        emoji.style.animationDuration = `${duration}s`;
-        emoji.style.animationDelay = `-${Math.random() * 5}s`;
-        const xOffset = (Math.random() - 0.5) * 200;
-        emoji.style.setProperty('--fall-x-offset', `${xOffset}px`);
-        emojiRainContainer.appendChild(emoji);
-        emoji.addEventListener('animationend', () => { emoji.remove(); });
-    }, 300);
-}
-function stopEmojiRain() {
-    if (emojiRainInterval) { clearInterval(emojiRainInterval); emojiRainInterval = null; }
-    if (emojiRainContainer) { emojiRainContainer.innerHTML = ''; emojiRainContainer.style.display = 'none'; }
-}
+function startEmojiRain(emojisToUse = defaultEmojis) { /* ... */ }
+function stopEmojiRain() { /* ... */ }
 
 function darkenColor(hex, percent) {
     let f = parseInt(hex.slice(1), 16), t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent,
@@ -558,13 +492,12 @@ function darkenColor(hex, percent) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("=============== DOMContentLoaded: Script Iniciado ===============");
 
-    // Ocultar todas as páginas exceto a primeira
     pages.forEach((page, index) => {
         if (index !== 0) {
             page.classList.add('hidden');
         }
     });
-    showPage(0); // Exibir a primeira página
+    showPage(0);
 
     // Anexar Event Listeners aos botões de navegação
     if (nextButtonPage1) {
@@ -598,7 +531,6 @@ document.addEventListener('DOMContentLoaded', () => {
     checkPage1Readiness();
     checkPage2Readiness();
 
-    // Verifica se a página foi carregada com parâmetros de URL (modo de visualização)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('date')) {
         console.log("Parâmetros de URL detectados, indo para a página de visualização.");
