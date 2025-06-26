@@ -1,85 +1,112 @@
-/* Variáveis de Tema (manter no topo) */
 :root {
-    --main-color: #FF00FF; /* Cor principal - rosa choque */
-    --main-color-dark: #cc00cc; /* Um pouco mais escuro para hover/active */
-    --main-color-shadow: rgba(255, 0, 255, 0.4); /* Sombra transparente */
-    --main-color-border-dash: rgba(255, 0, 255, 0.5); /* Borda tracejada para upload de foto */
-    --main-color-hover-bg: rgba(255, 0, 255, 0.1); /* Fundo sutil para hover */
-    --text-color: #f0f0f0; /* Cor do texto claro */
-    --background-color: #1a1a1a; /* Fundo escuro */
-    --card-background: #2a2a2a; /* Fundo dos cards */
+    --main-color: #FF00FF; /* Cor principal padrão (rosa choque) */
+    --main-color-dark: #cc00cc; /* Versão mais escura da cor principal */
+    --main-color-shadow: #FF00FF66; /* Cor principal com transparência para sombras */
+    --main-color-border-dash: #FF00FF80; /* Cor principal com transparência para bordas pontilhadas */
+    --main-color-hover-bg: #FF00FF1A; /* Cor principal com muita transparência para hover */
+    --text-color: #333;
+    --background-color: #f0f2f5;
+    --card-background: #fff;
     --border-radius: 12px;
-    --input-bg-color: #3a3a3a;
-    --input-border-color: #555;
-    --placeholder-color: #bbb;
-}
-
-/* Garante que o html e body ocupem 100% da viewport */
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%; /* Garante que ocupa a altura total da viewport */
-    overflow-x: hidden; /* Evita rolagem horizontal */
-    box-sizing: border-box; /* Inclui padding e borda na largura/altura */
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --transition-speed: 0.3s ease;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
     background-color: var(--background-color);
     color: var(--text-color);
     display: flex;
-    justify-content: center; /* Centraliza o container horizontalmente */
-    align-items: flex-start; /* Alinha o container ao topo para permitir rolagem vertical */
-    min-height: 100vh; /* Garante que o corpo tenha pelo menos a altura da viewport */
-    padding: 20px 0; /* Padding vertical, largura controlada pelo container */
-    box-sizing: border-box;
+    justify-content: center;
+    align-items: flex-start; /* Alinha no topo para permitir scroll */
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+    background-image: linear-gradient(45deg, #f0f2f5 25%, transparent 25%, transparent 75%, #f0f2f5 75%, #f0f2f5),
+                      linear-gradient(-45deg, #f0f2f5 25%, transparent 25%, transparent 75%, #f0f2f5 75%, #f0f2f5);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
 }
 
 .container {
-    background-color: #000000; /* Fundo preto mais escuro */
-    border: 2px solid var(--main-color);
+    background-color: var(--card-background);
     border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
     padding: 30px;
-    width: 90%; /* Ajuste para ocupar a maior parte da largura da tela */
-    max-width: 600px; /* Mantém uma largura máxima razoável para desktop */
-    box-shadow: 0 0 20px var(--main-color-shadow);
-    text-align: center;
-    position: relative; /* Essencial para o posicionamento absoluto das páginas */
+    margin: 20px;
+    width: 100%;
+    max-width: 700px;
     box-sizing: border-box;
-    /* Adicionado para garantir que o container não seja esmagado */
-    min-height: calc(100vh - 40px); /* Pelo menos a altura da viewport menos o padding do body */
-    display: flex; /* Transforma o container em um flex container */
-    flex-direction: column; /* Organiza os itens verticalmente */
-    justify-content: flex-start; /* Alinha os itens ao topo */
-    align-items: center; /* Centraliza itens flex horizontalmente */
+    position: relative;
+    overflow: hidden; /* Garante que as páginas escondidas não apareçam */
 }
 
 h1 {
+    text-align: center;
     color: var(--main-color);
-    margin-bottom: 25px;
-    font-size: 2.2em;
-    text-shadow: 0 0 10px var(--main-color-shadow);
-    width: 100%; /* Garante que o H1 ocupe a largura total */
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 1px 1px 2px var(--main-color-shadow);
 }
 
 h2 {
-    color: var(--main-color);
+    color: var(--main-color-dark);
+    border-bottom: 2px solid var(--main-color-border-dash);
+    padding-bottom: 10px;
+    margin-top: 25px;
     margin-bottom: 20px;
-    font-size: 1.6em;
-    text-shadow: 0 0 5px var(--main-color-shadow);
-    width: 100%; /* Garante que o H2 ocupe a largura total */
 }
+
+.page {
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    padding: 30px; /* Adiciona padding para o conteúdo das páginas */
+    box-sizing: border-box;
+    overflow-y: auto; /* Permite scroll dentro da página se o conteúdo for grande */
+}
+
+.page.active {
+    opacity: 1;
+    pointer-events: all;
+    position: relative; /* Volta para relative quando ativo para ocupar espaço no fluxo */
+}
+
+.page.hidden {
+    display: none; /* Esconde completamente as páginas inativas */
+}
+
+/* Ajuste para o container quando as páginas estão ativas */
+.container {
+    min-height: 600px; /* Altura mínima para o container */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.page.active {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto; /* Altura automática para a página ativa */
+    position: static; /* Remove position absolute para a página ativa */
+}
+
 
 .card {
     background-color: var(--card-background);
     border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
     padding: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    text-align: left; /* Alinha o conteúdo dos cards à esquerda */
-    width: 100%; /* Faz o card preencher a largura do container */
-    box-sizing: border-box;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
 }
 
 .input-group {
@@ -89,211 +116,181 @@ h2 {
 .input-group label {
     display: block;
     margin-bottom: 8px;
-    color: var(--text-color);
     font-weight: bold;
-}
-
-input[type="datetime-local"],
-input[type="text"],
-textarea {
-    width: 100%; /* Removido o calc para simplificar e garantir 100% */
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid var(--input-border-color);
-    border-radius: 8px;
-    background-color: var(--input-bg-color);
     color: var(--text-color);
-    font-size: 1em;
-    box-sizing: border-box; /* Inclui padding na largura */
 }
 
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(1); /* Torna o ícone do calendário branco/visível */
-}
-
-input[type="color"] {
-    width: 100%;
-    height: 50px;
-    border: 1px solid var(--input-border-color);
+.input-group input[type="datetime-local"],
+.input-group input[type="text"],
+.input-group input[type="color"],
+.input-group textarea {
+    width: calc(100% - 20px);
+    padding: 12px;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    cursor: pointer;
-    background: var(--input-bg-color); /* Garante um fundo para o input */
+    font-size: 1em;
+    box-sizing: border-box;
+    margin-top: 5px;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
 }
 
-.full-width-input {
-    width: 100%; /* Para inputs que devem ocupar 100% da largura do pai */
+.input-group input[type="datetime-local"]:focus,
+.input-group input[type="text"]:focus,
+.input-group input[type="color"]:focus,
+.input-group textarea:focus {
+    border-color: var(--main-color);
+    box-shadow: 0 0 0 3px var(--main-color-shadow);
+    outline: none;
 }
 
-textarea {
-    resize: vertical; /* Permite redimensionar verticalmente */
+.input-group textarea {
+    resize: vertical;
     min-height: 80px;
 }
 
-input::placeholder,
-textarea::placeholder {
-    color: var(--placeholder-color);
+.full-width-input {
+    width: 100%; /* Garante que ocupe toda a largura disponível */
 }
 
-.main-button, .secondary-button {
-    background-color: var(--main-color);
-    color: white;
-    padding: 14px 25px;
+button {
+    padding: 12px 25px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-size: 1.1em;
     font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 10px var(--main-color-shadow);
-    width: 100%; /* Ajusta para nova organização */
-    box-sizing: border-box;
-    margin-bottom: 10px; /* Espaço entre botões */
+    transition: background-color var(--transition-speed), transform 0.2s ease, box-shadow var(--transition-speed);
+    margin-top: 10px;
+    display: inline-block; /* Para que os botões fiquem lado a lado se houver espaço */
 }
 
-.main-button:hover {
+button.main-button {
+    background-color: var(--main-color);
+    color: white;
+    box-shadow: 0 4px 8px var(--main-color-shadow);
+}
+
+button.main-button:hover:not(:disabled) {
     background-color: var(--main-color-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px var(--main-color-shadow);
+    box-shadow: 0 6px 12px var(--main-color-shadow);
 }
 
-.main-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 5px var(--main-color-shadow);
+button.secondary-button {
+    background-color: #ccc;
+    color: var(--text-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.secondary-button {
-    background-color: var(--input-bg-color);
-    color: var(--main-color);
-    border: 2px solid var(--main-color);
-    box-shadow: none;
-}
-
-.secondary-button:hover {
-    background-color: var(--main-color-hover-bg);
+button.secondary-button:hover:not(:disabled) {
+    background-color: #bbb;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px var(--main-color-shadow);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.secondary-button:active {
-    transform: translateY(0);
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
     box-shadow: none;
 }
 
 .navigation-buttons {
-    width: 100%; /* Garante que os botões de navegação ocupem a largura total */
-    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 15px; /* Espaço entre os botões */
+    flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas menores */
 }
 
-/* Navegação de Páginas */
-.page {
-    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-    position: absolute; /* Permite sobrepor as páginas dentro do container */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%; /* Garante que a página preencha a altura do container */
-    padding: 30px; /* Mesmo padding do container */
-    box-sizing: border-box;
-    overflow-y: auto; /* Permite rolagem dentro de cada página, se o conteúdo for grande */
-    opacity: 0;
-    transform: translateX(100%);
-    z-index: 1; /* Garante que a página ativa esteja acima */
-    background-color: #000000; /* Cor de fundo para evitar transparência durante a transição */
-    display: flex; /* Torna a página um flex container */
-    flex-direction: column; /* Organiza o conteúdo verticalmente */
-    align-items: center; /* Centraliza horizontalmente */
-    justify-content: flex-start; /* Alinha o conteúdo ao topo */
+.navigation-buttons button {
+    flex-grow: 1; /* Permite que os botões cresçam para preencher o espaço */
+    min-width: 150px; /* Largura mínima para cada botão */
 }
 
-.page.active {
-    opacity: 1;
-    transform: translateX(0);
-    z-index: 2;
-}
-
-.page.hidden {
-    display: none; /* Usamos 'display: none' quando não é a página ativa */
-}
-
-/* Estilos Específicos da Página 2 (Emojis e Fotos) */
+/* Emojis */
 .emoji-inputs {
     display: flex;
-    justify-content: center; /* Centraliza os emojis */
-    gap: 10px; /* Espaço entre os inputs */
-    margin-bottom: 20px;
-    width: 100%; /* Garante que ocupe a largura total */
-    flex-wrap: wrap; /* Permite que os emojis quebrem linha se a tela for muito pequena */
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center;
 }
 
-.emoji-input {
-    width: 50px; /* Largura pequena */
-    height: 50px; /* Altura pequena, igual à largura para quadrado */
-    padding: 0; /* Remove padding */
+.emoji-inputs input {
+    width: 60px;
     text-align: center;
-    font-size: 2.2em; /* Tamanho do emoji maior para centralizar */
-    line-height: 50px; /* Centraliza verticalmente o texto no input */
-    flex-shrink: 0; /* Não permite que diminua se não houver espaço */
-    border: 1px solid var(--input-border-color);
+    font-size: 1.8em;
+    padding: 8px;
+    border: 2px dashed var(--main-color-border-dash);
     border-radius: 8px;
-    background-color: var(--input-bg-color);
-    color: var(--text-color);
-    box-sizing: border-box; /* Inclui borda na largura/altura */
-    margin: 0; /* Remove margem padrão, o gap controla o espaçamento */
-    outline: none; /* Remove a borda de foco padrão */
+    background-color: var(--main-color-hover-bg);
 }
 
-/* Estilo para placeholder para que ele também se ajuste */
-.emoji-input::placeholder {
-    font-size: 0.8em; /* Menor que o emoji real, se necessário */
-    color: var(--placeholder-color);
-}
-
+/* Photo Upload */
 .photo-upload-grid {
-    display: flex; /* Mudar para flexbox */
-    flex-direction: column; /* Coloca os itens em coluna (um abaixo do outro) */
-    align-items: center; /* Centraliza os itens horizontalmente */
-    gap: 15px; /* Espaçamento entre os slots de foto */
-    margin-bottom: 20px; /* Adiciona um espaço abaixo da grade de fotos */
-    width: 100%; /* Garante que a grid ocupe a largura total */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
 }
 
 .photo-uploader {
     position: relative;
-    width: 120px; /* Nova largura para formato retangular vertical */
-    height: 160px; /* Nova altura para proporção 3:4 */
-    background-color: var(--input-bg-color);
-    border: 2px dashed var(--main-color-border-dash);
-    border-radius: 8px;
+    width: 100%;
+    padding-top: 100%; /* Proporção 1:1 */
+    background-color: #f0f0f0;
+    border: 2px dashed #ccc;
+    border-radius: var(--border-radius);
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
     cursor: pointer;
-    overflow: hidden; /* Garante que a imagem não vaze */
-    box-sizing: border-box;
+    transition: border-color var(--transition-speed), background-color var(--transition-speed);
 }
 
-.photo-uploader img {
+.photo-uploader:hover {
+    border-color: var(--main-color);
+    background-color: #e0e0e0;
+}
+
+.photo-uploader .hidden-file-input {
+    display: none;
+}
+
+.photo-uploader .custom-file-upload {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Garante que a imagem preencha o espaço sem distorcer */
-    border-radius: 6px;
-    opacity: 0; /* Começa invisível */
-    transition: opacity 0.3s ease;
-    pointer-events: none; /* Permite cliques através da imagem para o label */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #777;
 }
 
-.photo-uploader .upload-text {
+.photo-uploader .custom-file-upload img {
     position: absolute;
-    color: var(--placeholder-color);
-    font-size: 1.1em;
-    pointer-events: none; /* Permite cliques através do texto para o label */
-    display: block; /* Garante que o texto seja visível por padrão */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    opacity: 0;
+    transition: opacity var(--transition-speed);
 }
 
-.photo-uploader .remove-photo-button {
+.photo-uploader .custom-file-upload .upload-text {
+    position: relative;
+    z-index: 1;
+}
+
+.remove-photo-button {
     position: absolute;
     top: 5px;
     right: 5px;
@@ -304,101 +301,201 @@ textarea::placeholder {
     width: 25px;
     height: 25px;
     font-size: 0.9em;
-    cursor: pointer;
-    display: none; /* Escondido por padrão */
-    align-items: center;
-    justify-content: center;
-    z-index: 10; /* Acima da imagem */
-    transition: background-color 0.2s ease;
-}
-
-.photo-uploader .remove-photo-button.show-button {
-    display: flex; /* Mostra o botão quando a imagem é carregada */
-}
-
-.photo-uploader .remove-photo-button:hover {
-    background-color: rgba(255, 0, 0, 0.9);
-}
-
-.hidden-file-input {
-    display: none;
-}
-
-.custom-file-upload {
-    position: absolute; /* Para cobrir todo o .photo-uploader */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    z-index: 2;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-speed), visibility var(--transition-speed);
+    padding: 0; /* Remover padding padrão do botão */
 }
 
-/* Nova seção para o link gerado */
-.share-link-section {
-    background-color: var(--card-background);
-    border-radius: var(--border-radius);
-    padding: 20px;
-    margin-top: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+.remove-photo-button.show-button {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* View Mode Page (Page 3) */
+.view-mode-page {
     text-align: center;
-    width: 100%; /* Garante que ocupe a largura total */
-    box-sizing: border-box;
+    position: relative;
+    min-height: 60vh; /* Garante que a página de visualização tenha uma altura mínima */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 80px; /* Espaço para o botão de voltar */
 }
 
-.share-link-section p {
-    margin-bottom: 15px;
-    font-size: 1.1em;
+.view-mode-title {
+    font-size: 3em;
+    margin-bottom: 20px;
+    color: var(--main-color);
+    text-shadow: 2px 2px 4px var(--main-color-shadow);
+}
+
+.counter-display {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--main-color-dark);
+    margin-bottom: 25px;
+    white-space: pre-wrap; /* Permite quebras de linha */
+}
+
+.view-mode-message {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: var(--main-color-hover-bg);
+    border-left: 5px solid var(--main-color);
+    border-radius: 8px;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
     color: var(--text-color);
 }
 
-.share-link-section textarea {
-    width: 100%; /* Simplificado para 100% */
-    height: 80px;
+.slideshow-container {
+    position: relative;
+    width: 90%;
+    max-width: 500px;
+    height: 0;
+    padding-bottom: 75%; /* Proporção 4:3 (ou ajuste para 100% para 1:1) */
+    margin: 30px auto;
+    background-color: #f0f0f0;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.slideshow-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.slideshow-container img.active {
+    opacity: 1;
+}
+
+.music-player-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.music-info-display {
+    font-size: 1em;
+    color: var(--text-color);
+    font-weight: bold;
+    text-align: center;
+}
+
+#player {
+    width: 100%;
+    height: 100px; /* Altura fixa para o player */
+    border-radius: var(--border-radius);
+    overflow: hidden; /* Garante que o iframe respeite o border-radius */
+}
+
+/* Estilos para a chuva de emojis */
+.emoji-rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Permite clicar através dos emojis */
+    overflow: hidden;
+    z-index: 9999; /* Garante que os emojis fiquem acima de tudo */
+}
+
+.falling-emoji {
+    position: absolute;
+    font-size: 2em; /* Tamanho inicial do emoji */
+    opacity: 0;
+    animation: fall linear infinite;
+    transform: translateY(-100%) translateX(var(--fall-x-offset, 0)); /* Inicia acima e com offset */
+    will-change: transform, opacity; /* Otimização para animação */
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-100%) translateX(var(--fall-x-offset, 0)) scale(0.8);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(calc(100vh + 50px)) translateX(var(--fall-x-offset, 0)) scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* Seção de Compartilhamento de Link */
+.share-link-section {
+    margin-top: 30px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    text-align: center;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.share-link-section p {
+    font-weight: bold;
     margin-bottom: 15px;
-    resize: none;
+    color: var(--main-color-dark);
+}
+
+.share-link-section textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #e9e9e9;
     font-size: 0.9em;
+    color: #555;
+    resize: none;
+    height: 60px;
+    margin-bottom: 15px;
     cursor: text;
+}
+
+.share-link-section button {
+    margin-top: 0;
 }
 
 .copy-message {
     display: block;
-    color: green; /* Ou uma cor de sucesso */
     margin-top: 10px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    color: green;
     font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
 }
 
 .copy-message.show {
     opacity: 1;
 }
 
-
-/* Estilos para a página de visualização (Page 3) */
-.view-mode-page {
-    /* Garante que elementos de edição não sejam visíveis */
-    padding-top: 50px; /* Ajuste se o h1 for menor */
-    text-align: center;
-    display: flex; /* Usa flexbox para centralizar conteúdo */
-    flex-direction: column;
-    justify-content: flex-start; /* Ajustado para start, para permitir rolagem */
-    align-items: center;
-    min-height: 100%; /* Garante que ocupe a altura total da página */
-    position: absolute; /* Para sobrepor as outras páginas */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--background-color); /* Fundo da página de visualização */
-    z-index: 10; /* Garante que fique acima de tudo quando ativo */
-    overflow-y: auto; /* Permite rolagem vertical para o conteúdo */
-}
-
-/* Esconde o botão de voltar na visualização quando o link é acessado diretamente */
+/* Esconder opções de edição na visualização */
 .view-mode-page.hide-edit-options .navigation-buttons {
     display: none;
 }
@@ -407,208 +504,61 @@ textarea::placeholder {
 }
 
 
-.view-mode-title {
-    margin-top: 0;
-    margin-bottom: 30px;
-}
-
-.counter-display {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: var(--main-color);
-    margin-bottom: 20px;
-    white-space: pre-wrap; /* Preserva quebras de linha */
-    text-shadow: 0 0 8px var(--main-color-shadow);
-}
-
-.view-mode-message {
-    font-size: 1.2em;
-    margin-bottom: 30px;
-    color: var(--text-color);
-    max-width: 90%;
-    word-wrap: break-word; /* Quebra palavras longas */
-}
-
-.slideshow-container {
-    width: 240px; /* Largura para acomodar a proporção 3:4 das fotos internas */
-    height: 320px; /* Altura para acomodar a proporção 3:4 das fotos internas (2x a largura) */
-    position: relative;
-    margin: 20px auto 30px auto;
-    border: 3px solid var(--main-color);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    box-shadow: 0 0 15px var(--main-color-shadow);
-    display: flex; /* Para centralizar a imagem dentro do container */
-    justify-content: center;
-    align-items: center;
-    background-color: #000; /* Fundo preto para o slideshow */
-    flex-shrink: 0; /* Não deixa diminuir se a página for flex */
-}
-
-.slideshow-photo {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Ajusta a imagem inteira dentro do container */
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    transition: opacity 1s ease-in-out; /* Transição suave entre as fotos */
-}
-
-.slideshow-photo.active {
-    opacity: 1;
-}
-
-.music-player-display {
-    margin-top: 30px;
-    background-color: var(--card-background);
-    padding: 15px;
-    border-radius: var(--border-radius);
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 0 10px var(--main-color-shadow);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0; /* Não deixa diminuir se a página for flex */
-}
-
-.music-info-display {
-    font-size: 1.1em;
-    color: var(--text-color);
-    margin-bottom: 10px;
-    font-weight: bold;
-    text-align: center;
-}
-
-#player {
-    width: 100%;
-    height: 100px; /* Altura fixa para o player YouTube, ajuste se necessário */
-    min-height: 100px;
-    background-color: #000; /* Garante fundo preto enquanto o player carrega */
-    border-radius: 8px;
-    overflow: hidden; /* Para garantir que o iframe não vaze */
-}
-
-/* Chuva de Emojis */
-.emoji-rain-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none; /* Permite cliques através */
-    overflow: hidden;
-    z-index: 9; /* Abaixo do conteúdo principal da visualização */
-}
-
-.falling-emoji {
-    position: absolute;
-    font-size: 2em;
-    opacity: 0;
-    animation: fall linear infinite;
-    animation-fill-mode: forwards;
-}
-
-@keyframes fall {
-    0% {
-        transform: translateY(-10vh) translateX(0);
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(100vh) translateX(var(--fall-x-offset, 0px));
-        opacity: 0.8;
-    }
-}
-
-/* Media Queries para Responsividade */
-@media (max-width: 768px) {
-    body {
-        padding: 10px 0; /* Menos padding em telas menores */
-    }
+/* Responsividade */
+@media (max-width: 600px) {
     .container {
+        margin: 10px;
         padding: 20px;
-        width: 95%; /* Ocupa ainda mais da largura em telas menores */
-        min-height: calc(100vh - 20px); /* Ajusta min-height com novo padding */
     }
 
     h1 {
-        font-size: 1.8em;
+        font-size: 2em;
     }
 
     h2 {
-        font-size: 1.3em;
+        font-size: 1.5em;
     }
 
-    .main-button, .secondary-button {
-        padding: 12px 20px;
+    .input-group input,
+    .input-group textarea {
+        font-size: 0.9em;
+        padding: 10px;
+    }
+
+    button {
         font-size: 1em;
+        padding: 10px 20px;
     }
 
-    /* Ajustes específicos para telas menores nos emojis */
-    .emoji-input {
-        width: 45px; /* Ligeiramente menor em telas menores */
-        height: 45px;
-        font-size: 2em; /* Mantém o emoji visível */
-        line-height: 45px;
+    .navigation-buttons {
+        flex-direction: column;
     }
 
-    /* Ajustes específicos para telas menores nas fotos */
-    .photo-uploader {
-        width: 100px; /* Ligeiramente menor em telas menores */
-        height: 133px; /* Proporção 3:4 (100 * 4/3) */
+    .emoji-inputs {
+        flex-direction: column;
+        align-items: center;
     }
 
-    .slideshow-container {
-        width: 200px; /* Ajusta largura para telas menores (mantendo proporção 3:4) */
-        height: 266px; /* Ajusta altura para telas menores (mantendo proporção 3:4) */
+    .emoji-inputs input {
+        width: 80%;
+        max-width: 150px;
+    }
+
+    .photo-upload-grid {
+        grid-template-columns: 1fr; /* Uma coluna em telas pequenas */
     }
 
     .counter-display {
-        font-size: 1.4em;
+        font-size: 1.5em;
     }
 
     .view-mode-message {
         font-size: 1em;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 15px;
-        width: 98%; /* Quase total em telas muito pequenas */
-        min-height: calc(100vh - 30px); /* Ajusta min-height com novo padding */
-    }
-
-    h1 {
-        font-size: 1.5em;
-    }
-
-    h2 {
-        font-size: 1.2em;
-    }
-
-    /* Ajustes para telas muito pequenas nos emojis */
-    .emoji-input {
-        width: 40px; /* Ainda menor em telas muito pequenas */
-        height: 40px;
-        font-size: 1.8em;
-        line-height: 40px;
-    }
-
-    /* Ajustes para telas muito pequenas nas fotos */
-    .photo-uploader {
-        width: 90px; /* Ainda menor em telas muito pequenas */
-        height: 120px; /* Proporção 3:4 (90 * 4/3) */
+        padding: 10px;
     }
 
     .slideshow-container {
-        width: 180px; /* Ajusta largura para telas muito pequenas (mantendo proporção 3:4) */
-        height: 240px; /* Ajusta altura para telas muito pequenas (mantendo proporção 3:4) */
+        width: 100%;
+        padding-bottom: 100%; /* Proporção 1:1 em telas pequenas */
     }
 }
