@@ -4,7 +4,7 @@ let currentPage = 0; // Começa na primeira página (Configuração)
 
 // Dados para gerar o link
 let initialDate = null;
-let themeColor = '#FF00FF'; // Cor padrão
+let themeColor = '#FF00FF'; // Cor padrão (rosa choque)
 let musicLink = '';
 let musicName = '';
 let message = '';
@@ -215,8 +215,9 @@ photoUploadersElements.forEach((uploader, index) => {
         const removeButton = uploader.querySelector('.remove-photo-button');
 
         // Adiciona um listener ao uploader div para disparar o clique no input de arquivo
-        uploader.addEventListener('click', () => {
-            if (fileInput && event.target !== removeButton) { // Impede clique se o botão remover foi clicado
+        uploader.addEventListener('click', (event) => {
+            // Se o clique não foi no botão de remover, abre o seletor de arquivos
+            if (fileInput && event.target !== removeButton) {
                 fileInput.click();
             }
         });
@@ -241,12 +242,12 @@ photoUploadersElements.forEach((uploader, index) => {
                     if (file.size > maxSize) {
                         alert('A imagem é muito grande! Por favor, selecione uma imagem menor (máximo 2MB).');
                         event.target.value = ''; // Limpa o input do arquivo
-                        // Restaura o estado visual se uma imagem anterior foi carregada
+                        // Se já havia uma imagem, restaura o estado dela
                         if (uploadedPhotoUrls[index]) {
                              if (uploadedImage) { uploadedImage.style.opacity = 1; }
                              if (uploadText) { uploadText.style.display = 'none'; }
                              if (removeButton) { removeButton.classList.add('show-button'); }
-                        } else {
+                        } else { // Caso contrário, volta ao estado de "nenhuma imagem"
                             if (uploadedImage) { uploadedImage.src = ''; uploadedImage.style.opacity = 0; }
                             if (uploadText) { uploadText.style.display = 'block'; }
                             if (removeButton) { removeButton.classList.remove('show-button'); }
@@ -577,7 +578,7 @@ function loadYouTubePlayer(videoUrl) {
             createPlayer(videoId);
         };
         const tag = document.createElement('script');
-        tag.src = "http://www.youtube.com/iframe_api";
+        tag.src = "https://www.youtube.com/iframe_api"; // URL corrigida
         const firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     } else {
